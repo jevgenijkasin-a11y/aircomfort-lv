@@ -6,6 +6,16 @@ const normalize = (str) => (str ? str.replace(/\\system32\\/gi, '\\System32\\') 
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/lv',
+        permanent: false,
+      },
+    ];
+  },
+
   webpack: (config) => {
     // Fix: Windows System32 path casing inconsistency causes webpack to load
     // the same module twice. Normalize all path fields that form module identifiers.
@@ -30,6 +40,7 @@ const nextConfig = {
         });
       },
     });
+
     return config;
   },
 };
