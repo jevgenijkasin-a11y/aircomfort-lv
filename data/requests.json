@@ -1,0 +1,11 @@
+[
+  {
+    "id": "b9bb5775-71eb-4297-b8ee-0a103b4dc79d",
+    "name": "Test User",
+    "phone": "+371 20 123456",
+    "email": "test@test.lv",
+    "message": "Test message",
+    "createdAt": "2026-05-11T11:44:56.422Z",
+    "read": false
+  }
+]

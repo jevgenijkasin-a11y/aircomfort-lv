@@ -1,0 +1,78 @@
+import { createClient } from '@supabase/supabase-js';
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+// Client-side / admin panel client (normal caching)
+export const supabase = createClient(url, key);
+
+// Server-side client: passes cache:'no-store' on every fetch so Next.js
+// never caches Supabase responses between requests
+export const supabaseServer = createClient(url, key, {
+  global: {
+    fetch: (input: RequestInfo | URL, init?: RequestInit) =>
+      fetch(input, { ...init, cache: 'no-store' }),
+  },
+});
+
+export interface SupabaseProduct {
+  id: number;
+  name_lv: string;
+  name_ru: string;
+  name_en: string;
+  brand: string;
+  price: number;
+  install_price: number;
+  power_kw: number;
+  area_coverage: string;
+  energy_class: string;
+  features: string[];
+  image_url: string;
+  category: string;
+  brand_color: string;
+  in_stock: boolean;
+  created_at: string;
+}
+
+export interface SupabaseContact {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  service: string;
+  message: string;
+  status: string;
+  created_at: string;
+}
+
+export interface SupabaseSetting {
+  id: number;
+  key: string;
+  value: string;
+}
+
+export function productFeatures(p: SupabaseProduct, locale: string): string[] {
+  const prefix = `${locale}:`;
+  const localeFeatures = p.features.filter(f => f.startsWith(prefix)).map(f => f.slice(prefix.length));
+  if (localeFeatures.length) return localeFeatures;
+  // Fallback: untagged features (old format without locale prefix)
+  const untagged = p.features.filter(f => !/^(lv|ru|en):/.test(f));
+  return untagged.length ? untagged : p.features;
+}
+
+export function productName(p: SupabaseProduct, locale: string): string {
+  if (locale === 'lv') return p.name_lv || p.name_en;
+  if (locale === 'ru') return p.name_ru || p.name_en;
+  return p.name_en;
+}
+
+export async function getSettings(): Promise<Record<string, string>> {
+  const { data } = await supabaseServer.from('settings').select('key,value');
+  const map: Record<string, string> = {};
+  if (data) data.forEach((r: { key: string; value: string }) => { map[r.key] = r.value; });
+  return map;
+}
+
+export function settingFor(settings: Record<string, string>, key: string, fallback = ''): string {
+  return settings[key] || fallback;
+}
