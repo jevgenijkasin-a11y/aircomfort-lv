@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/adminAuth';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   if (!(await verifySession(req))) {
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const filename = `${Date.now()}.${ext}`;
 
-  const { error } = await supabase.storage
+  const { error } = await supabaseAdmin.storage
     .from('products')
     .upload(filename, Buffer.from(bytes), {
       contentType: file.type || 'image/jpeg',
@@ -23,10 +23,11 @@ export async function POST(req: NextRequest) {
     });
 
   if (error) {
+    console.error('[upload] Supabase Storage error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const { data: { publicUrl } } = supabase.storage
+  const { data: { publicUrl } } = supabaseAdmin.storage
     .from('products')
     .getPublicUrl(filename);
 

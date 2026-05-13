@@ -24,6 +24,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState<number | null>(null);
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -64,17 +65,20 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
 
   const handleImageUpload = async (file: File) => {
     setUploadingImg(true);
+    setUploadError(null);
     const fd = new FormData();
     fd.append('file', file);
     const r = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-    if (r.ok) {
-      const { url } = await r.json();
+    const json = await r.json().catch(() => ({}));
+    if (r.ok && json.url) {
       setModal(m => {
         const current = m.product.image_urls || [];
         if (current.length >= 10) return m;
-        const next = [...current, url];
+        const next = [...current, json.url];
         return { ...m, product: { ...m.product, image_urls: next, image_url: next[0] } };
       });
+    } else {
+      setUploadError(json.error || `HTTP ${r.status}`);
     }
     setUploadingImg(false);
     if (fileRef.current) fileRef.current.value = '';
@@ -344,6 +348,12 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                 )}
 
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
+
+                {uploadError && (
+                  <p className="text-red-400 text-xs mt-1.5 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                    {lang === 'ru' ? 'Ошибка загрузки: ' : 'Upload error: '}{uploadError}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center gap-3">

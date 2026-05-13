@@ -6,6 +6,12 @@ const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 // Client-side / admin panel client (normal caching)
 export const supabase = createClient(url, key);
 
+// Admin client with service role key — bypasses RLS, server-side only
+export const supabaseAdmin = createClient(
+  url,
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? key,
+);
+
 // Server-side client: passes cache:'no-store' on every fetch so Next.js
 // never caches Supabase responses between requests
 export const supabaseServer = createClient(url, key, {
