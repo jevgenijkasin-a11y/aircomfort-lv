@@ -151,6 +151,13 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     await fetch('/api/admin/revalidate', { method: 'POST' });
   };
 
+  const firstImage = (imageUrl: string): string => {
+    if (imageUrl?.startsWith('[')) {
+      try { return (JSON.parse(imageUrl) as string[])[0] || ''; } catch { /* ignore */ }
+    }
+    return imageUrl || '';
+  };
+
   const inp = 'w-full bg-white/5 border border-white/10 text-white text-sm px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors placeholder-white/20';
   const lbl = 'block text-xs text-white/50 mb-1.5 font-medium';
 
@@ -173,8 +180,8 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
           {products.map((p) => (
             <div key={p.id} className="bg-white/4 border border-white/8 rounded-2xl overflow-hidden group hover:border-white/15 transition-all">
               <div className="h-28 flex items-center justify-center relative" style={{ background: `linear-gradient(135deg, ${p.brand_color}15, ${p.brand_color}05)` }}>
-                {p.image_url ? (
-                  <img src={p.image_url} alt={p.name_en} className="h-full w-full object-contain p-4" />
+                {firstImage(p.image_url) ? (
+                  <img src={firstImage(p.image_url)} alt={p.name_en} className="h-full w-full object-contain p-4" />
                 ) : (
                   <svg viewBox="0 0 24 24" className="w-8 h-8 opacity-20" fill="none" stroke="currentColor" strokeWidth="1">
                     <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
