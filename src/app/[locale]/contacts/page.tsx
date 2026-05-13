@@ -48,6 +48,13 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
   const address = settings.address || t('addressValue');
   const hours = settings.hours || t('hoursValue');
 
+  const titleKey = `contacts_title_${locale}` as const;
+  const subtitleKey = `contacts_subtitle_${locale}` as const;
+  const formTitleKey = `contacts_form_title_${locale}` as const;
+  const pageTitle = settings[titleKey] || t('title');
+  const pageSubtitle = settings[subtitleKey] || t('subtitle');
+  const formTitle = settings[formTitleKey] || t('form.title');
+
   return (
     <>
       <div className="pt-28 pb-10 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
@@ -59,15 +66,15 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
         />
         <div className="absolute bottom-0 left-1/3 w-80 h-80 rounded-full bg-[#1A6B9A]/10 blur-[80px]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <p className="text-[#27C4A0] text-sm font-semibold uppercase tracking-widest mb-3">{t('title')}</p>
-          <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-3">{t('title')}</h1>
-          <p className="text-white/45 text-lg max-w-xl">{t('subtitle')}</p>
+          <p className="text-[#27C4A0] text-sm font-semibold uppercase tracking-widest mb-3">{pageTitle}</p>
+          <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-3">{pageTitle}</h1>
+          <p className="text-white/45 text-lg max-w-xl">{pageSubtitle}</p>
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3">
-            <ContactForm />
+            <ContactForm formTitle={formTitle} />
           </div>
           <div className="lg:col-span-2">
             <div className="space-y-4">

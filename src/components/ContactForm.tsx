@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 
 type Status = 'idle' | 'sending' | 'success' | 'error';
 
-export default function ContactForm() {
+export default function ContactForm({ formTitle }: { formTitle?: string }) {
   const t = useTranslations('contacts.form');
   const [form, setForm] = useState({ name: '', phone: '', email: '', service: '', message: '' });
   const [status, setStatus] = useState<Status>('idle');
@@ -52,7 +52,7 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-7 space-y-5">
-      <h3 className="font-syne font-semibold text-xl mb-2">{t('title')}</h3>
+      <h3 className="font-syne font-semibold text-xl mb-2">{formTitle || t('title')}</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>

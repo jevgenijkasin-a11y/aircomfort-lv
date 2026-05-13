@@ -59,6 +59,15 @@ export interface SiteSettings {
   stat3_label_lv: string;
   stat3_label_ru: string;
   stat3_label_en: string;
+  contacts_title_lv: string;
+  contacts_title_ru: string;
+  contacts_title_en: string;
+  contacts_subtitle_lv: string;
+  contacts_subtitle_ru: string;
+  contacts_subtitle_en: string;
+  contacts_form_title_lv: string;
+  contacts_form_title_ru: string;
+  contacts_form_title_en: string;
 }
 
 export const T = {
@@ -114,9 +123,9 @@ export const T = {
     textsMaint: 'Обслуживание',
     textsConsult: 'Консультация',
     textsCatHome: 'Домашние кондиционеры',
-    textsCatHp: 'Тепловые насосы',
+    textsCatHp: 'Воздух-воздух',
     textsCatComm: 'Промышленные кондиционеры',
-    textsCatIhp: 'Промышленные тепловые насосы',
+    textsCatIhp: 'Воздух-вода',
     prodTitle: 'Управление товарами',
     prodAdd: 'Добавить товар',
     prodEdit: 'Редактировать',
@@ -131,9 +140,9 @@ export const T = {
     prodNameEn: 'Название (EN)',
     prodCategory: 'Категория',
     prodCatHome: 'Домашние кондиционеры',
-    prodCatHeatPump: 'Тепловые насосы',
+    prodCatHeatPump: 'Воздух-воздух',
     prodCatCommercial: 'Промышленная климатизация',
-    prodCatCommercialHeatPump: 'Промышленные тепловые насосы',
+    prodCatCommercialHeatPump: 'Воздух-вода',
     prodPower: 'Мощность (кВт)',
     prodArea: 'Площадь (м², напр. 20–25)',
     prodPrice: 'Цена (EUR)',
@@ -174,6 +183,16 @@ export const T = {
     setStat3LabelLv: 'Подпись 3 LV',
     setStat3LabelRu: 'Подпись 3 RU',
     setStat3LabelEn: 'Подпись 3 EN',
+    setContactsSection: 'Страница контактов',
+    setContactsTitleLv: 'Заголовок LV',
+    setContactsTitleRu: 'Заголовок RU',
+    setContactsTitleEn: 'Заголовок EN',
+    setContactsSubtitleLv: 'Подзаголовок LV',
+    setContactsSubtitleRu: 'Подзаголовок RU',
+    setContactsSubtitleEn: 'Подзаголовок EN',
+    setContactsFormTitleLv: 'Заголовок формы LV',
+    setContactsFormTitleRu: 'Заголовок формы RU',
+    setContactsFormTitleEn: 'Заголовок формы EN',
     setSave: 'Сохранить настройки',
     setSaved: 'Настройки сохранены!',
     pwdTitle: 'Смена пароля',
@@ -243,9 +262,9 @@ export const T = {
     textsMaint: 'Maintenance',
     textsConsult: 'Consultation',
     textsCatHome: 'Home Air Conditioners',
-    textsCatHp: 'Heat Pumps',
+    textsCatHp: 'Air-to-Air',
     textsCatComm: 'Commercial HVAC',
-    textsCatIhp: 'Industrial Heat Pumps',
+    textsCatIhp: 'Air-to-Water',
     prodTitle: 'Product Management',
     prodAdd: 'Add Product',
     prodEdit: 'Edit',
@@ -260,9 +279,9 @@ export const T = {
     prodNameEn: 'Name (EN)',
     prodCategory: 'Category',
     prodCatHome: 'Home Air Conditioners',
-    prodCatHeatPump: 'Heat Pumps',
+    prodCatHeatPump: 'Air-to-Air',
     prodCatCommercial: 'Commercial HVAC',
-    prodCatCommercialHeatPump: 'Industrial Heat Pumps',
+    prodCatCommercialHeatPump: 'Air-to-Water',
     prodPower: 'Power (kW)',
     prodArea: 'Coverage Area (m², e.g. 20–25)',
     prodPrice: 'Price (EUR)',
@@ -303,6 +322,16 @@ export const T = {
     setStat3LabelLv: 'Label 3 LV',
     setStat3LabelRu: 'Label 3 RU',
     setStat3LabelEn: 'Label 3 EN',
+    setContactsSection: 'Contacts Page',
+    setContactsTitleLv: 'Title LV',
+    setContactsTitleRu: 'Title RU',
+    setContactsTitleEn: 'Title EN',
+    setContactsSubtitleLv: 'Subtitle LV',
+    setContactsSubtitleRu: 'Subtitle RU',
+    setContactsSubtitleEn: 'Subtitle EN',
+    setContactsFormTitleLv: 'Form Title LV',
+    setContactsFormTitleRu: 'Form Title RU',
+    setContactsFormTitleEn: 'Form Title EN',
     setSave: 'Save Settings',
     setSaved: 'Settings saved!',
     pwdTitle: 'Change Password',

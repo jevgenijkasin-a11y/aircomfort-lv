@@ -20,7 +20,7 @@
     "stat3Value": "10+",
     "stat3Label": "brands in catalog",
     "serviceHome": "Home A/C",
-    "serviceHeatPump": "Heat Pumps",
+    "serviceHeatPump": "Air-to-Air",
     "serviceCommercial": "Commercial",
     "serviceMaintenance": "Maintenance"
   },
@@ -41,12 +41,12 @@
     "subtitle": "Solutions for home and business — from compact split systems to industrial heat pumps",
     "home": "Home Air Conditioners",
     "homeDesc": "Split systems for apartments and houses. Quiet operation, A+++ efficiency",
-    "heatPump": "Heat Pumps",
-    "heatPumpDesc": "Air-to-air and air-to-water heat pumps. Heating and cooling at minimal cost",
+    "heatPump": "Air-to-Air",
+    "heatPumpDesc": "Air-to-air heat pumps for home heating and cooling. High efficiency all year round",
     "commercial": "Commercial HVAC",
     "commercialDesc": "Cassette, ducted and rooftop units for offices, shops and industrial facilities",
-    "commercialHeatPump": "Industrial Heat Pumps",
-    "commercialHeatPumpDesc": "High-capacity air-to-water heat pumps for large buildings and production facilities",
+    "commercialHeatPump": "Air-to-Water",
+    "commercialHeatPumpDesc": "Air-to-water heat pumps for underfloor heating and hot water supply in large buildings",
     "explore": "View catalog"
   },
   "products": {
@@ -68,9 +68,9 @@
     "allPowers": "Any power",
     "allCategories": "All categories",
     "catHome": "Home",
-    "catHeatPump": "Heat Pumps",
+    "catHeatPump": "Air-to-Air",
     "catCommercial": "Commercial",
-    "catCommercialHeatPump": "Industrial Heat Pumps",
+    "catCommercialHeatPump": "Air-to-Water",
     "sortAsc": "Price: ascending",
     "sortDesc": "Price: descending",
     "noResults": "No products found",
@@ -166,11 +166,35 @@
     "titleAccent": "proposal for your space",
     "subtitle": "Free consultation and estimate within 2 hours"
   },
+  "cookies": {
+    "text": "We use cookies to ensure proper website functionality and to improve your experience. By continuing to use the site, you agree to the use of cookies.",
+    "accept": "Accept all",
+    "necessary": "Necessary only",
+    "learnMore": "Privacy Policy"
+  },
   "footer": {
     "tagline": "Comfort in your home",
     "nav": "Navigation",
     "contact": "Contact",
     "copyright": "© 2026 AirComfort. All rights reserved.",
     "privacy": "Privacy Policy"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "updated": "Last updated: May 2026",
+    "intro": "AirComfort (hereinafter — \"the Company\") is committed to protecting your personal data and ensuring transparency in its processing in accordance with the EU General Data Protection Regulation (GDPR).",
+    "s1title": "1. What data we collect",
+    "s1body": "We collect only the data you voluntarily provide through the contact form: name, phone number, and optionally email address and message text. We do not collect sensitive personal data.",
+    "s2title": "2. How we use your data",
+    "s2body": "Your data is used solely to respond to your inquiry and provide information about air conditioning equipment and installation services. We do not sell or transfer your data to third parties.",
+    "s3title": "3. Cookies",
+    "s3body": "The website uses technical cookies necessary for its proper operation, as well as analytics cookies (with your consent) to improve the user experience. You can manage your cookie preferences at any time through the banner at the bottom of the page.",
+    "s4title": "4. Data retention",
+    "s4body": "Personal data is stored no longer than necessary for the relevant purpose or as required by applicable law. Data submitted through the contact form is deleted after the request is processed.",
+    "s5title": "5. Your rights",
+    "s5body": "Under the GDPR you have the right to access, correct, delete, restrict, or object to the processing of your data. To exercise these rights, please contact us by email.",
+    "s6title": "6. Contact information",
+    "s6body": "If you have any questions about this privacy policy, please contact us:",
+    "back": "← Back to home"
   }
 }

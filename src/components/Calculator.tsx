@@ -216,7 +216,7 @@ export default function Calculator() {
                 <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
                   <span className="text-white/55 text-sm">{t('equipmentCost')}</span>
                   <span className="font-semibold text-white">
-                    {t('from')} {result.equipMin.toLocaleString()}–{result.equipMax.toLocaleString()} €
+                    {t('from')} {result.equipMin.toLocaleString('lv-LV')}–{result.equipMax.toLocaleString('lv-LV')} €
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
@@ -228,7 +228,7 @@ export default function Calculator() {
                 <div className="flex justify-between items-center py-3">
                   <span className="font-syne font-semibold">{t('totalCost')}</span>
                   <span className="font-syne font-bold text-xl text-[#27C4A0]">
-                    {t('from')} {(result.equipMin + result.installMin).toLocaleString()} €
+                    {t('from')} {(result.equipMin + result.installMin).toLocaleString('lv-LV')} €
                   </span>
                 </div>
               </div>

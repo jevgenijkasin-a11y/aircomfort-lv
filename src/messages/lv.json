@@ -20,7 +20,7 @@
     "stat3Value": "10+",
     "stat3Label": "zīmoli katalogā",
     "serviceHome": "Mājas kondicionētāji",
-    "serviceHeatPump": "Siltumsūkņi",
+    "serviceHeatPump": "Gaiss-gaiss",
     "serviceCommercial": "Komerciālie",
     "serviceMaintenance": "Apkope"
   },
@@ -41,12 +41,12 @@
     "subtitle": "Risinājumi mājai un uzņēmumam — no kompaktiem sadalītajiem līdz industriāliem siltumsūkņiem",
     "home": "Mājas kondicionieri",
     "homeDesc": "Sadalītās sistēmas dzīvokļiem un mājām. Kluss darbs, A+++ efektivitāte",
-    "heatPump": "Siltumsūkņi",
-    "heatPumpDesc": "Gaiss-gaiss un gaiss-ūdens siltumsūkņi. Apkure un dzesēšana ar minimāliem izdevumiem",
+    "heatPump": "Gaiss-gaiss",
+    "heatPumpDesc": "Gaiss-gaiss siltumsūkņi māju un dzīvokļu apsildei un dzesēšanai. Augsta efektivitāte visu gadu",
     "commercial": "Komerciālā klimatizācija",
     "commercialDesc": "Kasetes, kanālu un jumta kondicionieri birojiem, veikaliem un rūpnīcām",
-    "commercialHeatPump": "Industriālie siltumsūkņi",
-    "commercialHeatPumpDesc": "Augstas jaudas gaiss-ūdens siltumsūkņi lielām ēkām un ražošanai",
+    "commercialHeatPump": "Gaiss-ūdens",
+    "commercialHeatPumpDesc": "Gaiss-ūdens siltumsūkņi grīdas apkurei un karstā ūdens sagatavošanai lielām ēkām",
     "explore": "Skatīt katalogu"
   },
   "products": {
@@ -68,9 +68,9 @@
     "allPowers": "Jebkura jauda",
     "allCategories": "Visas kategorijas",
     "catHome": "Mājas",
-    "catHeatPump": "Siltumsūkņi",
+    "catHeatPump": "Gaiss-gaiss",
     "catCommercial": "Komerciālie",
-    "catCommercialHeatPump": "Industriālie siltumsūkņi",
+    "catCommercialHeatPump": "Gaiss-ūdens",
     "sortAsc": "Cena: augošā",
     "sortDesc": "Cena: dilstošā",
     "noResults": "Produkti nav atrasti",
@@ -166,11 +166,35 @@
     "titleAccent": "piedāvājumu jūsu telpām",
     "subtitle": "Bezmaksas konsultācija un aprēķins 2 stundu laikā"
   },
+  "cookies": {
+    "text": "Mēs izmantojam sīkdatnes, lai nodrošinātu vietnes pareizu darbību un uzlabotu jūsu pieredzi. Turpinot lietot vietni, jūs piekrītat sīkdatņu izmantošanai.",
+    "accept": "Piekrist visiem",
+    "necessary": "Tikai nepieciešamie",
+    "learnMore": "Privātuma politika"
+  },
   "footer": {
     "tagline": "Komforts jūsu mājās",
     "nav": "Navigācija",
     "contact": "Kontakti",
     "copyright": "© 2026 AirComfort. Visas tiesības aizsargātas.",
     "privacy": "Privātuma politika"
+  },
+  "privacy": {
+    "title": "Privātuma politika",
+    "updated": "Pēdējo reizi atjaunināts: 2026. gada maijs",
+    "intro": "AirComfort (turpmāk — \"Uzņēmums\") apņemas aizsargāt jūsu personas datus un nodrošināt to apstrādes pārredzamību saskaņā ar Eiropas Savienības Vispārīgo datu aizsardzības regulu (VDAR/GDPR).",
+    "s1title": "1. Kādus datus mēs vācam",
+    "s1body": "Mēs vācam tikai tos datus, ko jūs brīvprātīgi sniedzat, izmantojot kontaktveidlapu: vārds, tālruņa numurs un, pēc izvēles, e-pasta adrese un ziņojuma teksts. Mēs neapkopojam sensitīvus personas datus.",
+    "s2title": "2. Kā mēs izmantojam jūsu datus",
+    "s2body": "Jūsu dati tiek izmantoti vienīgi tam, lai atbildētu uz jūsu pieprasījumu un sniegtu informāciju par kondicionēšanas iekārtām un uzstādīšanas pakalpojumiem. Mēs nepārdodam un nenodojam jūsu datus trešajām pusēm.",
+    "s3title": "3. Sīkdatnes",
+    "s3body": "Vietne izmanto tehniskās sīkdatnes, kas nepieciešamas tās pareizai darbībai, kā arī analītikas sīkdatnes (ja jūs tam piekrītat), lai uzlabotu lietošanas pieredzi. Jūs varat jebkurā laikā pārvaldīt sīkdatņu preferences, izmantojot baneri lapas apakšā.",
+    "s4title": "4. Datu glabāšana",
+    "s4body": "Personas dati tiek glabāti ne ilgāk, nekā nepieciešams attiecīgajam mērķim vai kā to nosaka piemērojamie tiesību akti. Dati, kas iesūtīti caur kontaktveidlapu, tiek dzēsti pēc pieprasījuma apstrādes.",
+    "s5title": "5. Jūsu tiesības",
+    "s5body": "Saskaņā ar VDAR jums ir tiesības piekļūt saviem datiem, labot tos, dzēst, ierobežot to apstrādi vai iebilst pret to. Lai izmantotu šīs tiesības, sazinieties ar mums pa e-pastu.",
+    "s6title": "6. Kontaktinformācija",
+    "s6body": "Ja jums ir jautājumi par šo privātuma politiku, lūdzu, sazinieties ar mums:",
+    "back": "← Atpakaļ uz sākumlapu"
   }
 }

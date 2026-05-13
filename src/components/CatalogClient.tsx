@@ -144,7 +144,7 @@ function CatalogCard({ product, locale, t, tCat }: { product: SupabaseProduct; l
         </div>
         <div className="border-t border-[#1A6B9A]/15 pt-3 mt-auto">
           <div className="flex items-center justify-between mb-2.5">
-            <span className="font-syne font-bold text-xl">{product.price.toLocaleString()} €</span>
+            <span className="font-syne font-bold text-xl">{product.price.toLocaleString('lv-LV')} €</span>
             {product.install_price > 0 && (
               <span className="text-xs text-white/30">+{product.install_price} € {tCat('installPrice')}</span>
             )}

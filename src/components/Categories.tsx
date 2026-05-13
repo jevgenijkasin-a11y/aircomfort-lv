@@ -36,9 +36,9 @@ function IndustrialIcon() {
 
 const CAT_META = [
   { tKey: 'home' as const, sk: 'cat_home', slug: 'home', Icon: HomeIcon, accent: '#27C4A0' },
-  { tKey: 'heatPump' as const, sk: 'cat_hp', slug: 'heat-pump', Icon: HeatPumpIcon, accent: '#3B82F6' },
+  { tKey: 'heatPump' as const, sk: 'cat_hp', slug: 'heat_pump', Icon: HeatPumpIcon, accent: '#3B82F6' },
   { tKey: 'commercial' as const, sk: 'cat_comm', slug: 'commercial', Icon: CommercialIcon, accent: '#F59E0B' },
-  { tKey: 'commercialHeatPump' as const, sk: 'cat_ihp', slug: 'service', Icon: IndustrialIcon, accent: '#8B5CF6' },
+  { tKey: 'commercialHeatPump' as const, sk: 'cat_ihp', slug: 'commercial_heat_pump', Icon: IndustrialIcon, accent: '#8B5CF6' },
 ] as const;
 
 export default async function Categories() {

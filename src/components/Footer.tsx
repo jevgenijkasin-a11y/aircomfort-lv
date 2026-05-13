@@ -135,7 +135,7 @@ export default async function Footer() {
           <p className="text-white/25 text-xs">{t('footer.copyright')}</p>
           <div className="flex items-center gap-6">
             <span className="text-white/20 text-xs">AirComfort.lv</span>
-            <button className="text-white/25 hover:text-white/50 text-xs transition-colors">{t('footer.privacy')}</button>
+            <Link href="/privacy" className="text-white/25 hover:text-white/50 text-xs transition-colors">{t('footer.privacy')}</Link>
           </div>
         </div>
       </div>

@@ -12,6 +12,9 @@ const DEFAULTS: SiteSettings = {
   stat1_value: '500+', stat1_label_lv: '', stat1_label_ru: '', stat1_label_en: '',
   stat2_value: '5', stat2_label_lv: '', stat2_label_ru: '', stat2_label_en: '',
   stat3_value: '10+', stat3_label_lv: '', stat3_label_ru: '', stat3_label_en: '',
+  contacts_title_lv: '', contacts_title_ru: '', contacts_title_en: '',
+  contacts_subtitle_lv: '', contacts_subtitle_ru: '', contacts_subtitle_en: '',
+  contacts_form_title_lv: '', contacts_form_title_ru: '', contacts_form_title_en: '',
 };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -171,6 +174,52 @@ export default function AdminSettings({ lang }: { lang: Lang }) {
                 </div>
               </div>
             ))}
+          </div>
+
+          <SectionTitle>{s.setContactsSection}</SectionTitle>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className={lbl}>{s.setContactsTitleLv}</label>
+                <input className={inp} value={settings.contacts_title_lv} onChange={set('contacts_title_lv')} placeholder="Sazinieties ar mums" />
+              </div>
+              <div>
+                <label className={lbl}>{s.setContactsTitleRu}</label>
+                <input className={inp} value={settings.contacts_title_ru} onChange={set('contacts_title_ru')} placeholder="Свяжитесь с нами" />
+              </div>
+              <div>
+                <label className={lbl}>{s.setContactsTitleEn}</label>
+                <input className={inp} value={settings.contacts_title_en} onChange={set('contacts_title_en')} placeholder="Contact Us" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className={lbl}>{s.setContactsSubtitleLv}</label>
+                <textarea className={`${inp} resize-none`} rows={2} value={settings.contacts_subtitle_lv} onChange={set('contacts_subtitle_lv')} placeholder="Atstājiet pieprasījumu..." />
+              </div>
+              <div>
+                <label className={lbl}>{s.setContactsSubtitleRu}</label>
+                <textarea className={`${inp} resize-none`} rows={2} value={settings.contacts_subtitle_ru} onChange={set('contacts_subtitle_ru')} placeholder="Оставьте заявку..." />
+              </div>
+              <div>
+                <label className={lbl}>{s.setContactsSubtitleEn}</label>
+                <textarea className={`${inp} resize-none`} rows={2} value={settings.contacts_subtitle_en} onChange={set('contacts_subtitle_en')} placeholder="Leave a request..." />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className={lbl}>{s.setContactsFormTitleLv}</label>
+                <input className={inp} value={settings.contacts_form_title_lv} onChange={set('contacts_form_title_lv')} placeholder="Nosūtīt pieprasījumu" />
+              </div>
+              <div>
+                <label className={lbl}>{s.setContactsFormTitleRu}</label>
+                <input className={inp} value={settings.contacts_form_title_ru} onChange={set('contacts_form_title_ru')} placeholder="Отправить заявку" />
+              </div>
+              <div>
+                <label className={lbl}>{s.setContactsFormTitleEn}</label>
+                <input className={inp} value={settings.contacts_form_title_en} onChange={set('contacts_form_title_en')} placeholder="Send Request" />
+              </div>
+            </div>
           </div>
 
           <div className="pt-4">
