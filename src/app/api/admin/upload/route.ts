@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/adminAuth';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   if (!(await verifySession(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
   const formData = await req.formData();
   const file = formData.get('file') as File | null;
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -14,8 +14,21 @@ export async function POST(req: NextRequest) {
   const bytes = await file.arrayBuffer();
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const filename = `${Date.now()}.${ext}`;
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'products');
-  await fs.mkdir(uploadDir, { recursive: true });
-  await fs.writeFile(path.join(uploadDir, filename), Buffer.from(bytes));
-  return NextResponse.json({ url: `/uploads/products/${filename}` });
+
+  const { error } = await supabase.storage
+    .from('products')
+    .upload(filename, Buffer.from(bytes), {
+      contentType: file.type || 'image/jpeg',
+      upsert: false,
+    });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('products')
+    .getPublicUrl(filename);
+
+  return NextResponse.json({ url: publicUrl });
 }
