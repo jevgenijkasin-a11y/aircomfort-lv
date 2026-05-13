@@ -1,6 +1,6 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { supabaseServer, type SupabaseProduct, productName, productFeatures } from '@/lib/supabase';
+import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages } from '@/lib/supabase';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-[#27C4A0] border-[#27C4A0]/30 bg-[#27C4A0]/10',
@@ -19,8 +19,8 @@ function ProductCard({ product, locale, t }: { product: SupabaseProduct; locale:
         style={{ background: `linear-gradient(135deg, ${product.brand_color}18, ${product.brand_color}08)` }}>
         <div className="absolute inset-0 opacity-10"
           style={{ background: `radial-gradient(circle at 60% 40%, ${product.brand_color}, transparent 70%)` }} />
-        {product.image_url ? (
-          <img src={product.image_url} alt={name} className="relative h-full w-full object-contain p-4" />
+        {productImages(product)[0] ? (
+          <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-4" />
         ) : (
           <div className="relative flex flex-col items-center gap-2">
             <svg viewBox="0 0 24 24" className="w-14 h-14 opacity-30" fill="none" stroke="currentColor" strokeWidth="1">

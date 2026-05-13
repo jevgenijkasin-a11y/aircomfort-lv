@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { type SupabaseProduct, productName } from '@/lib/supabase';
+import { type SupabaseProduct, productName, productImages } from '@/lib/supabase';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-[#27C4A0] border-[#27C4A0]/30 bg-[#27C4A0]/10',
@@ -125,8 +125,8 @@ function CatalogCard({ product, locale, t, tCat }: { product: SupabaseProduct; l
       <div className="h-36 flex items-center justify-center relative"
         style={{ background: `linear-gradient(135deg, ${product.brand_color}18, ${product.brand_color}05)` }}>
         <div className="absolute inset-0 opacity-10" style={{ background: `radial-gradient(circle at 60% 40%, ${product.brand_color}, transparent 70%)` }} />
-        {product.image_url ? (
-          <img src={product.image_url} alt={name} className="relative h-full w-full object-contain p-3" />
+        {productImages(product)[0] ? (
+          <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-3" />
         ) : (
           <svg viewBox="0 0 24 24" className="w-10 h-10 opacity-25 relative" fill="none" stroke="currentColor" strokeWidth="1">
             <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
