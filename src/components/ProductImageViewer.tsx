@@ -1,33 +1,73 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Props {
-  src: string;
+  images: string[];
   alt: string;
   brandColor: string;
   brand: string;
 }
 
-export default function ProductImageViewer({ src, alt, brandColor, brand }: Props) {
-  const [open, setOpen] = useState(false);
+export default function ProductImageViewer({ images, alt, brandColor, brand }: Props) {
+  const [active, setActive] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
+  const [lbIndex, setLbIndex] = useState(0);
+
+  const hasImages = images.length > 0;
+  const hasMultiple = images.length > 1;
+
+  const prev = useCallback(() => setLbIndex(i => (i - 1 + images.length) % images.length), [images.length]);
+  const next = useCallback(() => setLbIndex(i => (i + 1) % images.length), [images.length]);
+
+  const openLightbox = (i: number) => { setLbIndex(i); setLightbox(true); };
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightbox(false);
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightbox, prev, next]);
 
   return (
     <>
+      {/* Main image */}
       <div
-        className="h-80 flex items-center justify-center relative cursor-zoom-in"
+        className="h-80 flex items-center justify-center relative cursor-zoom-in select-none"
         style={{ background: `linear-gradient(135deg, ${brandColor}25, ${brandColor}08)` }}
-        onClick={() => src && setOpen(true)}
-        title={src ? 'Нажмите для увеличения' : undefined}
+        onClick={() => hasImages && openLightbox(active)}
       >
         <div className="absolute inset-0 opacity-15"
           style={{ background: `radial-gradient(circle at 60% 40%, ${brandColor}, transparent 70%)` }} />
-        {src ? (
+
+        {hasImages ? (
           <>
-            <img src={src} alt={alt} className="relative h-full w-full object-contain p-8" />
+            <img src={images[active]} alt={alt} className="relative h-full w-full object-contain p-8" />
+
+            {hasMultiple && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setActive(i => (i - 1 + images.length) % images.length); }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors z-10"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setActive(i => (i + 1) % images.length); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors z-10"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </>
+            )}
+
             <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1.5 text-white/60 text-xs">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
-              увеличить
+              {hasMultiple ? `${active + 1} / ${images.length}` : 'увеличить'}
             </div>
           </>
         ) : (
@@ -41,27 +81,84 @@ export default function ProductImageViewer({ src, alt, brandColor, brand }: Prop
         )}
       </div>
 
+      {/* Thumbnail strip */}
+      {hasMultiple && (
+        <div className="flex gap-2 p-3 overflow-x-auto scrollbar-thin">
+          {images.map((src, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                active === i
+                  ? 'border-[#27C4A0] opacity-100'
+                  : 'border-white/10 opacity-45 hover:opacity-75 hover:border-white/25'
+              }`}
+              style={{ background: `${brandColor}12` }}
+            >
+              <img src={src} alt={`${alt} ${i + 1}`} className="w-full h-full object-contain p-1" />
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Lightbox */}
-      {open && (
+      {lightbox && (
         <div
-          className="fixed inset-0 z-[999] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+          onClick={() => setLightbox(false)}
         >
           <button
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-            onClick={() => setOpen(false)}
-            aria-label="Закрыть"
+            onClick={() => setLightbox(false)}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
-          <img
-            src={src}
-            alt={alt}
-            className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
+
+          {hasMultiple && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-white/50 text-sm">
+              {lbIndex + 1} / {images.length}
+            </div>
+          )}
+
+          <div className="relative flex items-center justify-center w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
+            {hasMultiple && (
+              <button
+                onClick={prev}
+                className="absolute -left-2 sm:left-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+              </button>
+            )}
+            <img
+              src={images[lbIndex]}
+              alt={`${alt} ${lbIndex + 1}`}
+              className="max-w-full max-h-[70vh] object-contain rounded-2xl shadow-2xl mx-4"
+            />
+            {hasMultiple && (
+              <button
+                onClick={next}
+                className="absolute -right-2 sm:right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+              </button>
+            )}
+          </div>
+
+          {hasMultiple && (
+            <div className="flex gap-2 mt-5 overflow-x-auto max-w-lg px-4" onClick={(e) => e.stopPropagation()}>
+              {images.map((src, i) => (
+                <button
+                  key={i}
+                  onClick={() => setLbIndex(i)}
+                  className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                    lbIndex === i ? 'border-[#27C4A0]' : 'border-white/15 opacity-50 hover:opacity-80'
+                  }`}
+                >
+                  <img src={src} alt="" className="w-full h-full object-contain" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </>

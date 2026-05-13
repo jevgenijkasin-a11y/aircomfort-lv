@@ -11,7 +11,7 @@ const EMPTY: ProductForm = {
   category: 'home', power_kw: 2.5, area_coverage: '20–25',
   price: 0, install_price: 249, energy_class: 'A++',
   features: [], features_lv: [], features_ru: [], features_en: [],
-  brand_color: '#1A6B9A', image_url: '', in_stock: true,
+  brand_color: '#1A6B9A', image_url: '', image_urls: [], in_stock: true,
 };
 
 const energyClasses = ['A+++', 'A++', 'A+', 'A', 'B'];
@@ -41,9 +41,16 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   const openAdd = () => setModal({ open: true, product: { ...EMPTY } });
   const openEdit = (p: AdminProduct) => {
     const hasLocale = p.features.some(f => /^(lv|ru|en):/.test(f));
+    let imgs: string[] = [];
+    if (p.image_url?.startsWith('[')) {
+      try { imgs = JSON.parse(p.image_url); } catch { imgs = p.image_url ? [p.image_url] : []; }
+    } else if (p.image_url) {
+      imgs = [p.image_url];
+    }
     setModal({
       open: true, product: {
         ...p,
+        image_urls: imgs,
         features_lv: hasLocale ? p.features.filter(f => f.startsWith('lv:')).map(f => f.slice(3)) : [],
         features_ru: hasLocale ? p.features.filter(f => f.startsWith('ru:')).map(f => f.slice(3)) : [],
         features_en: hasLocale ? p.features.filter(f => f.startsWith('en:')).map(f => f.slice(3)) : p.features,
@@ -62,9 +69,22 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     const r = await fetch('/api/admin/upload', { method: 'POST', body: fd });
     if (r.ok) {
       const { url } = await r.json();
-      setField('image_url', url);
+      setModal(m => {
+        const current = m.product.image_urls || [];
+        if (current.length >= 10) return m;
+        const next = [...current, url];
+        return { ...m, product: { ...m.product, image_urls: next, image_url: next[0] } };
+      });
     }
     setUploadingImg(false);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const removeImage = (index: number) => {
+    setModal(m => {
+      const next = (m.product.image_urls || []).filter((_, i) => i !== index);
+      return { ...m, product: { ...m.product, image_urls: next, image_url: next[0] || '' } };
+    });
   };
 
   const save = async () => {
@@ -85,10 +105,15 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
       ? [...tagged(lv, 'lv'), ...tagged(ru, 'ru'), ...tagged(en, 'en')]
       : parseStr(fields.features);
 
-    const { features_lv: _flv, features_ru: _fru, features_en: _fen, features: _f, ...restFields } = fields;
+    const { features_lv: _flv, features_ru: _fru, features_en: _fen, features: _f, image_urls: _iu, ...restFields } = fields;
+    const imageUrls: string[] = (fields.image_urls as string[]) || [];
+    const imageUrlValue = imageUrls.length > 1
+      ? JSON.stringify(imageUrls)
+      : (imageUrls[0] || '');
     const payload = {
       ...restFields,
       features,
+      image_url: imageUrlValue,
       power_kw: Number(fields.power_kw),
       price: Number(fields.price),
       install_price: Number(fields.install_price),
@@ -276,20 +301,48 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
               </div>
 
               <div>
-                <label className={lbl}>{lang === 'ru' ? 'Фото товара' : 'Product Photo'}</label>
-                <div
-                  onClick={() => fileRef.current?.click()}
-                  className="relative border-2 border-dashed border-white/15 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-[#27C4A0]/40 transition-colors min-h-[100px]"
-                >
-                  {modal.product.image_url ? (
-                    <img src={modal.product.image_url} alt="preview" className="max-h-24 object-contain rounded" />
-                  ) : (
-                    <>
-                      <svg className="w-8 h-8 text-white/20 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      <p className="text-white/30 text-xs">{uploadingImg ? s.loading : s.prodImageClick}</p>
-                    </>
-                  )}
-                </div>
+                <label className={lbl}>
+                  {lang === 'ru' ? `Фото товара (${(modal.product.image_urls || []).length}/10)` : `Product Photos (${(modal.product.image_urls || []).length}/10)`}
+                </label>
+
+                {(modal.product.image_urls || []).length > 0 && (
+                  <div className="grid grid-cols-4 gap-2 mb-2">
+                    {(modal.product.image_urls || []).map((url, i) => (
+                      <div key={url + i} className="relative aspect-square rounded-xl overflow-hidden bg-white/5 border border-white/10 group">
+                        {i === 0 && (
+                          <span className="absolute top-1 left-1 bg-[#27C4A0] text-[#0B1929] text-[9px] font-bold px-1 py-0.5 rounded z-10 leading-none">
+                            {lang === 'ru' ? 'Гл.' : 'Main'}
+                          </span>
+                        )}
+                        <img src={url} alt="" className="w-full h-full object-contain p-1" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(i)}
+                          className="absolute top-1 right-1 w-5 h-5 bg-black/60 hover:bg-red-500 rounded-full flex items-center justify-center text-white transition-colors z-10 opacity-0 group-hover:opacity-100"
+                        >
+                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {(modal.product.image_urls || []).length < 10 && (
+                  <div
+                    onClick={() => !uploadingImg && fileRef.current?.click()}
+                    className="border-2 border-dashed border-white/15 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-[#27C4A0]/40 transition-colors min-h-[72px]"
+                  >
+                    {uploadingImg ? (
+                      <div className="w-5 h-5 border-2 border-[#27C4A0]/30 border-t-[#27C4A0] rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <svg className="w-6 h-6 text-white/20 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        <p className="text-white/30 text-xs">{lang === 'ru' ? 'Добавить фото' : 'Add photo'}</p>
+                      </>
+                    )}
+                  </div>
+                )}
+
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
               </div>
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { supabaseServer, type SupabaseProduct, productName, productFeatures } from '@/lib/supabase';
+import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages } from '@/lib/supabase';
 import ProductImageViewer from '@/components/ProductImageViewer';
 
 interface Props {
@@ -37,6 +37,7 @@ export default async function ProductPage({ params }: Props) {
   const p = product as SupabaseProduct;
   const name = productName(p, locale);
   const features = productFeatures(p, locale);
+  const images = productImages(p);
   const energyCls = energyColors[p.energy_class] ?? 'text-white/50 border-white/20 bg-white/5';
 
   return (
@@ -61,7 +62,7 @@ export default async function ProductPage({ params }: Props) {
           {/* Image with lightbox */}
           <div className="glass-card rounded-2xl overflow-hidden relative">
             <ProductImageViewer
-              src={p.image_url}
+              images={images}
               alt={name}
               brandColor={p.brand_color}
               brand={p.brand}

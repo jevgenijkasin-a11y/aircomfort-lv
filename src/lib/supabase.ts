@@ -73,6 +73,17 @@ export async function getSettings(): Promise<Record<string, string>> {
   return map;
 }
 
+export function productImages(p: SupabaseProduct): string[] {
+  if (p.image_url?.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(p.image_url);
+      if (Array.isArray(parsed) && parsed.length) return parsed as string[];
+    } catch { /* fall through */ }
+  }
+  if (p.image_url) return [p.image_url];
+  return [];
+}
+
 export function settingFor(settings: Record<string, string>, key: string, fallback = ''): string {
   return settings[key] || fallback;
 }

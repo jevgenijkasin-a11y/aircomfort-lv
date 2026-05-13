@@ -30,6 +30,7 @@ export interface AdminProduct {
   features_en?: string[] | string;
   brand_color: string;
   image_url: string;
+  image_urls: string[];
   in_stock: boolean;
   created_at?: string;
 }
