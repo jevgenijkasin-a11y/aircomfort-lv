@@ -60,7 +60,7 @@
     "viewBtn": "View",
     "energyClass": "Energy class",
     "installIncluded": "Installation included",
-    "installFrom": "Installation from 250 €"
+    "installFrom": "Installation from {price} €"
   },
   "catalog": {
     "title": "Air Conditioner Catalog",
@@ -121,7 +121,7 @@
     "resultTitle": "Calculation Result",
     "recommendedPower": "Recommended power",
     "equipmentCost": "Equipment cost",
-    "installationCost": "Installation",
+    "installationCost": "Installation from",
     "totalCost": "Total",
     "getOffer": "Get an individual offer",
     "disclaimer": "* Estimate only. Final price confirmed after site inspection.",

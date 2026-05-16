@@ -69,6 +69,7 @@ export interface SiteSettings {
   contacts_form_title_lv: string;
   contacts_form_title_ru: string;
   contacts_form_title_en: string;
+  install_price_from: string;
 }
 
 export const T = {
@@ -194,6 +195,7 @@ export const T = {
     setContactsFormTitleLv: 'Заголовок формы LV',
     setContactsFormTitleRu: 'Заголовок формы RU',
     setContactsFormTitleEn: 'Заголовок формы EN',
+    setInstallPriceFrom: 'Монтаж от (€)',
     setSave: 'Сохранить настройки',
     setSaved: 'Настройки сохранены!',
     pwdTitle: 'Смена пароля',
@@ -333,6 +335,7 @@ export const T = {
     setContactsFormTitleLv: 'Form Title LV',
     setContactsFormTitleRu: 'Form Title RU',
     setContactsFormTitleEn: 'Form Title EN',
+    setInstallPriceFrom: 'Installation from (€)',
     setSave: 'Save Settings',
     setSaved: 'Settings saved!',
     pwdTitle: 'Change Password',

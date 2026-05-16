@@ -60,7 +60,7 @@
     "viewBtn": "Посмотреть",
     "energyClass": "Класс энергоэффективности",
     "installIncluded": "Монтаж включён",
-    "installFrom": "Монтаж от 250 €"
+    "installFrom": "Монтаж от {price} €"
   },
   "catalog": {
     "title": "Каталог кондиционеров",
@@ -121,7 +121,7 @@
     "resultTitle": "Результат расчёта",
     "recommendedPower": "Рекомендуемая мощность",
     "equipmentCost": "Стоимость оборудования",
-    "installationCost": "Монтаж",
+    "installationCost": "Монтаж от",
     "totalCost": "Итого",
     "getOffer": "Получить индивидуальное предложение",
     "disclaimer": "* Расчёт ориентировочный. Окончательная цена подтверждается после осмотра.",

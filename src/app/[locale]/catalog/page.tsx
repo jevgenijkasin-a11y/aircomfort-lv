@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, getLocale, setRequestLocale } from 'next-intl/server';
-import { supabaseServer, type SupabaseProduct } from '@/lib/supabase';
+import { supabaseServer, type SupabaseProduct, getSettings } from '@/lib/supabase';
 import CatalogClient from '@/components/CatalogClient';
 
 export const dynamic = 'force-dynamic';
@@ -20,12 +20,14 @@ export default async function CatalogPage({
   const { locale: routeLocale } = await params;
   setRequestLocale(routeLocale);
 
-  const [t, locale, { data: products }, sp] = await Promise.all([
+  const [t, locale, { data: products }, sp, settings] = await Promise.all([
     getTranslations('catalog'),
     getLocale(),
     supabaseServer.from('products').select('*').eq('in_stock', true).order('price', { ascending: true }),
     searchParams,
+    getSettings(),
   ]);
+  const installFrom = parseInt(settings.install_price_from || '250') || 250;
 
   return (
     <>
@@ -39,7 +41,7 @@ export default async function CatalogPage({
           <p className="text-white/45 text-lg">{t('subtitle')}</p>
         </div>
       </div>
-      <CatalogClient initialProducts={(products ?? []) as SupabaseProduct[]} locale={locale} initialCategory={sp.category} />
+      <CatalogClient initialProducts={(products ?? []) as SupabaseProduct[]} locale={locale} initialCategory={sp.category} installFrom={installFrom} />
     </>
   );
 }

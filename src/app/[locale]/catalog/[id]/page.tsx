@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages } from '@/lib/supabase';
+import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages, getSettings } from '@/lib/supabase';
 import ProductImageViewer from '@/components/ProductImageViewer';
 
 interface Props {
@@ -26,11 +26,13 @@ const energyColors: Record<string, string> = {
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
   setRequestLocale(locale);
-  const [t, tp, { data: product }] = await Promise.all([
+  const [t, tp, { data: product }, settings] = await Promise.all([
     getTranslations('catalog'),
     getTranslations('products'),
     supabaseServer.from('products').select('*').eq('id', id).single(),
+    getSettings(),
   ]);
+  const installFrom = parseInt(settings.install_price_from || '250') || 250;
 
   if (!product) notFound();
 
@@ -108,7 +110,7 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               </div>
               <div className="flex items-center py-3 border-t border-[#1A6B9A]/15">
-                <span className="text-white/50 text-sm">{tp('installFrom')}</span>
+                <span className="text-white/50 text-sm">{tp('installFrom', { price: installFrom })}</span>
               </div>
             </div>
 

@@ -15,6 +15,7 @@ const DEFAULTS: SiteSettings = {
   contacts_title_lv: '', contacts_title_ru: '', contacts_title_en: '',
   contacts_subtitle_lv: '', contacts_subtitle_ru: '', contacts_subtitle_en: '',
   contacts_form_title_lv: '', contacts_form_title_ru: '', contacts_form_title_en: '',
+  install_price_from: '250',
 };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -220,6 +221,12 @@ export default function AdminSettings({ lang }: { lang: Lang }) {
                 <input className={inp} value={settings.contacts_form_title_en} onChange={set('contacts_form_title_en')} placeholder="Send Request" />
               </div>
             </div>
+          </div>
+
+          <SectionTitle>Montāža / Монтаж / Installation</SectionTitle>
+          <div className="max-w-xs">
+            <label className={lbl}>{s.setInstallPriceFrom}</label>
+            <input className={inp} type="number" min="0" value={settings.install_price_from} onChange={set('install_price_from')} placeholder="250" />
           </div>
 
           <div className="pt-4">

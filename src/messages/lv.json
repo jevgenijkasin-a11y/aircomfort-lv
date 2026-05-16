@@ -60,7 +60,7 @@
     "viewBtn": "Apskatīt",
     "energyClass": "Enerģijas klase",
     "installIncluded": "Uzstādīšana iekļauta",
-    "installFrom": "Montāža no 250 €"
+    "installFrom": "Montāža no {price} €"
   },
   "catalog": {
     "title": "Kondicionētāju katalogs",
@@ -121,7 +121,7 @@
     "resultTitle": "Aprēķina rezultāts",
     "recommendedPower": "Ieteicamā jauda",
     "equipmentCost": "Iekārtas izmaksas",
-    "installationCost": "Uzstādīšana",
+    "installationCost": "Uzstādīšana no",
     "totalCost": "Kopā",
     "getOffer": "Saņemt individuālo piedāvājumu",
     "disclaimer": "* Aprēķins ir orientējošs. Galīgā cena tiek apstiprināta pēc apskates.",

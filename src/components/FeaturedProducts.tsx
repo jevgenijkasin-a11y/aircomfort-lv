@@ -1,6 +1,6 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages } from '@/lib/supabase';
+import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages, getSettings } from '@/lib/supabase';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-[#27C4A0] border-[#27C4A0]/30 bg-[#27C4A0]/10',
@@ -8,7 +8,7 @@ const energyColors: Record<string, string> = {
   'A+': 'text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10',
 };
 
-function ProductCard({ product, locale, t }: { product: SupabaseProduct; locale: string; t: (k: string) => string }) {
+function ProductCard({ product, locale, t, installFrom }: { product: SupabaseProduct; locale: string; t: (k: string, v?: Record<string, unknown>) => string; installFrom: number }) {
   const name = productName(product, locale);
   const features = productFeatures(product, locale);
   const energyCls = energyColors[product.energy_class] ?? 'text-white/50 border-white/20 bg-white/5';
@@ -60,7 +60,7 @@ function ProductCard({ product, locale, t }: { product: SupabaseProduct; locale:
               <p className="text-xs text-white/35 mb-0.5">{t('from')}</p>
               <p className="font-syne font-bold text-2xl text-white">{product.price.toLocaleString('lv-LV')} €</p>
             </div>
-            <p className="text-xs text-white/35 text-right">{t('installFrom')}</p>
+            <p className="text-xs text-white/35 text-right">{t('installFrom', { price: installFrom })}</p>
           </div>
           <Link href={`/catalog/${product.id}` as any}
             className="w-full flex items-center justify-center gap-2 bg-[#1A6B9A]/20 hover:bg-[#27C4A0] border border-[#1A6B9A]/40 hover:border-[#27C4A0] text-white hover:text-[#072D47] font-semibold text-sm py-2.5 rounded-xl transition-all duration-200">
@@ -74,7 +74,8 @@ function ProductCard({ product, locale, t }: { product: SupabaseProduct; locale:
 }
 
 export default async function FeaturedProducts() {
-  const [t, locale] = await Promise.all([getTranslations('products'), getLocale()]);
+  const [t, locale, settings] = await Promise.all([getTranslations('products'), getLocale(), getSettings()]);
+  const installFrom = parseInt(settings.install_price_from || '250') || 250;
 
   const { data } = await supabaseServer
     .from('products')
@@ -104,7 +105,7 @@ export default async function FeaturedProducts() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p as SupabaseProduct} locale={locale} t={(k) => t(k as Parameters<typeof t>[0])} />
+            <ProductCard key={p.id} product={p as SupabaseProduct} locale={locale} t={(k, v) => t(k as Parameters<typeof t>[0], v as any)} installFrom={installFrom} />
           ))}
         </div>
       </div>

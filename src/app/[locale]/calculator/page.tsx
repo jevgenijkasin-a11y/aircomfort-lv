@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Calculator from '@/components/Calculator';
+import { getSettings } from '@/lib/supabase';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('calculator');
@@ -11,8 +12,12 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations('calculator');
-  const tn = await getTranslations('nav');
+  const [t, tn, settings] = await Promise.all([
+    getTranslations('calculator'),
+    getTranslations('nav'),
+    getSettings(),
+  ]);
+  const installFrom = parseInt(settings.install_price_from || '250') || 250;
 
   return (
     <>
@@ -33,7 +38,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
           <p className="text-white/45 text-lg max-w-xl mx-auto">{t('subtitle')}</p>
         </div>
       </div>
-      <Calculator />
+      <Calculator installFrom={installFrom} />
     </>
   );
 }

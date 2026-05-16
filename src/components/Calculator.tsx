@@ -17,7 +17,8 @@ function calculatePower(
   roomType: string,
   insulation: string,
   windows: number,
-  floor: string
+  floor: string,
+  installBase: number
 ): CalcResult {
   const baseFactors: Record<string, number> = {
     good: 30,
@@ -54,12 +55,12 @@ function calculatePower(
     powerKw,
     equipMin: range.min,
     equipMax: range.maxPrice,
-    installMin: 249,
-    installMax: 349,
+    installMin: installBase,
+    installMax: installBase + 100,
   };
 }
 
-export default function Calculator() {
+export default function Calculator({ installFrom = 250 }: { installFrom?: number }) {
   const t = useTranslations('calculator');
 
   const [area, setArea] = useState('');
@@ -72,7 +73,7 @@ export default function Calculator() {
   const handleCalc = () => {
     const areaNum = parseFloat(area);
     if (!areaNum || areaNum <= 0) return;
-    setResult(calculatePower(areaNum, roomType, insulation, parseInt(windows) || 0, floor));
+    setResult(calculatePower(areaNum, roomType, insulation, parseInt(windows) || 0, floor, installFrom));
   };
 
   const labelCls = 'block text-sm font-medium text-white/60 mb-1.5';
