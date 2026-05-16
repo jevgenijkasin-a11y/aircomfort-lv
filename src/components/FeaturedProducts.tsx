@@ -60,9 +60,7 @@ function ProductCard({ product, locale, t }: { product: SupabaseProduct; locale:
               <p className="text-xs text-white/35 mb-0.5">{t('from')}</p>
               <p className="font-syne font-bold text-2xl text-white">{product.price.toLocaleString('lv-LV')} €</p>
             </div>
-            {product.install_price > 0 && (
-              <p className="text-xs text-white/35 text-right">+ {product.install_price} € {t('installIncluded').split(' ')[0]}</p>
-            )}
+            <p className="text-xs text-white/35 text-right">{t('installFrom')}</p>
           </div>
           <Link href={`/catalog/${product.id}` as any}
             className="w-full flex items-center justify-center gap-2 bg-[#1A6B9A]/20 hover:bg-[#27C4A0] border border-[#1A6B9A]/40 hover:border-[#27C4A0] text-white hover:text-[#072D47] font-semibold text-sm py-2.5 rounded-xl transition-all duration-200">

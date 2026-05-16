@@ -59,7 +59,8 @@
     "order": "Order",
     "viewBtn": "View",
     "energyClass": "Energy class",
-    "installIncluded": "Installation included"
+    "installIncluded": "Installation included",
+    "installFrom": "Installation from 250 €"
   },
   "catalog": {
     "title": "Air Conditioner Catalog",

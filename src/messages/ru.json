@@ -59,7 +59,8 @@
     "order": "Заказать",
     "viewBtn": "Посмотреть",
     "energyClass": "Класс энергоэффективности",
-    "installIncluded": "Монтаж включён"
+    "installIncluded": "Монтаж включён",
+    "installFrom": "Монтаж от 250 €"
   },
   "catalog": {
     "title": "Каталог кондиционеров",

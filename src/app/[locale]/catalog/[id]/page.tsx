@@ -107,14 +107,8 @@ export default async function ProductPage({ params }: Props) {
                   <p className="font-syne font-bold text-2xl text-white">{p.price.toLocaleString('lv-LV')} €</p>
                 </div>
               </div>
-              {p.install_price > 0 && (
-                <div className="flex items-center justify-between py-3 border-t border-[#1A6B9A]/15">
-                  <span className="text-white/50 text-sm">{tp('installIncluded')}</span>
-                  <span className="font-semibold text-white">+{p.install_price} €</span>
-                </div>
-              )}
-              <div className="pt-2">
-                <p className="text-white/35 text-xs mb-3">{tp('from')} {(p.price + (p.install_price || 0)).toLocaleString('lv-LV')} € {tp('installIncluded').toLowerCase()}</p>
+              <div className="flex items-center py-3 border-t border-[#1A6B9A]/15">
+                <span className="text-white/50 text-sm">{tp('installFrom')}</span>
               </div>
             </div>
 

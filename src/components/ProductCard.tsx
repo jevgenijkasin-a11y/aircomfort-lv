@@ -91,9 +91,7 @@ export default function ProductCard({ product }: Props) {
                 {product.price.toLocaleString('lv-LV')} €
               </p>
             </div>
-            <p className="text-xs text-white/35 text-right">
-              + {product.installationPrice} € uzst.
-            </p>
+            <p className="text-xs text-white/35 text-right">{t('installFrom')}</p>
           </div>
           <Link
             href="/contacts"
