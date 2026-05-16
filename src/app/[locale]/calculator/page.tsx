@@ -18,6 +18,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
     getSettings(),
   ]);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
+  const installTo = parseInt(settings.install_price_to || '350') || 350;
 
   return (
     <>
@@ -38,7 +39,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
           <p className="text-white/45 text-lg max-w-xl mx-auto">{t('subtitle')}</p>
         </div>
       </div>
-      <Calculator installFrom={installFrom} />
+      <Calculator installFrom={installFrom} installTo={installTo} />
     </>
   );
 }
