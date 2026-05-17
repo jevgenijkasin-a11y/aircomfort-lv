@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 
 export const dynamic = 'force-dynamic';
 
-const brandList = ['Daikin', 'Mitsubishi', 'Samsung', 'LG', 'Panasonic'];
+const brandList = ['Daikin', 'Mitsubishi', 'LG', 'TCL', 'Midea', 'Nordis', 'Hisense', 'Toshiba'];
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
