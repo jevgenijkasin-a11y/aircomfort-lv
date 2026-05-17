@@ -81,7 +81,7 @@ export default async function FeaturedProducts() {
     .from('products')
     .select('*')
     .eq('in_stock', true)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
     .limit(3);
 
   const products = data ?? [];
