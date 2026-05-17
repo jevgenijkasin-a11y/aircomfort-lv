@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { T, Lang, AdminProduct } from './adminStrings';
 import { supabase } from '@/lib/supabase';
 
@@ -24,6 +24,9 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   const [modal, setModal] = useState<{ open: boolean; product: ProductForm }>({ open: false, product: EMPTY });
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [filterBrand, setFilterBrand] = useState('');
+  const [filterPower, setFilterPower] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
   const [uploadingImg, setUploadingImg] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -39,6 +42,20 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   };
 
   useEffect(() => { load(); }, []);
+
+  const brands = useMemo(() => Array.from(new Set(products.map(p => p.brand))).sort(), [products]);
+  const powers = useMemo(() => Array.from(new Set(products.map(p => p.power_kw))).sort((a, b) => a - b), [products]);
+
+  const filteredProducts = useMemo(() => {
+    let list = products;
+    if (filterBrand) list = list.filter(p => p.brand === filterBrand);
+    if (filterPower) list = list.filter(p => p.power_kw === parseFloat(filterPower));
+    if (filterCategory) list = list.filter(p => p.category === filterCategory);
+    return list;
+  }, [products, filterBrand, filterPower, filterCategory]);
+
+  const resetFilters = () => { setFilterBrand(''); setFilterPower(''); setFilterCategory(''); };
+  const hasFilters = filterBrand || filterPower || filterCategory;
 
   const openAdd = () => setModal({ open: true, product: { ...EMPTY } });
   const openEdit = (p: AdminProduct) => {
@@ -175,11 +192,63 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
         </button>
       </div>
 
+      <div className="bg-white/4 border border-white/8 rounded-2xl p-4 mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div>
+          <label className="block text-xs text-white/40 mb-1.5 font-medium">{lang === 'ru' ? 'Бренд' : 'Brand'}</label>
+          <div className="relative">
+            <select value={filterBrand} onChange={e => setFilterBrand(e.target.value)} className="w-full bg-[#0A2035]/80 border border-white/10 text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors appearance-none cursor-pointer" style={{ background: '#0A2035' }}>
+              <option value="">{lang === 'ru' ? 'Все бренды' : 'All brands'}</option>
+              {brands.map(b => <option key={b} value={b} style={{ background: '#0A2035' }}>{b}</option>)}
+            </select>
+            <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs text-white/40 mb-1.5 font-medium">{lang === 'ru' ? 'Мощность' : 'Power'}</label>
+          <div className="relative">
+            <select value={filterPower} onChange={e => setFilterPower(e.target.value)} className="w-full bg-[#0A2035]/80 border border-white/10 text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors appearance-none cursor-pointer" style={{ background: '#0A2035' }}>
+              <option value="">{lang === 'ru' ? 'Любая' : 'Any'}</option>
+              {powers.map(p => <option key={p} value={p} style={{ background: '#0A2035' }}>{p} kW</option>)}
+            </select>
+            <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs text-white/40 mb-1.5 font-medium">{lang === 'ru' ? 'Категория' : 'Category'}</label>
+          <div className="relative">
+            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="w-full bg-[#0A2035]/80 border border-white/10 text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors appearance-none cursor-pointer" style={{ background: '#0A2035' }}>
+              <option value="">{lang === 'ru' ? 'Все' : 'All'}</option>
+              <option value="home" style={{ background: '#0A2035' }}>{lang === 'ru' ? 'Бытовые' : 'Home'}</option>
+              <option value="heat_pump" style={{ background: '#0A2035' }}>{lang === 'ru' ? 'Насос воздух-воздух' : 'Heat Pump A-A'}</option>
+              <option value="commercial" style={{ background: '#0A2035' }}>{lang === 'ru' ? 'Коммерческие' : 'Commercial'}</option>
+              <option value="commercial_heat_pump" style={{ background: '#0A2035' }}>{lang === 'ru' ? 'Насос воздух-вода' : 'Heat Pump A-W'}</option>
+            </select>
+            <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
+          </div>
+        </div>
+        <div className="flex flex-col justify-end">
+          {hasFilters ? (
+            <button onClick={resetFilters} className="w-full flex items-center justify-center gap-1.5 bg-white/8 hover:bg-white/12 text-white/60 hover:text-white text-sm py-2 rounded-xl transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              {lang === 'ru' ? 'Сбросить' : 'Reset'}
+            </button>
+          ) : (
+            <p className="text-center text-xs text-white/20 py-2">{filteredProducts.length} {lang === 'ru' ? 'товаров' : 'items'}</p>
+          )}
+        </div>
+      </div>
+
+      {hasFilters && (
+        <p className="text-white/40 text-sm mb-4">
+          <span className="text-white font-semibold">{filteredProducts.length}</span> {lang === 'ru' ? 'из' : 'of'} {products.length} {lang === 'ru' ? 'товаров' : 'items'}
+        </p>
+      )}
+
       {loading ? (
         <div className="text-center py-20 text-white/40">{s.loading}</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {products.map((p) => (
+          {filteredProducts.map((p) => (
             <div key={p.id} className="bg-white/4 border border-white/8 rounded-2xl overflow-hidden group hover:border-white/15 transition-all">
               <div className="h-28 flex items-center justify-center relative" style={{ background: `linear-gradient(135deg, ${p.brand_color}15, ${p.brand_color}05)` }}>
                 {firstImage(p.image_url) ? (
