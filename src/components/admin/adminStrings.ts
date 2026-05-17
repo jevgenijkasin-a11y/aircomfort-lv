@@ -32,6 +32,9 @@ export interface AdminProduct {
   image_url: string;
   image_urls: string[];
   in_stock: boolean;
+  is_hit: boolean;
+  is_promo: boolean;
+  discount_percent: number | null;
   created_at?: string;
 }
 
@@ -159,6 +162,9 @@ export const T = {
     prodImageClick: 'Нажмите для загрузки фото',
     prodDeleteConfirm: 'Удалить этот товар?',
     prodInStock: 'В наличии',
+    prodIsHit: 'Хит',
+    prodIsPromo: 'Акция',
+    prodDiscount: 'Скидка %',
     setTitle: 'Настройки сайта',
     setPhone: 'Телефон',
     setEmail: 'Email',
@@ -300,6 +306,9 @@ export const T = {
     prodImageClick: 'Click to upload photo',
     prodDeleteConfirm: 'Delete this product?',
     prodInStock: 'In Stock',
+    prodIsHit: 'Hit',
+    prodIsPromo: 'Promo',
+    prodDiscount: 'Discount %',
     setTitle: 'Site Settings',
     setPhone: 'Phone',
     setEmail: 'Email',

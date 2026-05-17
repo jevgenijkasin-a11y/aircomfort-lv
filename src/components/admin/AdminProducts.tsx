@@ -12,6 +12,7 @@ const EMPTY: ProductForm = {
   price: 0, install_price: 249, energy_class: 'A++',
   features: [], features_lv: [], features_ru: [], features_en: [],
   brand_color: '#1A6B9A', image_url: '', image_urls: [], in_stock: true,
+  is_hit: false, is_promo: false, discount_percent: null,
 };
 
 const energyClasses = ['A+++', 'A++', 'A+', 'A', 'B'];
@@ -121,6 +122,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
       power_kw: Number(fields.power_kw),
       price: Number(fields.price),
       install_price: Number(fields.install_price),
+      discount_percent: fields.discount_percent ? Number(fields.discount_percent) : null,
     };
 
     if (id) {
@@ -374,6 +376,51 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                   <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#27C4A0]"></div>
                 </label>
                 <span className="text-sm text-white/60">{s.prodInStock}</span>
+              </div>
+
+              <div className="bg-white/3 border border-white/8 rounded-xl p-3 space-y-3">
+                <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">{lang === 'ru' ? 'Бейджи на карточке' : 'Card Badges'}</p>
+                <div className="flex items-center gap-3">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={modal.product.is_hit ?? false}
+                      onChange={(e) => setField('is_hit', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f97316]"></div>
+                  </label>
+                  <span className="text-sm text-white/60">{s.prodIsHit}</span>
+                  {modal.product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white">Хит</span>}
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={modal.product.is_promo ?? false}
+                      onChange={(e) => setField('is_promo', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e91e8c]"></div>
+                  </label>
+                  <span className="text-sm text-white/60">{s.prodIsPromo}</span>
+                  {modal.product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white">Акция</span>}
+                </div>
+                <div>
+                  <label className={lbl}>{s.prodDiscount} ({lang === 'ru' ? 'оставь пустым если нет' : 'leave empty if none'})</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      className={`${inp} w-24`}
+                      type="number"
+                      min={1}
+                      max={99}
+                      value={modal.product.discount_percent ?? ''}
+                      onChange={(e) => setField('discount_percent', e.target.value === '' ? null : Number(e.target.value))}
+                      placeholder="0"
+                    />
+                    {modal.product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black">-{modal.product.discount_percent}%</span>}
+                  </div>
+                </div>
               </div>
             </div>
 

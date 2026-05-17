@@ -37,6 +37,9 @@ export interface SupabaseProduct {
   category: string;
   brand_color: string;
   in_stock: boolean;
+  is_hit: boolean;
+  is_promo: boolean;
+  discount_percent: number | null;
   created_at: string;
 }
 
