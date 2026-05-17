@@ -60,7 +60,9 @@
     "viewBtn": "Apskatīt",
     "energyClass": "Enerģijas klase",
     "installIncluded": "Uzstādīšana iekļauta",
-    "installFrom": "Montāža no {price} €"
+    "installFrom": "Montāža no {price} €",
+    "badgeHit": "Hit",
+    "badgePromo": "Akcija"
   },
   "catalog": {
     "title": "Kondicionētāju katalogs",

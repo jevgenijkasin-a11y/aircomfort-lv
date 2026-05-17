@@ -60,7 +60,9 @@
     "viewBtn": "View",
     "energyClass": "Energy class",
     "installIncluded": "Installation included",
-    "installFrom": "Installation from {price} €"
+    "installFrom": "Installation from {price} €",
+    "badgeHit": "Hit",
+    "badgePromo": "Sale"
   },
   "catalog": {
     "title": "Air Conditioner Catalog",
