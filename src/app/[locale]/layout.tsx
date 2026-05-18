@@ -7,6 +7,7 @@ import { routing } from '@/i18n/routing';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FloatingButtons from '@/components/FloatingButtons';
+import ScrollToTop from '@/components/ScrollToTop';
 import CookieBanner from '@/components/CookieBanner';
 import '../globals.css';
 
@@ -61,6 +62,7 @@ export default async function LocaleLayout({
           <main className="min-h-screen">{children}</main>
           <Footer />
           <FloatingButtons />
+          <ScrollToTop />
           <CookieBanner />
         </NextIntlClientProvider>
       </body>
