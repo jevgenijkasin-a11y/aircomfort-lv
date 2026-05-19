@@ -105,7 +105,6 @@ export default async function ProductPage({ params }: Props) {
                   <p className={`font-syne font-bold text-xl ${energyColors[p.energy_class]?.split(' ')[0] ?? 'text-white'}`}>{p.energy_class}</p>
                 </div>
                 <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                  <p className="text-white/40 text-xs mb-1">{tp('from')}</p>
                   {p.discount_percent ? (
                     <>
                       <p className="text-sm text-white/35 line-through leading-none mb-1">{p.price.toLocaleString('lv-LV')} €</p>

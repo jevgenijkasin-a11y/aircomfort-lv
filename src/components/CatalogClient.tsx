@@ -121,7 +121,7 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
   const energyCls = energyColors[product.energy_class] ?? 'text-white/50 border-white/20 bg-white/5';
 
   return (
-    <Link href={`/catalog/${product.id}` as any} className="glass-card glass-card-hover rounded-2xl overflow-hidden flex flex-col group">
+    <Link href={`/catalog/${product.id}` as any} className="bg-white rounded-2xl overflow-hidden flex flex-col group border border-gray-100 hover:border-gray-300 hover:shadow-xl transition-all duration-200">
       <div className="h-36 flex items-center justify-center relative bg-white">
         {productImages(product)[0] ? (
           <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-3" />
@@ -141,29 +141,29 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
         )}
       </div>
       <div className="p-4 flex flex-col flex-1">
-        <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
-        <h3 className="font-syne font-semibold text-sm mb-2 leading-snug">{name}</h3>
+        <p className="text-[#1A9A7A] text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
+        <h3 className="font-syne font-semibold text-sm text-gray-900 mb-2 leading-snug">{name}</h3>
         <div className="flex gap-3 mb-3">
-          <span className="text-xs text-white/40">{product.power_kw} kW</span>
-          {product.area_coverage && <span className="text-xs text-white/40">{product.area_coverage} m²</span>}
+          <span className="text-xs text-gray-400">{product.power_kw} kW</span>
+          {product.area_coverage && <span className="text-xs text-gray-400">{product.area_coverage} m²</span>}
         </div>
-        <div className="border-t border-[#1A6B9A]/15 pt-3 mt-auto">
+        <div className="border-t border-gray-100 pt-3 mt-auto">
           <div className="flex items-center justify-between mb-2.5">
             <div>
               {product.discount_percent ? (
                 <>
-                  <span className="text-xs text-white/35 line-through mr-1.5">{product.price.toLocaleString('lv-LV')} €</span>
+                  <span className="text-xs text-gray-400 line-through mr-1.5">{product.price.toLocaleString('lv-LV')} €</span>
                   <span className="font-syne font-bold text-xl text-[#27C4A0]">
                     {Math.round(product.price * (1 - product.discount_percent / 100)).toLocaleString('lv-LV')} €
                   </span>
                 </>
               ) : (
-                <span className="font-syne font-bold text-xl">{product.price.toLocaleString('lv-LV')} €</span>
+                <span className="font-syne font-bold text-xl text-gray-900">{product.price.toLocaleString('lv-LV')} €</span>
               )}
             </div>
-            <span className="text-xs text-white/30">{t('installFrom', { price: installFrom })}</span>
+            <span className="text-xs text-gray-400">{t('installFrom', { price: installFrom })}</span>
           </div>
-          <div className="w-full flex items-center justify-center gap-2 bg-[#1A6B9A]/20 hover:bg-[#27C4A0] border border-[#1A6B9A]/40 hover:border-[#27C4A0] text-white hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47]">
+          <div className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-[#27C4A0] border border-gray-200 hover:border-[#27C4A0] text-gray-700 hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47] group-hover:border-[#27C4A0]">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
             {tCat('viewBtn')}
           </div>
