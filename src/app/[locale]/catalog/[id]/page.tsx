@@ -45,7 +45,7 @@ export default async function ProductPage({ params }: Props) {
   return (
     <>
       {/* Header */}
-      <div className="pt-28 pb-6 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
+      <div className="pt-36 pb-6 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <Link href="/catalog" className="inline-flex items-center gap-2 text-white/40 hover:text-[#27C4A0] text-sm transition-colors mb-4">
@@ -54,11 +54,11 @@ export default async function ProductPage({ params }: Props) {
           </Link>
           <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-widest mb-1">{p.brand}</p>
           <h1 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{name}</h1>
-          {(p.is_hit || p.is_promo || p.discount_percent) && (
+          {(p.is_hit || p.is_promo || !!p.discount_percent) && (
             <div className="flex flex-wrap gap-2">
               {p.is_hit && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#f97316] text-white shadow-md">{tp('badgeHit')}</span>}
               {p.is_promo && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#e91e8c] text-white shadow-md">{tp('badgePromo')}</span>}
-              {p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#eab308] text-black shadow-md">−{p.discount_percent}%</span>}
+              {!!p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#eab308] text-black shadow-md">−{p.discount_percent}%</span>}
             </div>
           )}
         </div>
@@ -77,11 +77,11 @@ export default async function ProductPage({ params }: Props) {
               brand={p.brand}
             />
             <div className={`absolute top-4 right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>
-            {(p.is_hit || p.is_promo || p.discount_percent) && (
+            {(p.is_hit || p.is_promo || !!p.discount_percent) && (
               <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                 {p.is_hit && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#f97316] text-white shadow-sm">{tp('badgeHit')}</span>}
                 {p.is_promo && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#e91e8c] text-white shadow-sm">{tp('badgePromo')}</span>}
-                {p.discount_percent && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#eab308] text-black shadow-sm">−{p.discount_percent}%</span>}
+                {!!p.discount_percent && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#eab308] text-black shadow-sm">−{p.discount_percent}%</span>}
               </div>
             )}
 
@@ -133,7 +133,7 @@ export default async function ProductPage({ params }: Props) {
                   )}
                 </div>
               </div>
-              {p.price && p.discount_percent && (
+              {!!p.price && !!p.discount_percent && (
                 <div className="bg-[#eab308]/10 border border-[#eab308]/25 rounded-xl p-4 flex items-center justify-between">
                   <div>
                     <p className="text-white/50 text-xs mb-0.5">{tp('wasPrice')}</p>

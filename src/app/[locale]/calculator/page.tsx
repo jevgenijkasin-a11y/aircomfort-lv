@@ -22,7 +22,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
 
   return (
     <>
-      <div className="pt-28 pb-10 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
+      <div className="pt-36 pb-10 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{

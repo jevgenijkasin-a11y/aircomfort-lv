@@ -31,7 +31,7 @@ export default async function CatalogPage({
 
   return (
     <>
-      <div className="pt-28 pb-10 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
+      <div className="pt-36 pb-10 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-[#1A6B9A]/10 blur-[80px]" />

@@ -132,11 +132,11 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
           </svg>
         )}
         <div className={`absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyCls}`}>{product.energy_class}</div>
-        {(product.is_hit || product.is_promo || product.discount_percent) && (
+        {(product.is_hit || product.is_promo || !!product.discount_percent) && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white shadow-sm">{t('badgeHit')}</span>}
             {product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white shadow-sm">{t('badgePromo')}</span>}
-            {product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black shadow-sm">-{product.discount_percent}%</span>}
+            {!!product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black shadow-sm">-{product.discount_percent}%</span>}
           </div>
         )}
       </div>
