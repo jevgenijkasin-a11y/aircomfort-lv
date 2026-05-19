@@ -260,18 +260,32 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                   </svg>
                 )}
                 <span className="absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded-lg bg-[#27C4A0]/20 text-[#27C4A0] border border-[#27C4A0]/30">{p.energy_class}</span>
-                {!p.in_stock && (
-                  <span className="absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30">
-                    {lang === 'ru' ? 'Нет' : 'OOS'}
-                  </span>
-                )}
+                <div className="absolute top-2 left-2 flex flex-col gap-1">
+                  {!p.in_stock && (
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30">
+                      {lang === 'ru' ? 'Нет' : 'OOS'}
+                    </span>
+                  )}
+                  {p.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white shadow-sm">{lang === 'ru' ? 'Хит' : 'Hit'}</span>}
+                  {p.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white shadow-sm">{lang === 'ru' ? 'Акция' : 'Promo'}</span>}
+                  {p.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black shadow-sm">−{p.discount_percent}%</span>}
+                </div>
               </div>
               <div className="p-4">
                 <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-wider mb-0.5">{p.brand}</p>
                 <p className="text-white font-semibold text-sm leading-snug mb-2">{p.name_en}</p>
                 <div className="flex items-center justify-between text-xs text-white/40 mb-3">
                   <span>{p.power_kw} kW · {p.area_coverage} m²</span>
-                  <span className="font-bold text-white text-base">{p.price.toLocaleString()} €</span>
+                  <div className="text-right">
+                    {p.discount_percent ? (
+                      <>
+                        <span className="line-through text-white/30 text-xs mr-1">{p.price.toLocaleString()} €</span>
+                        <span className="font-bold text-[#27C4A0] text-base">{Math.round(p.price * (1 - p.discount_percent / 100)).toLocaleString()} €</span>
+                      </>
+                    ) : (
+                      <span className="font-bold text-white text-base">{p.price.toLocaleString()} €</span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => openEdit(p)} className="flex-1 bg-white/8 hover:bg-white/12 text-white text-xs font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
