@@ -15,15 +15,12 @@ function ProductCard({ product, locale, t, installFrom }: { product: SupabasePro
 
   return (
     <div className="glass-card glass-card-hover rounded-2xl overflow-hidden flex flex-col group">
-      <div className="h-44 flex items-center justify-center relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${product.brand_color}18, ${product.brand_color}08)` }}>
-        <div className="absolute inset-0 opacity-10"
-          style={{ background: `radial-gradient(circle at 60% 40%, ${product.brand_color}, transparent 70%)` }} />
+      <div className="h-44 flex items-center justify-center relative overflow-hidden bg-white">
         {productImages(product)[0] ? (
-          <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-4" />
+          <img src={productImages(product)[0]} alt={name} className="h-full w-full object-contain p-4" />
         ) : (
-          <div className="relative flex flex-col items-center gap-2">
-            <svg viewBox="0 0 24 24" className="w-14 h-14 opacity-30" fill="none" stroke="currentColor" strokeWidth="1">
+          <div className="flex flex-col items-center gap-2">
+            <svg viewBox="0 0 24 24" className="w-14 h-14 opacity-20 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1">
               <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
               <circle cx="12" cy="12" r="3" />
             </svg>

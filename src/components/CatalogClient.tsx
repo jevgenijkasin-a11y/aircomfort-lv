@@ -122,13 +122,11 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
 
   return (
     <Link href={`/catalog/${product.id}` as any} className="glass-card glass-card-hover rounded-2xl overflow-hidden flex flex-col group">
-      <div className="h-36 flex items-center justify-center relative"
-        style={{ background: `linear-gradient(135deg, ${product.brand_color}18, ${product.brand_color}05)` }}>
-        <div className="absolute inset-0 opacity-10" style={{ background: `radial-gradient(circle at 60% 40%, ${product.brand_color}, transparent 70%)` }} />
+      <div className="h-36 flex items-center justify-center relative bg-white">
         {productImages(product)[0] ? (
           <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-3" />
         ) : (
-          <svg viewBox="0 0 24 24" className="w-10 h-10 opacity-25 relative" fill="none" stroke="currentColor" strokeWidth="1">
+          <svg viewBox="0 0 24 24" className="w-10 h-10 opacity-20 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1">
             <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
             <circle cx="12" cy="12" r="3" />
           </svg>
