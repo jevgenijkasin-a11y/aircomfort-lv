@@ -60,6 +60,17 @@ export interface SupabaseSetting {
   value: string;
 }
 
+export interface SupabaseReview {
+  id: number;
+  author_name: string;
+  text_lv: string;
+  text_ru: string;
+  text_en: string;
+  rating: number;
+  is_visible: boolean;
+  created_at: string;
+}
+
 export function productFeatures(p: SupabaseProduct, locale: string): string[] {
   const prefix = `${locale}:`;
   const localeFeatures = p.features.filter(f => f.startsWith(prefix)).map(f => f.slice(prefix.length));
