@@ -101,6 +101,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
               <InfoCard
                 label={t('address')}
                 value={address}
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
                 icon={
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -119,10 +120,10 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
               />
             </div>
 
-            {/* Google Maps embed */}
+            {/* Google Maps embed — address from admin settings */}
             <div className="mt-4 rounded-2xl overflow-hidden border border-[#1A6B9A]/25 h-48">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d69458.7!2d24.105!3d56.946!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46eecfb0e5073ded%3A0x400cfcd68f2fe30!2sRiga%2C%20Latvia!5e0!3m2!1sen!2slv!4v1"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
                 width="100%"
                 height="100%"
                 style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg)' }}

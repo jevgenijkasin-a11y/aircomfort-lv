@@ -25,9 +25,9 @@
     "serviceMaintenance": "Apkope"
   },
   "trustbar": {
-    "warranty": "Garantija 3 gadi",
-    "installation": "Montāža 1 dienā",
-    "consultation": "Bezmaksas konsultācija"
+    "warranty": "Garantija",
+    "installation": "Montāža no 1 dienas",
+    "consultation": "Bezmaksas konsultācija un provizoriskais izmaksu aprēķins"
   },
   "services": {
     "title": "Mūsu pakalpojumi",
@@ -141,7 +141,7 @@
   },
   "contacts": {
     "title": "Sazinieties ar mums",
-    "subtitle": "Atstājiet pieprasījumu — mēs sazināsimies ar jums 2 stundu laikā",
+    "subtitle": "Atstājiet pieprasījumu — mēs sazināsimies ar jums pēc iespējas ātrāk",
     "address": "Adrese",
     "addressValue": "Rīga, Latvija",
     "phone": "Telefons",
@@ -188,7 +188,7 @@
   "cta": {
     "title": "Sagatavosim individuālu",
     "titleAccent": "piedāvājumu jūsu telpām",
-    "subtitle": "Bezmaksas konsultācija un aprēķins 2 stundu laikā"
+    "subtitle": "Bezmaksas konsultācija un provizoriskais izmaksu aprēķins"
   },
   "cookies": {
     "text": "Mēs izmantojam sīkdatnes, lai nodrošinātu vietnes pareizu darbību un uzlabotu jūsu pieredzi. Turpinot lietot vietni, jūs piekrītat sīkdatņu izmantošanai.",
