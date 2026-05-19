@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { T, Lang, Section } from './adminStrings';
 import AdminRequests from './AdminRequests';
 import AdminProducts from './AdminProducts';
+import AdminSlider from './AdminSlider';
 import AdminReviews from './AdminReviews';
 import AdminTexts from './AdminTexts';
 import AdminSettings, { AdminPassword } from './AdminSettings';
@@ -30,6 +31,10 @@ const navItems: { id: Section; icon: React.ReactNode }[] = [
   {
     id: 'products',
     icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" /></svg>,
+  },
+  {
+    id: 'slider',
+    icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
   },
   {
     id: 'reviews',
@@ -164,6 +169,7 @@ export default function AdminApp() {
         <main className="flex-1 overflow-y-auto">
           {section === 'requests' && <AdminRequests lang={lang} />}
           {section === 'products' && <AdminProducts lang={lang} />}
+          {section === 'slider' && <AdminSlider lang={lang} />}
           {section === 'reviews' && <AdminReviews lang={lang} />}
           {section === 'texts' && <AdminTexts lang={lang} />}
           {section === 'settings' && <AdminSettings lang={lang} />}

@@ -71,6 +71,14 @@ export interface SupabaseReview {
   created_at: string;
 }
 
+export interface SupabaseHeroSlide {
+  id: number;
+  image_url: string;
+  sort_order: number;
+  is_visible: boolean;
+  created_at: string;
+}
+
 export function productFeatures(p: SupabaseProduct, locale: string): string[] {
   const prefix = `${locale}:`;
   const localeFeatures = p.features.filter(f => f.startsWith(prefix)).map(f => f.slice(prefix.length));
@@ -106,4 +114,14 @@ export function productImages(p: SupabaseProduct): string[] {
 
 export function settingFor(settings: Record<string, string>, key: string, fallback = ''): string {
   return settings[key] || fallback;
+}
+
+export async function getHeroSlides(): Promise<string[]> {
+  const { data } = await supabaseServer
+    .from('hero_slides')
+    .select('image_url')
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true });
+  if (!data || data.length === 0) return [];
+  return (data as { image_url: string }[]).map((r) => r.image_url);
 }

@@ -1,13 +1,25 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { getSettings } from '@/lib/supabase';
+import { getSettings, getHeroSlides } from '@/lib/supabase';
+import HeroSlider from './HeroSlider';
+
+const DEFAULT_SLIDES = [
+  'https://images.unsplash.com/photo-1631545806609-bbb02e574b74?w=1920&q=80',
+  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80',
+  'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80',
+  'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&q=80',
+  'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=1920&q=80',
+];
 
 export default async function Hero() {
-  const [t, locale, settings] = await Promise.all([
+  const [t, locale, settings, dbSlides] = await Promise.all([
     getTranslations('hero'),
     getLocale(),
     getSettings(),
+    getHeroSlides(),
   ]);
+
+  const slideUrls = dbSlides.length > 0 ? dbSlides : DEFAULT_SLIDES;
 
   const titleFromSettings = settings[`hero_title_${locale}`];
   const titleMain = titleFromSettings || t('title');
@@ -56,21 +68,9 @@ export default async function Hero() {
     },
   ];
 
-  const slides = [
-    'https://images.unsplash.com/photo-1631545806609-bbb02e574b74?w=1920&q=80',
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80',
-    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80',
-  ];
-
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Pure-CSS auto-slider — no 'use client' component, no RSC manifest lookup */}
-      {slides.map((url, i) => (
-        <div key={i} className="hero-slide absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt="" className="w-full h-full object-cover" aria-hidden />
-        </div>
-      ))}
+      <HeroSlider slides={slideUrls} />
       <div className="absolute inset-0 bg-gradient-to-br from-[#040f18]/90 via-[#072D47]/80 to-[#0b3d5c]/85" />
       {/* Diagonal lines decorative accent */}
       <div className="absolute top-0 right-0 w-1/2 h-full opacity-5 pointer-events-none z-10">
