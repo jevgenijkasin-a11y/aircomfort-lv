@@ -53,7 +53,14 @@ export default async function ProductPage({ params }: Props) {
             {t('backToCatalog')}
           </Link>
           <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-widest mb-1">{p.brand}</p>
-          <h1 className="font-syne font-bold text-3xl sm:text-4xl">{name}</h1>
+          <h1 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{name}</h1>
+          {(p.is_hit || p.is_promo || p.discount_percent) && (
+            <div className="flex flex-wrap gap-2">
+              {p.is_hit && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#f97316] text-white shadow-md">{tp('badgeHit')}</span>}
+              {p.is_promo && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#e91e8c] text-white shadow-md">{tp('badgePromo')}</span>}
+              {p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#eab308] text-black shadow-md">−{p.discount_percent}%</span>}
+            </div>
+          )}
         </div>
       </div>
 
@@ -70,6 +77,13 @@ export default async function ProductPage({ params }: Props) {
               brand={p.brand}
             />
             <div className={`absolute top-4 right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>
+            {(p.is_hit || p.is_promo || p.discount_percent) && (
+              <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                {p.is_hit && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#f97316] text-white shadow-sm">{tp('badgeHit')}</span>}
+                {p.is_promo && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#e91e8c] text-white shadow-sm">{tp('badgePromo')}</span>}
+                {p.discount_percent && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#eab308] text-black shadow-sm">−{p.discount_percent}%</span>}
+              </div>
+            )}
 
             {/* Features */}
             {features.length > 0 && (
