@@ -121,10 +121,10 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
   const energyCls = energyColors[product.energy_class] ?? 'text-gray-500 border-gray-300 bg-gray-100';
 
   return (
-    <Link href={`/catalog/${product.id}` as any} className="bg-[#F2F5FA] rounded-2xl overflow-hidden flex flex-col group border border-[#D8DFE9] hover:border-[#B0BDD0] hover:shadow-xl transition-all duration-200">
-      <div className="h-36 flex items-center justify-center relative bg-[#DDE5F0] rounded-t-2xl">
+    <Link href={`/catalog/${product.id}` as any} className="bg-white rounded-2xl overflow-hidden flex flex-col group border border-[#e6edf3] hover:border-[#B0BDD0] transition-all duration-200" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.07)' }}>
+      <div className="h-44 flex items-center justify-center relative rounded-t-2xl" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)' }}>
         {productImages(product)[0] ? (
-          <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-3" />
+          <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-6" style={{ filter: 'drop-shadow(0 8px 14px rgba(15,23,42,0.10))' }} />
         ) : (
           <svg viewBox="0 0 24 24" className="w-10 h-10 opacity-20 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1">
             <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
