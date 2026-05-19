@@ -97,19 +97,19 @@ export default async function Hero() {
             {subtitle}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-5">
             <Link
               href="/catalog"
-              className="inline-flex items-center justify-center gap-3 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold text-lg px-10 py-5 rounded-2xl transition-all duration-200 shadow-2xl shadow-[#27C4A0]/35 hover:shadow-[#27C4A0]/55 hover:-translate-y-1"
+              className="inline-flex items-center justify-center gap-3 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 shadow-[0_8px_40px_rgba(39,196,160,0.5)] hover:shadow-[0_12px_50px_rgba(39,196,160,0.65)] hover:-translate-y-1.5 tracking-wide"
             >
               {t('ctaCatalog')}
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
               </svg>
             </Link>
             <Link
               href="/calculator"
-              className="inline-flex items-center justify-center gap-3 bg-white/10 hover:bg-white/18 border-2 border-white/30 hover:border-white/50 text-white font-bold text-lg px-10 py-5 rounded-2xl transition-all duration-200 backdrop-blur-sm hover:-translate-y-1"
+              className="inline-flex items-center justify-center gap-3 bg-white/12 hover:bg-white/20 border-2 border-white/40 hover:border-white/70 text-white font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 backdrop-blur-sm hover:-translate-y-1.5 tracking-wide"
             >
               {t('ctaCalculator')}
             </Link>
