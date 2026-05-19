@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { T, Lang, Section } from './adminStrings';
 import AdminRequests from './AdminRequests';
 import AdminProducts from './AdminProducts';
+import AdminReviews from './AdminReviews';
 import AdminTexts from './AdminTexts';
 import AdminSettings, { AdminPassword } from './AdminSettings';
 
@@ -29,6 +30,10 @@ const navItems: { id: Section; icon: React.ReactNode }[] = [
   {
     id: 'products',
     icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" /></svg>,
+  },
+  {
+    id: 'reviews',
+    icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>,
   },
   {
     id: 'texts',
@@ -159,6 +164,7 @@ export default function AdminApp() {
         <main className="flex-1 overflow-y-auto">
           {section === 'requests' && <AdminRequests lang={lang} />}
           {section === 'products' && <AdminProducts lang={lang} />}
+          {section === 'reviews' && <AdminReviews lang={lang} />}
           {section === 'texts' && <AdminTexts lang={lang} />}
           {section === 'settings' && <AdminSettings lang={lang} />}
           {section === 'password' && <AdminPassword lang={lang} />}
