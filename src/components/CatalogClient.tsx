@@ -150,7 +150,9 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
         <div className="border-t border-gray-100 pt-3 mt-auto">
           <div className="flex items-center justify-between mb-2.5">
             <div>
-              {product.discount_percent ? (
+              {!product.price ? (
+                <span className="font-syne font-semibold text-sm text-gray-500">{t('priceOnRequest')}</span>
+              ) : product.discount_percent ? (
                 <>
                   <span className="text-xs text-gray-400 line-through mr-1.5">{product.price.toLocaleString('lv-LV')} €</span>
                   <span className="font-syne font-bold text-xl text-[#27C4A0]">

@@ -61,7 +61,9 @@ function ProductCard({ product, locale, t, installFrom }: { product: SupabasePro
         <div className="border-t border-[#1A6B9A]/15 pt-4">
           <div className="flex items-end justify-between mb-3">
             <div>
-              {product.discount_percent ? (
+              {!product.price ? (
+                <p className="font-syne font-semibold text-base text-white/50">{t('priceOnRequest')}</p>
+              ) : product.discount_percent ? (
                 <>
                   <p className="text-xs text-white/35 mb-0.5">{t('from')}</p>
                   <div className="flex items-baseline gap-2">

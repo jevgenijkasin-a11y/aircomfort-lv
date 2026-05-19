@@ -119,7 +119,9 @@ export default async function ProductPage({ params }: Props) {
                   <p className={`font-syne font-bold text-xl ${energyColors[p.energy_class]?.split(' ')[0] ?? 'text-white'}`}>{p.energy_class}</p>
                 </div>
                 <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                  {p.discount_percent ? (
+                  {!p.price ? (
+                    <p className="font-syne font-semibold text-base text-white/50">{tp('priceOnRequest')}</p>
+                  ) : p.discount_percent ? (
                     <>
                       <p className="text-sm text-white/35 line-through leading-none mb-1">{p.price.toLocaleString('lv-LV')} €</p>
                       <p className="font-syne font-bold text-2xl text-[#27C4A0]">
@@ -131,7 +133,7 @@ export default async function ProductPage({ params }: Props) {
                   )}
                 </div>
               </div>
-              {p.discount_percent && (
+              {p.price && p.discount_percent && (
                 <div className="bg-[#eab308]/10 border border-[#eab308]/25 rounded-xl p-4 flex items-center justify-between">
                   <div>
                     <p className="text-white/50 text-xs mb-0.5">{tp('wasPrice')}</p>

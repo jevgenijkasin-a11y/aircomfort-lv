@@ -118,6 +118,20 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
                 }
               />
             </div>
+
+            {/* Google Maps embed */}
+            <div className="mt-4 rounded-2xl overflow-hidden border border-[#1A6B9A]/25 h-48">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d69458.7!2d24.105!3d56.946!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46eecfb0e5073ded%3A0x400cfcd68f2fe30!2sRiga%2C%20Latvia!5e0!3m2!1sen!2slv!4v1"
+                width="100%"
+                height="100%"
+                style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg)' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Map"
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -24,6 +24,11 @@
     "serviceCommercial": "Komerciālie",
     "serviceMaintenance": "Apkope"
   },
+  "trustbar": {
+    "warranty": "Garantija 3 gadi",
+    "installation": "Montāža 1 dienā",
+    "consultation": "Bezmaksas konsultācija"
+  },
   "services": {
     "title": "Mūsu pakalpojumi",
     "subtitle": "Pilns cikls — no konsultācijas līdz apkopei",
@@ -64,7 +69,8 @@
     "badgeHit": "Hit",
     "badgePromo": "Akcija",
     "wasPrice": "Bija",
-    "nowPrice": "Tagad"
+    "nowPrice": "Tagad",
+    "priceOnRequest": "Cena pēc pieprasījuma"
   },
   "catalog": {
     "title": "Kondicionētāju katalogs",
@@ -165,6 +171,19 @@
       "success": "Paldies! Mēs sazināsimies ar jums drīzumā.",
       "error": "Kļūda. Lūdzu, mēģiniet vēlreiz vai zvaniet."
     }
+  },
+  "reviews": {
+    "title": "Klientu atsauksmes",
+    "subtitle": "Ko par mums saka mūsu klienti",
+    "r1name": "Andris K.",
+    "r1text": "Uzstādīja kondicionieri dzīvoklī. Ļoti profesionāla komanda, viss paveikts vienā dienā, kā solīts. Esmu ļoti apmierināts ar rezultātu!",
+    "r1date": "Marts 2026",
+    "r2name": "Jeļena S.",
+    "r2text": "Izvēlējos siltumsūkni mājai. Konsultants palīdzēja izvēlēties piemērotu modeli. Uzstādīšana bija ātra un kārtīga. Iesaku!",
+    "r2date": "Februāris 2026",
+    "r3name": "Māris B.",
+    "r3text": "Pasūtījām komerciālās iekārtas birojam. Lielisks serviss, konkurētspējīgas cenas. Iekārtas darbojas bez traucējumiem jau 6 mēnešus.",
+    "r3date": "Janvāris 2026"
   },
   "cta": {
     "title": "Sagatavosim individuālu",

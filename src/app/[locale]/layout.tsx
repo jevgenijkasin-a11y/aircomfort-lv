@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { Syne, DM_Sans } from 'next/font/google';
+import { Inter, Syne } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import Header from '@/components/Header';
+import TrustBar from '@/components/TrustBar';
 import Footer from '@/components/Footer';
 import FloatingButtons from '@/components/FloatingButtons';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -18,9 +19,9 @@ const syne = Syne({
   display: 'swap',
 });
 
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-dm-sans',
+const inter = Inter({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-inter',
   weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
 });
@@ -55,10 +56,11 @@ export default async function LocaleLayout({
   const messages = (await import(`@/messages/${locale}.json`)).default;
 
   return (
-    <html lang={locale} className={`${syne.variable} ${dmSans.variable}`}>
-      <body className="bg-[#072D47] text-white font-sans antialiased">
+    <html lang={locale} className={`${syne.variable} ${inter.variable}`}>
+      <body className="bg-[#0A1628] text-white font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
+          <TrustBar />
           <main className="min-h-screen">{children}</main>
           <Footer />
           <FloatingButtons />

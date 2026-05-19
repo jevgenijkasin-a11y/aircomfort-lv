@@ -2,6 +2,7 @@ import Hero from '@/components/Hero';
 import Services from '@/components/Services';
 import Categories from '@/components/Categories';
 import FeaturedProducts from '@/components/FeaturedProducts';
+import Reviews from '@/components/Reviews';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 
@@ -39,6 +40,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Services />
       <Categories />
       <FeaturedProducts />
+      <Reviews />
       <section className="section-padding bg-[#051e31] relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#27C4A0]/5 blur-[100px]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
