@@ -32,14 +32,14 @@ export default async function TrustBar() {
 
   return (
     <div className="bg-[#051525] border-b border-[#1A6B9A]/20 py-2 relative z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center gap-6 sm:gap-10 flex-wrap">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-auto scrollbar-none">
+        <div className="flex items-center justify-center gap-5 sm:gap-10 whitespace-nowrap min-w-max mx-auto">
           {items.map(({ key, icon }, i) => (
-            <div key={key} className="flex items-center gap-2 text-white/70 text-xs sm:text-sm font-medium">
+            <div key={key} className="flex items-center gap-1.5 text-white/70 text-xs font-medium">
               <span className="text-[#27C4A0]">{icon}</span>
               {t(key)}
               {i < items.length - 1 && (
-                <span className="hidden sm:block w-px h-3 bg-[#1A6B9A]/40 ml-4" />
+                <span className="w-px h-3 bg-[#1A6B9A]/40 ml-4" />
               )}
             </div>
           ))}
