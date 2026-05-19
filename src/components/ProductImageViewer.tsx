@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Props {
   images: string[];
@@ -97,15 +98,15 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
         </div>
       )}
 
-      {/* Lightbox */}
-      {lightbox && (
+      {/* Lightbox — rendered via portal to escape parent stacking contexts */}
+      {lightbox && createPortal(
         <div
-          className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4"
           onClick={() => setLightbox(false)}
         >
           <button
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-            onClick={() => setLightbox(false)}
+            className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+            onClick={(e) => { e.stopPropagation(); setLightbox(false); }}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
@@ -116,10 +117,10 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
             </div>
           )}
 
-          <div className="relative flex items-center justify-center w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative flex items-center justify-center max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
             {hasMultiple && (
               <button
-                onClick={prev}
+                onClick={(e) => { e.stopPropagation(); prev(); }}
                 className="absolute -left-2 sm:left-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
@@ -128,11 +129,11 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
             <img
               src={images[lbIndex]}
               alt={`${alt} ${lbIndex + 1}`}
-              className="max-w-full max-h-[70vh] object-contain rounded-2xl shadow-2xl mx-4"
+              className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl mx-4"
             />
             {hasMultiple && (
               <button
-                onClick={next}
+                onClick={(e) => { e.stopPropagation(); next(); }}
                 className="absolute -right-2 sm:right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
@@ -145,7 +146,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
               {images.map((src, i) => (
                 <button
                   key={i}
-                  onClick={() => setLbIndex(i)}
+                  onClick={(e) => { e.stopPropagation(); setLbIndex(i); }}
                   className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
                     lbIndex === i ? 'border-[#27C4A0]' : 'border-white/15 opacity-50 hover:opacity-80'
                   }`}
@@ -155,7 +156,8 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
               ))}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
