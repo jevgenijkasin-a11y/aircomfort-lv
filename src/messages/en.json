@@ -24,6 +24,11 @@
     "serviceCommercial": "Commercial",
     "serviceMaintenance": "Maintenance"
   },
+  "trustbar": {
+    "warranty": "Warranty",
+    "installation": "Installation from 1 day",
+    "consultation": "Free consultation and preliminary cost estimate"
+  },
   "services": {
     "title": "Our Services",
     "subtitle": "Full cycle — from consultation to maintenance",
@@ -135,7 +140,7 @@
   },
   "contacts": {
     "title": "Contact Us",
-    "subtitle": "Leave a request — we'll call you back within 2 hours",
+    "subtitle": "Leave a request — we will contact you as soon as possible",
     "address": "Address",
     "addressValue": "Riga, Latvia",
     "phone": "Phone",
@@ -182,7 +187,7 @@
   "cta": {
     "title": "We'll prepare a custom",
     "titleAccent": "proposal for your space",
-    "subtitle": "Free consultation and estimate within 2 hours"
+    "subtitle": "Free consultation and preliminary cost estimate"
   },
   "cookies": {
     "text": "We use cookies to ensure proper website functionality and to improve your experience. By continuing to use the site, you agree to the use of cookies.",
