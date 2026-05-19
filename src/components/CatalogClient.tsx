@@ -6,9 +6,9 @@ import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productImages } from '@/lib/supabase';
 
 const energyColors: Record<string, string> = {
-  'A+++': 'text-[#27C4A0] border-[#27C4A0]/30 bg-[#27C4A0]/10',
-  'A++': 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10',
-  'A+': 'text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10',
+  'A+++': 'text-[#0D9B78] border-[#0D9B78]/40 bg-[#D4F5EC]',
+  'A++': 'text-[#16a34a] border-[#16a34a]/40 bg-[#dcfce7]',
+  'A+': 'text-[#15803d] border-[#15803d]/40 bg-[#bbf7d0]',
 };
 
 
@@ -118,11 +118,11 @@ export default function CatalogClient({ initialProducts, locale, initialCategory
 
 function CatalogCard({ product, locale, t, tCat, installFrom }: { product: SupabaseProduct; locale: string; t: ReturnType<typeof useTranslations>; tCat: ReturnType<typeof useTranslations>; installFrom: number }) {
   const name = productName(product, locale);
-  const energyCls = energyColors[product.energy_class] ?? 'text-white/50 border-white/20 bg-white/5';
+  const energyCls = energyColors[product.energy_class] ?? 'text-gray-500 border-gray-300 bg-gray-100';
 
   return (
-    <Link href={`/catalog/${product.id}` as any} className="bg-white rounded-2xl overflow-hidden flex flex-col group border border-gray-100 hover:border-gray-300 hover:shadow-xl transition-all duration-200">
-      <div className="h-36 flex items-center justify-center relative bg-white">
+    <Link href={`/catalog/${product.id}` as any} className="bg-[#F2F5FA] rounded-2xl overflow-hidden flex flex-col group border border-[#D8DFE9] hover:border-[#B0BDD0] hover:shadow-xl transition-all duration-200">
+      <div className="h-36 flex items-center justify-center relative bg-[#DDE5F0] rounded-t-2xl">
         {productImages(product)[0] ? (
           <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-3" />
         ) : (
@@ -147,7 +147,7 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
           <span className="text-xs text-gray-400">{product.power_kw} kW</span>
           {product.area_coverage && <span className="text-xs text-gray-400">{product.area_coverage} m²</span>}
         </div>
-        <div className="border-t border-gray-100 pt-3 mt-auto">
+        <div className="border-t border-[#CDD5E0] pt-3 mt-auto">
           <div className="flex items-center justify-between mb-2.5">
             <div>
               {!product.price ? (
@@ -165,7 +165,7 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
             </div>
             <span className="text-xs text-gray-400">{t('installFrom', { price: installFrom })}</span>
           </div>
-          <div className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-[#27C4A0] border border-gray-200 hover:border-[#27C4A0] text-gray-700 hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47] group-hover:border-[#27C4A0]">
+          <div className="w-full flex items-center justify-center gap-2 bg-[#E4EAF3] hover:bg-[#27C4A0] border border-[#CDD5E0] hover:border-[#27C4A0] text-[#3D5270] hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47] group-hover:border-[#27C4A0]">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
             {tCat('viewBtn')}
           </div>
