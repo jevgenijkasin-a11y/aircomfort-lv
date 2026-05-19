@@ -166,6 +166,19 @@
       "error": "Error. Please try again or give us a call."
     }
   },
+  "reviews": {
+    "title": "Customer Reviews",
+    "subtitle": "What our clients say about us",
+    "r1name": "Andris K.",
+    "r1text": "Had an air conditioner installed for my apartment. Very professional team, everything was done in one day as promised. Very happy with the result!",
+    "r1date": "March 2026",
+    "r2name": "Elena S.",
+    "r2text": "Chose a heat pump for the house. The consultant helped pick the right model for our size. Installation was quick and tidy. Highly recommend!",
+    "r2date": "February 2026",
+    "r3name": "Māris B.",
+    "r3text": "We ordered commercial units for the office. Great service, competitive prices. The equipment has been working flawlessly for 6 months now.",
+    "r3date": "January 2026"
+  },
   "cta": {
     "title": "We'll prepare a custom",
     "titleAccent": "proposal for your space",
