@@ -91,6 +91,19 @@ function ProductCard({ product, locale, t, installFrom }: { product: SupabasePro
   );
 }
 
+// Seeded LCG shuffle — same result all day, different result tomorrow (UTC midnight)
+function dailyShuffle<T>(arr: T[]): T[] {
+  const seed = Math.floor(Date.now() / 86_400_000); // changes every 24h UTC
+  const result = [...arr];
+  let s = seed;
+  for (let i = result.length - 1; i > 0; i--) {
+    s = (Math.imul(s, 1664525) + 1013904223) | 0;
+    const j = Math.abs(s) % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 export default async function FeaturedProducts() {
   const [t, locale, settings] = await Promise.all([getTranslations('products'), getLocale(), getSettings()]);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
@@ -98,12 +111,11 @@ export default async function FeaturedProducts() {
   const { data } = await supabaseServer
     .from('products')
     .select('*')
-    .eq('in_stock', true)
-    .order('created_at', { ascending: false })
-    .limit(3);
+    .eq('in_stock', true);
 
-  const products = data ?? [];
-  if (!products.length) return null;
+  const all = data ?? [];
+  if (!all.length) return null;
+  const products = dailyShuffle(all).slice(0, 3);
 
   return (
     <section className="section-padding relative overflow-hidden">
