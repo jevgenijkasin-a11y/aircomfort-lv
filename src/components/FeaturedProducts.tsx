@@ -61,8 +61,22 @@ function ProductCard({ product, locale, t, installFrom }: { product: SupabasePro
         <div className="border-t border-[#1A6B9A]/15 pt-4">
           <div className="flex items-end justify-between mb-3">
             <div>
-              <p className="text-xs text-white/35 mb-0.5">{t('from')}</p>
-              <p className="font-syne font-bold text-2xl text-white">{product.price.toLocaleString('lv-LV')} €</p>
+              {product.discount_percent ? (
+                <>
+                  <p className="text-xs text-white/35 mb-0.5">{t('from')}</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm text-white/35 line-through">{product.price.toLocaleString('lv-LV')} €</span>
+                    <span className="font-syne font-bold text-2xl text-[#27C4A0]">
+                      {Math.round(product.price * (1 - product.discount_percent / 100)).toLocaleString('lv-LV')} €
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-white/35 mb-0.5">{t('from')}</p>
+                  <p className="font-syne font-bold text-2xl text-white">{product.price.toLocaleString('lv-LV')} €</p>
+                </>
+              )}
             </div>
             <p className="text-xs text-white/35 text-right">{t('installFrom', { price: installFrom })}</p>
           </div>

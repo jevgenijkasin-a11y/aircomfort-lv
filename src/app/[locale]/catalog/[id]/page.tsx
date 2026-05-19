@@ -106,9 +106,33 @@ export default async function ProductPage({ params }: Props) {
                 </div>
                 <div className="bg-[#0A3658]/50 rounded-xl p-4">
                   <p className="text-white/40 text-xs mb-1">{tp('from')}</p>
-                  <p className="font-syne font-bold text-2xl text-white">{p.price.toLocaleString('lv-LV')} €</p>
+                  {p.discount_percent ? (
+                    <>
+                      <p className="text-sm text-white/35 line-through leading-none mb-1">{p.price.toLocaleString('lv-LV')} €</p>
+                      <p className="font-syne font-bold text-2xl text-[#27C4A0]">
+                        {Math.round(p.price * (1 - p.discount_percent / 100)).toLocaleString('lv-LV')} €
+                      </p>
+                    </>
+                  ) : (
+                    <p className="font-syne font-bold text-2xl text-white">{p.price.toLocaleString('lv-LV')} €</p>
+                  )}
                 </div>
               </div>
+              {p.discount_percent && (
+                <div className="bg-[#eab308]/10 border border-[#eab308]/25 rounded-xl p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-white/50 text-xs mb-0.5">{tp('wasPrice')}</p>
+                    <p className="text-white/50 text-base line-through">{p.price.toLocaleString('lv-LV')} €</p>
+                  </div>
+                  <svg className="w-5 h-5 text-[#eab308]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" /></svg>
+                  <div className="text-right">
+                    <p className="text-[#27C4A0] text-xs mb-0.5">{tp('nowPrice')} −{p.discount_percent}%</p>
+                    <p className="font-syne font-bold text-xl text-[#27C4A0]">
+                      {Math.round(p.price * (1 - p.discount_percent / 100)).toLocaleString('lv-LV')} €
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center py-3 border-t border-[#1A6B9A]/15">
                 <span className="text-white/50 text-sm">{tp('installFrom', { price: installFrom })}</span>
               </div>

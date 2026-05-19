@@ -62,7 +62,9 @@
     "installIncluded": "Uzstādīšana iekļauta",
     "installFrom": "Montāža no {price} €",
     "badgeHit": "Hit",
-    "badgePromo": "Akcija"
+    "badgePromo": "Akcija",
+    "wasPrice": "Bija",
+    "nowPrice": "Tagad"
   },
   "catalog": {
     "title": "Kondicionētāju katalogs",

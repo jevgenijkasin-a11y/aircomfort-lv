@@ -62,7 +62,9 @@
     "installIncluded": "Монтаж включён",
     "installFrom": "Монтаж от {price} €",
     "badgeHit": "Хит",
-    "badgePromo": "Акция"
+    "badgePromo": "Акция",
+    "wasPrice": "Было",
+    "nowPrice": "Стало"
   },
   "catalog": {
     "title": "Каталог кондиционеров",

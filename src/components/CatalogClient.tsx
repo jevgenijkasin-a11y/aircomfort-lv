@@ -149,7 +149,18 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
         </div>
         <div className="border-t border-[#1A6B9A]/15 pt-3 mt-auto">
           <div className="flex items-center justify-between mb-2.5">
-            <span className="font-syne font-bold text-xl">{product.price.toLocaleString('lv-LV')} €</span>
+            <div>
+              {product.discount_percent ? (
+                <>
+                  <span className="text-xs text-white/35 line-through mr-1.5">{product.price.toLocaleString('lv-LV')} €</span>
+                  <span className="font-syne font-bold text-xl text-[#27C4A0]">
+                    {Math.round(product.price * (1 - product.discount_percent / 100)).toLocaleString('lv-LV')} €
+                  </span>
+                </>
+              ) : (
+                <span className="font-syne font-bold text-xl">{product.price.toLocaleString('lv-LV')} €</span>
+              )}
+            </div>
             <span className="text-xs text-white/30">{t('installFrom', { price: installFrom })}</span>
           </div>
           <div className="w-full flex items-center justify-center gap-2 bg-[#1A6B9A]/20 hover:bg-[#27C4A0] border border-[#1A6B9A]/40 hover:border-[#27C4A0] text-white hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47]">

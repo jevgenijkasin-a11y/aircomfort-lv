@@ -62,7 +62,9 @@
     "installIncluded": "Installation included",
     "installFrom": "Installation from {price} €",
     "badgeHit": "Hit",
-    "badgePromo": "Sale"
+    "badgePromo": "Sale",
+    "wasPrice": "Was",
+    "nowPrice": "Now"
   },
   "catalog": {
     "title": "Air Conditioner Catalog",
