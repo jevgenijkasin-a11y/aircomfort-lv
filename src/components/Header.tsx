@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 
 const locales = ['lv', 'ru', 'en'] as const;
 
 export default function Header() {
   const t = useTranslations('nav');
   const locale = useLocale();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -66,9 +67,10 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center bg-[#0D3D5E]/70 rounded-xl p-1 gap-0.5">
               {locales.map((lang) => (
-                <a
+                <Link
                   key={lang}
-                  href={`/${lang}`}
+                  href={pathname}
+                  locale={lang}
                   className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all duration-200 ${
                     locale === lang
                       ? 'bg-[#27C4A0] text-[#072D47]'
@@ -76,7 +78,7 @@ export default function Header() {
                   }`}
                 >
                   {lang.toUpperCase()}
-                </a>
+                </Link>
               ))}
             </div>
 
@@ -123,9 +125,11 @@ export default function Header() {
             <div className="mt-3 pt-3 border-t border-[#1A6B9A]/20 flex items-center justify-between px-1">
               <div className="flex items-center bg-[#0D3D5E]/70 rounded-xl p-1 gap-0.5">
                 {locales.map((lang) => (
-                  <a
+                  <Link
                     key={lang}
-                    href={`/${lang}`}
+                    href={pathname}
+                    locale={lang}
+                    onClick={() => setMenuOpen(false)}
                     className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
                       locale === lang
                         ? 'bg-[#27C4A0] text-[#072D47]'
@@ -133,7 +137,7 @@ export default function Header() {
                     }`}
                   >
                     {lang.toUpperCase()}
-                  </a>
+                  </Link>
                 ))}
               </div>
               <Link
