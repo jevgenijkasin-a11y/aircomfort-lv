@@ -117,24 +117,26 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
             </div>
           )}
 
-          <div className="relative flex items-center justify-center max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="relative flex items-center justify-center max-w-5xl w-full h-[72vh]" onClick={(e) => e.stopPropagation()}>
             {hasMultiple && (
               <button
                 onClick={(e) => { e.stopPropagation(); prev(); }}
-                className="absolute -left-2 sm:left-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0"
+                className="absolute -left-2 sm:left-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0 z-10"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
               </button>
             )}
-            <img
-              src={images[lbIndex]}
-              alt={`${alt} ${lbIndex + 1}`}
-              className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl mx-4"
-            />
+            <div className="w-full h-full flex items-center justify-center bg-white/5 rounded-2xl mx-4 overflow-hidden">
+              <img
+                src={images[lbIndex]}
+                alt={`${alt} ${lbIndex + 1}`}
+                className="max-w-full max-h-full object-contain p-6"
+              />
+            </div>
             {hasMultiple && (
               <button
                 onClick={(e) => { e.stopPropagation(); next(); }}
-                className="absolute -right-2 sm:right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0"
+                className="absolute -right-2 sm:right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0 z-10"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
               </button>
