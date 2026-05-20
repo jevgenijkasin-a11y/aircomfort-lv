@@ -44,6 +44,7 @@ export default function CatalogClient({ initialProducts, locale, initialCategory
     if (sort !== 'asc') p.set('sort', sort);
     const q = p.toString();
     window.history.replaceState(null, '', q ? `${pathname}?${q}` : pathname);
+    sessionStorage.setItem('catalogParams', q);
   }, [brand, power, category, sort, ready, pathname]);
 
   const brands = useMemo(() => Array.from(new Set(initialProducts.map((p) => p.brand))), [initialProducts]);
