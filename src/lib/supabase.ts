@@ -41,6 +41,16 @@ export interface SupabaseProduct {
   is_promo: boolean;
   discount_percent: number | null;
   created_at: string;
+  description_lv?: string;
+  description_ru?: string;
+  description_en?: string;
+  specs?: Record<string, string>;
+}
+
+export function productDescription(p: SupabaseProduct, locale: string): string {
+  if (locale === 'lv') return p.description_lv || p.description_ru || p.description_en || '';
+  if (locale === 'ru') return p.description_ru || p.description_lv || p.description_en || '';
+  return p.description_en || p.description_ru || p.description_lv || '';
 }
 
 export interface SupabaseContact {

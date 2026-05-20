@@ -1,16 +1,25 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { T, Lang, AdminProduct } from './adminStrings';
+import { T, Lang, AdminProduct, ProductSpecs } from './adminStrings';
 import { supabase } from '@/lib/supabase';
 
 type ProductForm = Omit<AdminProduct, 'id' | 'created_at'> & { id?: number };
+
+const EMPTY_SPECS: ProductSpecs = {
+  manufacturer: '', cooling_kw: '', heating_kw: '',
+  scop: '', seer: '', noise_db: '', airflow: '',
+  operating_temp: '', mounting: '', refrigerant: '',
+  wifi: '', electrical: '', indoor_dims: '', outdoor_dims: '',
+};
 
 const EMPTY: ProductForm = {
   brand: '', name_lv: '', name_ru: '', name_en: '',
   category: 'home', power_kw: 2.5, area_coverage: '20–25',
   price: 0, install_price: 249, energy_class: 'A++',
   features: [], features_lv: [], features_ru: [], features_en: [],
+  description_lv: '', description_ru: '', description_en: '',
+  specs: { ...EMPTY_SPECS },
   brand_color: '#1A6B9A', image_url: '', image_urls: [], in_stock: true,
   is_hit: false, is_promo: false, discount_percent: null,
 };
@@ -57,7 +66,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   const resetFilters = () => { setFilterBrand(''); setFilterPower(''); setFilterCategory(''); };
   const hasFilters = filterBrand || filterPower || filterCategory;
 
-  const openAdd = () => setModal({ open: true, product: { ...EMPTY } });
+  const openAdd = () => setModal({ open: true, product: { ...EMPTY, specs: { ...EMPTY_SPECS } } });
   const openEdit = (p: AdminProduct) => {
     const hasLocale = p.features.some(f => /^(lv|ru|en):/.test(f));
     let imgs: string[] = [];
@@ -73,6 +82,10 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
         features_lv: hasLocale ? p.features.filter(f => f.startsWith('lv:')).map(f => f.slice(3)) : [],
         features_ru: hasLocale ? p.features.filter(f => f.startsWith('ru:')).map(f => f.slice(3)) : [],
         features_en: hasLocale ? p.features.filter(f => f.startsWith('en:')).map(f => f.slice(3)) : p.features,
+        description_lv: p.description_lv ?? '',
+        description_ru: p.description_ru ?? '',
+        description_en: p.description_en ?? '',
+        specs: { ...EMPTY_SPECS, ...(p.specs ?? {}) },
       },
     });
   };
@@ -80,6 +93,9 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
 
   const setField = (k: string, v: unknown) =>
     setModal((m) => ({ ...m, product: { ...m.product, [k]: v } }));
+
+  const setSpec = (k: keyof ProductSpecs, v: string) =>
+    setModal((m) => ({ ...m, product: { ...m.product, specs: { ...(m.product.specs ?? {}), [k]: v } } }));
 
   const handleImageUpload = async (file: File) => {
     setUploadingImg(true);
@@ -117,7 +133,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
       typeof v === 'string' ? v.split(',').map(f => f.trim()).filter(Boolean)
       : Array.isArray(v) ? v : [];
 
-    const tagged = (arr: string[], lang: string) => arr.map(f => `${lang}:${f}`);
+    const tagged = (arr: string[], lng: string) => arr.map(f => `${lng}:${f}`);
 
     const lv = parseStr(fields.features_lv);
     const ru = parseStr(fields.features_ru);
@@ -127,7 +143,14 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
       ? [...tagged(lv, 'lv'), ...tagged(ru, 'ru'), ...tagged(en, 'en')]
       : parseStr(fields.features);
 
-    const { features_lv: _flv, features_ru: _fru, features_en: _fen, features: _f, image_urls: _iu, ...restFields } = fields;
+    // Filter out empty spec values
+    const rawSpecs = fields.specs ?? {};
+    const specs: Record<string, string> = {};
+    for (const [k, v] of Object.entries(rawSpecs)) {
+      if (v && v.trim()) specs[k] = v.trim();
+    }
+
+    const { features_lv: _flv, features_ru: _fru, features_en: _fen, features: _f, image_urls: _iu, specs: _sp, ...restFields } = fields;
     const imageUrls: string[] = (fields.image_urls as string[]) || [];
     const imageUrlValue = imageUrls.length > 1
       ? JSON.stringify(imageUrls)
@@ -140,6 +163,10 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
       price: Number(fields.price),
       install_price: Number(fields.install_price),
       discount_percent: fields.discount_percent ? Number(fields.discount_percent) : null,
+      description_lv: fields.description_lv ?? '',
+      description_ru: fields.description_ru ?? '',
+      description_en: fields.description_en ?? '',
+      specs: Object.keys(specs).length ? specs : null,
     };
 
     if (id) {
@@ -179,6 +206,24 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
 
   const inp = 'w-full bg-white/5 border border-white/10 text-white text-sm px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors placeholder-white/20';
   const lbl = 'block text-xs text-white/50 mb-1.5 font-medium';
+  const sectionHdr = 'text-white/60 text-xs font-semibold uppercase tracking-widest mb-3 pb-2 border-b border-white/8';
+
+  const specFields: { key: keyof ProductSpecs; label: string }[] = [
+    { key: 'manufacturer', label: s.specManufacturer },
+    { key: 'cooling_kw', label: s.specCoolingKw },
+    { key: 'heating_kw', label: s.specHeatingKw },
+    { key: 'scop', label: s.specScop },
+    { key: 'seer', label: s.specSeer },
+    { key: 'noise_db', label: s.specNoiseDb },
+    { key: 'airflow', label: s.specAirflow },
+    { key: 'operating_temp', label: s.specOperatingTemp },
+    { key: 'mounting', label: s.specMounting },
+    { key: 'refrigerant', label: s.specRefrigerant },
+    { key: 'wifi', label: s.specWifi },
+    { key: 'electrical', label: s.specElectrical },
+    { key: 'indoor_dims', label: s.specIndoorDims },
+    { key: 'outdoor_dims', label: s.specOutdoorDims },
+  ];
 
   return (
     <div className="p-6 lg:p-8">
@@ -192,6 +237,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
         </button>
       </div>
 
+      {/* Filters */}
       <div className="bg-white/4 border border-white/8 rounded-2xl p-4 mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
           <label className="block text-xs text-white/40 mb-1.5 font-medium">{lang === 'ru' ? 'Бренд' : 'Brand'}</label>
@@ -302,216 +348,231 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
         </div>
       )}
 
+      {/* Full-screen edit modal */}
       {modal.open && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-start justify-end z-50">
-          <div className="w-full max-w-md h-full bg-[#0D2137] border-l border-white/10 overflow-y-auto flex flex-col">
-            <div className="flex items-center justify-between p-5 border-b border-white/10 sticky top-0 bg-[#0D2137] z-10">
-              <h2 className="font-bold text-white">{modal.product.id ? s.prodEditTitle : s.prodAddTitle}</h2>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-6">
+          <div className="w-full max-w-7xl h-full max-h-[95vh] bg-[#0D2137] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 flex-shrink-0">
+              <h2 className="font-bold text-white text-lg">{modal.product.id ? s.prodEditTitle : s.prodAddTitle}</h2>
               <button onClick={closeModal} className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
 
-            <div className="p-5 space-y-4 flex-1">
-              <div>
-                <label className={lbl}>{s.prodBrand}</label>
-                <input className={inp} value={modal.product.brand} onChange={(e) => setField('brand', e.target.value)} placeholder="Daikin" />
-              </div>
+            {/* Body — 3 columns */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-white/8">
 
-              <div>
-                <label className={lbl}>{s.prodNameLv}</label>
-                <input className={inp} value={modal.product.name_lv} onChange={(e) => setField('name_lv', e.target.value)} placeholder="Daikin Perfera 2.5kW" />
-              </div>
+                {/* Column 1: Basic info */}
+                <div className="p-5 space-y-4">
+                  <p className={sectionHdr}>{lang === 'ru' ? 'Основная информация' : 'Basic Info'}</p>
 
-              <div>
-                <label className={lbl}>{s.prodNameRu}</label>
-                <input className={inp} value={modal.product.name_ru} onChange={(e) => setField('name_ru', e.target.value)} placeholder="Дайкин Перфера 2.5кВт" />
-              </div>
+                  <div>
+                    <label className={lbl}>{s.prodBrand}</label>
+                    <input className={inp} value={modal.product.brand} onChange={(e) => setField('brand', e.target.value)} placeholder="Daikin" />
+                  </div>
+                  <div>
+                    <label className={lbl}>{s.prodNameLv}</label>
+                    <input className={inp} value={modal.product.name_lv} onChange={(e) => setField('name_lv', e.target.value)} placeholder="Daikin Perfera 2.5kW" />
+                  </div>
+                  <div>
+                    <label className={lbl}>{s.prodNameRu}</label>
+                    <input className={inp} value={modal.product.name_ru} onChange={(e) => setField('name_ru', e.target.value)} placeholder="Дайкин Перфера 2.5кВт" />
+                  </div>
+                  <div>
+                    <label className={lbl}>{s.prodNameEn}</label>
+                    <input className={inp} value={modal.product.name_en} onChange={(e) => setField('name_en', e.target.value)} placeholder="Daikin Perfera 2.5kW" />
+                  </div>
+                  <div>
+                    <label className={lbl}>{s.prodCategory}</label>
+                    <select className={inp} value={modal.product.category} onChange={(e) => setField('category', e.target.value)} style={{ background: '#0D2137' }}>
+                      <option value="home">{s.prodCatHome}</option>
+                      <option value="heat_pump">{s.prodCatHeatPump}</option>
+                      <option value="commercial">{s.prodCatCommercial}</option>
+                      <option value="commercial_heat_pump">{s.prodCatCommercialHeatPump}</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={lbl}>{s.prodPower}</label>
+                      <input className={inp} type="number" step="0.5" value={modal.product.power_kw} onChange={(e) => setField('power_kw', e.target.value)} />
+                    </div>
+                    <div>
+                      <label className={lbl}>{s.prodArea}</label>
+                      <input className={inp} value={modal.product.area_coverage} onChange={(e) => setField('area_coverage', e.target.value)} placeholder="20–25" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={lbl}>{s.prodPrice}</label>
+                      <input className={inp} type="number" value={modal.product.price} onChange={(e) => setField('price', e.target.value)} />
+                    </div>
+                    <div>
+                      <label className={lbl}>{s.prodInstallPrice}</label>
+                      <input className={inp} type="number" value={modal.product.install_price} onChange={(e) => setField('install_price', e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={lbl}>{s.prodEnergyClass}</label>
+                    <select className={inp} value={modal.product.energy_class} onChange={(e) => setField('energy_class', e.target.value)} style={{ background: '#0D2137' }}>
+                      {energyClasses.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={lbl}>{s.prodBrandColor}</label>
+                    <div className="flex gap-2">
+                      <input type="color" value={modal.product.brand_color} onChange={(e) => setField('brand_color', e.target.value)} className="h-10 w-12 rounded-lg cursor-pointer bg-transparent border border-white/10" />
+                      <input className={`${inp} flex-1`} value={modal.product.brand_color} onChange={(e) => setField('brand_color', e.target.value)} placeholder="#003087" />
+                    </div>
+                  </div>
 
-              <div>
-                <label className={lbl}>{s.prodNameEn}</label>
-                <input className={inp} value={modal.product.name_en} onChange={(e) => setField('name_en', e.target.value)} placeholder="Daikin Perfera 2.5kW" />
-              </div>
-
-              <div>
-                <label className={lbl}>{s.prodCategory}</label>
-                <select className={inp} value={modal.product.category} onChange={(e) => setField('category', e.target.value)} style={{ background: '#0D2137' }}>
-                  <option value="home">{s.prodCatHome}</option>
-                  <option value="heat_pump">{s.prodCatHeatPump}</option>
-                  <option value="commercial">{s.prodCatCommercial}</option>
-                  <option value="commercial_heat_pump">{s.prodCatCommercialHeatPump}</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={lbl}>{s.prodPower}</label>
-                  <input className={inp} type="number" step="0.5" value={modal.product.power_kw} onChange={(e) => setField('power_kw', e.target.value)} />
+                  {/* Description */}
+                  <div className="pt-2">
+                    <p className={sectionHdr}>{s.prodDescSection}</p>
+                    <div className="space-y-3">
+                      <div>
+                        <label className={lbl}>{s.prodDescLv}</label>
+                        <textarea className={`${inp} resize-none`} rows={3} value={modal.product.description_lv ?? ''} onChange={(e) => setField('description_lv', e.target.value)} placeholder="Apraksts latviešu valodā..." />
+                      </div>
+                      <div>
+                        <label className={lbl}>{s.prodDescRu}</label>
+                        <textarea className={`${inp} resize-none`} rows={3} value={modal.product.description_ru ?? ''} onChange={(e) => setField('description_ru', e.target.value)} placeholder="Описание на русском языке..." />
+                      </div>
+                      <div>
+                        <label className={lbl}>{s.prodDescEn}</label>
+                        <textarea className={`${inp} resize-none`} rows={3} value={modal.product.description_en ?? ''} onChange={(e) => setField('description_en', e.target.value)} placeholder="Description in English..." />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className={lbl}>{s.prodArea}</label>
-                  <input className={inp} value={modal.product.area_coverage} onChange={(e) => setField('area_coverage', e.target.value)} placeholder="20–25" />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={lbl}>{s.prodPrice}</label>
-                  <input className={inp} type="number" value={modal.product.price} onChange={(e) => setField('price', e.target.value)} />
-                </div>
-                <div>
-                  <label className={lbl}>{s.prodInstallPrice}</label>
-                  <input className={inp} type="number" value={modal.product.install_price} onChange={(e) => setField('install_price', e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <label className={lbl}>{s.prodEnergyClass}</label>
-                <select className={inp} value={modal.product.energy_class} onChange={(e) => setField('energy_class', e.target.value)} style={{ background: '#0D2137' }}>
-                  {energyClasses.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-
-              <div className="bg-white/3 border border-white/8 rounded-xl p-3 space-y-2">
-                <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-2">{s.prodFeatures}</p>
-                <div>
-                  <label className={lbl}>{s.prodFeaturesLv}</label>
-                  <textarea className={`${inp} resize-none`} rows={2} value={Array.isArray(modal.product.features_lv) ? modal.product.features_lv.join(', ') : (modal.product.features_lv ?? '')} onChange={(e) => setField('features_lv', e.target.value)} placeholder="Inverters, Wi-Fi, A+++, R32" />
-                </div>
-                <div>
-                  <label className={lbl}>{s.prodFeaturesRu}</label>
-                  <textarea className={`${inp} resize-none`} rows={2} value={Array.isArray(modal.product.features_ru) ? modal.product.features_ru.join(', ') : (modal.product.features_ru ?? '')} onChange={(e) => setField('features_ru', e.target.value)} placeholder="Инвертор, Wi-Fi, A+++, R32" />
-                </div>
-                <div>
-                  <label className={lbl}>{s.prodFeaturesEn}</label>
-                  <textarea className={`${inp} resize-none`} rows={2} value={Array.isArray(modal.product.features_en) ? modal.product.features_en.join(', ') : (modal.product.features_en ?? '')} onChange={(e) => setField('features_en', e.target.value)} placeholder="Inverter, Wi-Fi, A+++, R32" />
-                </div>
-              </div>
-
-              <div>
-                <label className={lbl}>{s.prodBrandColor}</label>
-                <div className="flex gap-2">
-                  <input type="color" value={modal.product.brand_color} onChange={(e) => setField('brand_color', e.target.value)} className="h-10 w-12 rounded-lg cursor-pointer bg-transparent border border-white/10" />
-                  <input className={`${inp} flex-1`} value={modal.product.brand_color} onChange={(e) => setField('brand_color', e.target.value)} placeholder="#003087" />
-                </div>
-              </div>
-
-              <div>
-                <label className={lbl}>
-                  {lang === 'ru' ? `Фото товара (${(modal.product.image_urls || []).length}/10)` : `Product Photos (${(modal.product.image_urls || []).length}/10)`}
-                </label>
-
-                {(modal.product.image_urls || []).length > 0 && (
-                  <div className="grid grid-cols-4 gap-2 mb-2">
-                    {(modal.product.image_urls || []).map((url, i) => (
-                      <div key={url + i} className="relative aspect-square rounded-xl overflow-hidden bg-white/5 border border-white/10 group">
-                        {i === 0 && (
-                          <span className="absolute top-1 left-1 bg-[#27C4A0] text-[#0B1929] text-[9px] font-bold px-1 py-0.5 rounded z-10 leading-none">
-                            {lang === 'ru' ? 'Гл.' : 'Main'}
-                          </span>
-                        )}
-                        <img src={url} alt="" className="w-full h-full object-contain p-1" />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(i)}
-                          className="absolute top-1 right-1 w-5 h-5 bg-black/60 hover:bg-red-500 rounded-full flex items-center justify-center text-white transition-colors z-10 opacity-0 group-hover:opacity-100"
-                        >
-                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
+                {/* Column 2: Specs */}
+                <div className="p-5 space-y-4">
+                  <p className={sectionHdr}>{s.prodSpecsSection}</p>
+                  <div className="space-y-3">
+                    {specFields.map(({ key, label }) => (
+                      <div key={key}>
+                        <label className={lbl}>{label}</label>
+                        <input
+                          className={inp}
+                          value={(modal.product.specs as ProductSpecs)?.[key] ?? ''}
+                          onChange={(e) => setSpec(key, e.target.value)}
+                          placeholder={key === 'wifi' ? (lang === 'ru' ? 'Да / Нет' : 'Yes / No') : ''}
+                        />
                       </div>
                     ))}
                   </div>
-                )}
+                </div>
 
-                {(modal.product.image_urls || []).length < 10 && (
-                  <div
-                    onClick={() => !uploadingImg && fileRef.current?.click()}
-                    className="border-2 border-dashed border-white/15 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-[#27C4A0]/40 transition-colors min-h-[72px]"
-                  >
-                    {uploadingImg ? (
-                      <div className="w-5 h-5 border-2 border-[#27C4A0]/30 border-t-[#27C4A0] rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <svg className="w-6 h-6 text-white/20 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        <p className="text-white/30 text-xs">{lang === 'ru' ? 'Добавить фото' : 'Add photo'}</p>
-                      </>
+                {/* Column 3: Photos, Features, Badges */}
+                <div className="p-5 space-y-4">
+                  {/* Photos */}
+                  <div>
+                    <p className={sectionHdr}>{lang === 'ru' ? `Фотографии (${(modal.product.image_urls || []).length}/10)` : `Photos (${(modal.product.image_urls || []).length}/10)`}</p>
+
+                    {(modal.product.image_urls || []).length > 0 && (
+                      <div className="grid grid-cols-4 gap-2 mb-2">
+                        {(modal.product.image_urls || []).map((url, i) => (
+                          <div key={url + i} className="relative aspect-square rounded-xl overflow-hidden bg-white/5 border border-white/10 group">
+                            {i === 0 && (
+                              <span className="absolute top-1 left-1 bg-[#27C4A0] text-[#0B1929] text-[9px] font-bold px-1 py-0.5 rounded z-10 leading-none">
+                                {lang === 'ru' ? 'Гл.' : 'Main'}
+                              </span>
+                            )}
+                            <img src={url} alt="" className="w-full h-full object-contain p-1" />
+                            <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 w-5 h-5 bg-black/60 hover:bg-red-500 rounded-full flex items-center justify-center text-white transition-colors z-10 opacity-0 group-hover:opacity-100">
+                              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {(modal.product.image_urls || []).length < 10 && (
+                      <div onClick={() => !uploadingImg && fileRef.current?.click()} className="border-2 border-dashed border-white/15 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-[#27C4A0]/40 transition-colors min-h-[64px]">
+                        {uploadingImg ? (
+                          <div className="w-5 h-5 border-2 border-[#27C4A0]/30 border-t-[#27C4A0] rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <svg className="w-6 h-6 text-white/20 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            <p className="text-white/30 text-xs">{lang === 'ru' ? 'Добавить фото' : 'Add photo'}</p>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
+                    {uploadError && (
+                      <p className="text-red-400 text-xs mt-1.5 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                        {lang === 'ru' ? 'Ошибка: ' : 'Error: '}{uploadError}
+                      </p>
                     )}
                   </div>
-                )}
 
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
+                  {/* Features */}
+                  <div>
+                    <p className={sectionHdr}>{s.prodFeatures}</p>
+                    <div className="space-y-3">
+                      <div>
+                        <label className={lbl}>{s.prodFeaturesLv}</label>
+                        <textarea className={`${inp} resize-none`} rows={2} value={Array.isArray(modal.product.features_lv) ? modal.product.features_lv.join(', ') : (modal.product.features_lv ?? '')} onChange={(e) => setField('features_lv', e.target.value)} placeholder="Inverters, Wi-Fi, A+++" />
+                      </div>
+                      <div>
+                        <label className={lbl}>{s.prodFeaturesRu}</label>
+                        <textarea className={`${inp} resize-none`} rows={2} value={Array.isArray(modal.product.features_ru) ? modal.product.features_ru.join(', ') : (modal.product.features_ru ?? '')} onChange={(e) => setField('features_ru', e.target.value)} placeholder="Инвертор, Wi-Fi, A+++" />
+                      </div>
+                      <div>
+                        <label className={lbl}>{s.prodFeaturesEn}</label>
+                        <textarea className={`${inp} resize-none`} rows={2} value={Array.isArray(modal.product.features_en) ? modal.product.features_en.join(', ') : (modal.product.features_en ?? '')} onChange={(e) => setField('features_en', e.target.value)} placeholder="Inverter, Wi-Fi, A+++" />
+                      </div>
+                    </div>
+                  </div>
 
-                {uploadError && (
-                  <p className="text-red-400 text-xs mt-1.5 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-                    {lang === 'ru' ? 'Ошибка загрузки: ' : 'Upload error: '}{uploadError}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={modal.product.in_stock}
-                    onChange={(e) => setField('in_stock', e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#27C4A0]"></div>
-                </label>
-                <span className="text-sm text-white/60">{s.prodInStock}</span>
-              </div>
-
-              <div className="bg-white/3 border border-white/8 rounded-xl p-3 space-y-3">
-                <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">{lang === 'ru' ? 'Бейджи на карточке' : 'Card Badges'}</p>
-                <div className="flex items-center gap-3">
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={modal.product.is_hit ?? false}
-                      onChange={(e) => setField('is_hit', e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f97316]"></div>
-                  </label>
-                  <span className="text-sm text-white/60">{s.prodIsHit}</span>
-                  {modal.product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white">Хит</span>}
-                </div>
-                <div className="flex items-center gap-3">
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={modal.product.is_promo ?? false}
-                      onChange={(e) => setField('is_promo', e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e91e8c]"></div>
-                  </label>
-                  <span className="text-sm text-white/60">{s.prodIsPromo}</span>
-                  {modal.product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white">Акция</span>}
-                </div>
-                <div>
-                  <label className={lbl}>{s.prodDiscount} ({lang === 'ru' ? 'оставь пустым если нет' : 'leave empty if none'})</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      className={`${inp} w-24`}
-                      type="number"
-                      min={1}
-                      max={99}
-                      value={modal.product.discount_percent ?? ''}
-                      onChange={(e) => setField('discount_percent', e.target.value === '' ? null : Number(e.target.value))}
-                      placeholder="0"
-                    />
-                    {modal.product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black">-{modal.product.discount_percent}%</span>}
+                  {/* Stock & Badges */}
+                  <div>
+                    <p className={sectionHdr}>{lang === 'ru' ? 'Статус и бейджи' : 'Status & Badges'}</p>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" checked={modal.product.in_stock} onChange={(e) => setField('in_stock', e.target.checked)} className="sr-only peer" />
+                          <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#27C4A0]"></div>
+                        </label>
+                        <span className="text-sm text-white/60">{s.prodInStock}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" checked={modal.product.is_hit ?? false} onChange={(e) => setField('is_hit', e.target.checked)} className="sr-only peer" />
+                          <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f97316]"></div>
+                        </label>
+                        <span className="text-sm text-white/60">{s.prodIsHit}</span>
+                        {modal.product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white">Хит</span>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" checked={modal.product.is_promo ?? false} onChange={(e) => setField('is_promo', e.target.checked)} className="sr-only peer" />
+                          <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e91e8c]"></div>
+                        </label>
+                        <span className="text-sm text-white/60">{s.prodIsPromo}</span>
+                        {modal.product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white">Акция</span>}
+                      </div>
+                      <div>
+                        <label className={lbl}>{s.prodDiscount} ({lang === 'ru' ? 'оставь пустым если нет' : 'leave empty if none'})</label>
+                        <div className="flex items-center gap-2">
+                          <input className={`${inp} w-24`} type="number" min={1} max={99} value={modal.product.discount_percent ?? ''} onChange={(e) => setField('discount_percent', e.target.value === '' ? null : Number(e.target.value))} placeholder="0" />
+                          {modal.product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black">-{modal.product.discount_percent}%</span>}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-5 border-t border-white/10 flex gap-3 sticky bottom-0 bg-[#0D2137]">
-              <button onClick={save} disabled={saving} className="flex-1 bg-[#27C4A0] hover:bg-[#1fa389] disabled:opacity-50 text-[#0B1929] font-semibold py-3 rounded-xl transition-colors">
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-white/10 flex gap-3 flex-shrink-0 bg-[#0D2137]">
+              <button onClick={save} disabled={saving} className="flex-1 bg-[#27C4A0] hover:bg-[#1fa389] disabled:opacity-50 text-[#0B1929] font-semibold py-3 rounded-xl transition-colors text-base">
                 {saving ? s.saving : s.prodSave}
               </button>
-              <button onClick={closeModal} className="px-5 bg-white/8 hover:bg-white/12 text-white font-semibold py-3 rounded-xl transition-colors">{s.prodCancel}</button>
+              <button onClick={closeModal} className="px-6 bg-white/8 hover:bg-white/12 text-white font-semibold py-3 rounded-xl transition-colors">{s.prodCancel}</button>
             </div>
           </div>
         </div>

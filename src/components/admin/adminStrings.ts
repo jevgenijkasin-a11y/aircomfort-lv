@@ -12,6 +12,23 @@ export interface AdminRequest {
   created_at: string;
 }
 
+export interface ProductSpecs {
+  manufacturer?: string;
+  cooling_kw?: string;
+  heating_kw?: string;
+  scop?: string;
+  seer?: string;
+  noise_db?: string;
+  airflow?: string;
+  operating_temp?: string;
+  mounting?: string;
+  refrigerant?: string;
+  wifi?: string;
+  electrical?: string;
+  indoor_dims?: string;
+  outdoor_dims?: string;
+}
+
 export interface AdminProduct {
   id: number;
   brand: string;
@@ -28,6 +45,10 @@ export interface AdminProduct {
   features_lv?: string[] | string;
   features_ru?: string[] | string;
   features_en?: string[] | string;
+  description_lv?: string;
+  description_ru?: string;
+  description_en?: string;
+  specs?: ProductSpecs;
   brand_color: string;
   image_url: string;
   image_urls: string[];
@@ -165,6 +186,25 @@ export const T = {
     prodIsHit: 'Хит',
     prodIsPromo: 'Акция',
     prodDiscount: 'Скидка %',
+    prodDescSection: 'Описание товара',
+    prodDescLv: 'Описание (LV)',
+    prodDescRu: 'Описание (RU)',
+    prodDescEn: 'Описание (EN)',
+    prodSpecsSection: 'Технические характеристики',
+    specManufacturer: 'Производитель',
+    specCoolingKw: 'Холодопроизводительность (кВт)',
+    specHeatingKw: 'Тепловая мощность (кВт)',
+    specScop: 'SCOP',
+    specSeer: 'SEER',
+    specNoiseDb: 'Уровень шума (дБ)',
+    specAirflow: 'Объём воздуха (м³/ч)',
+    specOperatingTemp: 'Рабочая температура',
+    specMounting: 'Тип крепления',
+    specRefrigerant: 'Тип хладагента',
+    specWifi: 'Wi-Fi',
+    specElectrical: 'Электрическое соединение',
+    specIndoorDims: 'Габариты внутреннего блока',
+    specOutdoorDims: 'Габариты наружного блока',
     navReviews: 'Отзывы',
     revTitle: 'Отзывы клиентов',
     revAdd: 'Добавить отзыв',
@@ -342,6 +382,25 @@ export const T = {
     prodIsHit: 'Hit',
     prodIsPromo: 'Promo',
     prodDiscount: 'Discount %',
+    prodDescSection: 'Product Description',
+    prodDescLv: 'Description (LV)',
+    prodDescRu: 'Description (RU)',
+    prodDescEn: 'Description (EN)',
+    prodSpecsSection: 'Technical Specifications',
+    specManufacturer: 'Manufacturer',
+    specCoolingKw: 'Cooling Capacity (kW)',
+    specHeatingKw: 'Heating Capacity (kW)',
+    specScop: 'SCOP',
+    specSeer: 'SEER',
+    specNoiseDb: 'Noise Level (dB)',
+    specAirflow: 'Airflow (m³/h)',
+    specOperatingTemp: 'Operating Temperature',
+    specMounting: 'Mounting Type',
+    specRefrigerant: 'Refrigerant Type',
+    specWifi: 'Wi-Fi',
+    specElectrical: 'Electrical Connection',
+    specIndoorDims: 'Indoor Unit Dimensions',
+    specOutdoorDims: 'Outdoor Unit Dimensions',
     navReviews: 'Reviews',
     revTitle: 'Customer Reviews',
     revAdd: 'Add Review',

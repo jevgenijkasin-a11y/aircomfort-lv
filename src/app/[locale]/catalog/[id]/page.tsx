@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages, getSettings } from '@/lib/supabase';
+import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages, productDescription, getSettings } from '@/lib/supabase';
 import ProductImageViewer from '@/components/ProductImageViewer';
 import BackLink from '@/components/BackLink';
 
@@ -54,6 +54,23 @@ function buildContactMessage(p: SupabaseProduct, name: string, locale: string, i
   return lines.join('\n');
 }
 
+const SPEC_LABELS: Record<string, Record<string, string>> = {
+  manufacturer:   { ru: 'Производитель', lv: 'Ražotājs', en: 'Manufacturer' },
+  cooling_kw:     { ru: 'Холодопроизводительность', lv: 'Dzesēšanas jauda', en: 'Cooling Capacity' },
+  heating_kw:     { ru: 'Тепловая мощность', lv: 'Sildīšanas jauda', en: 'Heating Capacity' },
+  scop:           { ru: 'SCOP', lv: 'SCOP', en: 'SCOP' },
+  seer:           { ru: 'SEER', lv: 'SEER', en: 'SEER' },
+  noise_db:       { ru: 'Уровень шума (дБ)', lv: 'Trokšņa līmenis (dB)', en: 'Noise Level (dB)' },
+  airflow:        { ru: 'Объём воздуха (м³/ч)', lv: 'Gaisa plūsma (m³/h)', en: 'Airflow (m³/h)' },
+  operating_temp: { ru: 'Рабочая температура', lv: 'Darba temperatūra', en: 'Operating Temperature' },
+  mounting:       { ru: 'Тип крепления', lv: 'Stiprinājuma veids', en: 'Mounting Type' },
+  refrigerant:    { ru: 'Тип хладагента', lv: 'Aukstumaģenta veids', en: 'Refrigerant Type' },
+  wifi:           { ru: 'Wi-Fi', lv: 'Wi-Fi', en: 'Wi-Fi' },
+  electrical:     { ru: 'Электрическое соединение', lv: 'Elektriskais savienojums', en: 'Electrical Connection' },
+  indoor_dims:    { ru: 'Габариты внутреннего блока', lv: 'Iekšējā bloka izmēri', en: 'Indoor Unit Dimensions' },
+  outdoor_dims:   { ru: 'Габариты наружного блока', lv: 'Ārējā bloka izmēri', en: 'Outdoor Unit Dimensions' },
+};
+
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
   setRequestLocale(locale);
@@ -75,6 +92,8 @@ export default async function ProductPage({ params }: Props) {
 
   const contactMessage = buildContactMessage(p, name, locale, installFrom);
   const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
+  const description = productDescription(p, locale);
+  const specs = p.specs && typeof p.specs === 'object' ? Object.entries(p.specs).filter(([, v]) => v) : [];
 
   return (
     <>
@@ -199,8 +218,39 @@ export default async function ProductPage({ params }: Props) {
                locale === 'ru' ? 'Бесплатная доставка и профессиональная установка' :
                'Free delivery and professional installation'}
             </p>
+
+            {/* Description */}
+            {description && (
+              <div className="glass-card rounded-2xl p-6">
+                <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">
+                  {locale === 'lv' ? 'Apraksts' : locale === 'ru' ? 'Описание' : 'Description'}
+                </p>
+                <p className="text-white/70 text-sm leading-relaxed whitespace-pre-line">{description}</p>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Specs table — full width below main grid */}
+        {specs.length > 0 && (
+          <div className="mt-10">
+            <div className="glass-card rounded-2xl p-6">
+              <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-5">
+                {locale === 'lv' ? 'Tehniskie dati' : locale === 'ru' ? 'Технические характеристики' : 'Technical Specifications'}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
+                {specs.map(([key, value], i) => (
+                  <div key={key} className={`flex items-start justify-between py-3 px-4 ${i % 2 === 0 ? '' : ''} border-b border-[#1A6B9A]/12 last:border-b-0`}>
+                    <span className="text-white/45 text-sm pr-4">
+                      {SPEC_LABELS[key]?.[locale] ?? SPEC_LABELS[key]?.en ?? key}
+                    </span>
+                    <span className="text-white font-medium text-sm text-right">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
