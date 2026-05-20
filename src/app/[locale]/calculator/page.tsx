@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Calculator from '@/components/Calculator';
-import { getSettings } from '@/lib/supabase';
+import { getSettings, supabaseServer } from '@/lib/supabase';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('calculator');
@@ -12,10 +12,15 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [t, tn, settings] = await Promise.all([
+  const [t, tn, settings, { data: productPrices }] = await Promise.all([
     getTranslations('calculator'),
     getTranslations('nav'),
     getSettings(),
+    supabaseServer
+      .from('products')
+      .select('power_kw, price, discount_percent')
+      .eq('in_stock', true)
+      .gt('price', 0),
   ]);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
   const installTo = parseInt(settings.install_price_to || '350') || 350;
@@ -39,7 +44,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
           <p className="text-white/45 text-lg max-w-xl mx-auto">{t('subtitle')}</p>
         </div>
       </div>
-      <Calculator installFrom={installFrom} installTo={installTo} />
+      <Calculator installFrom={installFrom} installTo={installTo} products={(productPrices ?? []) as { power_kw: number; price: number; discount_percent: number | null }[]} />
     </>
   );
 }

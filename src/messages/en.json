@@ -137,7 +137,8 @@
     "disclaimer": "* Estimate only. Final price confirmed after site inspection.",
     "kw": "kW",
     "eur": "EUR",
-    "from": "from"
+    "from": "from",
+    "priceOnRequest": "Price on request"
   },
   "contacts": {
     "title": "Contact Us",

@@ -137,7 +137,8 @@
     "disclaimer": "* Aprēķins ir orientējošs. Galīgā cena tiek apstiprināta pēc apskates.",
     "kw": "kW",
     "eur": "EUR",
-    "from": "no"
+    "from": "no",
+    "priceOnRequest": "Cena pēc pieprasījuma"
   },
   "contacts": {
     "title": "Sazinieties ar mums",

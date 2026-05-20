@@ -4,6 +4,12 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 
+interface ProductPrice {
+  power_kw: number;
+  price: number;
+  discount_percent: number | null;
+}
+
 interface CalcResult {
   powerKw: number;
   equipMin: number;
@@ -12,56 +18,36 @@ interface CalcResult {
   installMax: number;
 }
 
-function calculatePower(
-  area: number,
-  roomType: string,
-  insulation: string,
-  windows: number,
-  floor: string,
-  installBase: number,
-  installTop: number
-): CalcResult {
-  const baseFactors: Record<string, number> = {
-    good: 30,
-    avg: 40,
-    poor: 50,
-  };
-
-  const roomExtra: Record<string, number> = {
-    bedroom: 0,
-    living: 200,
-    office: 300,
-    kitchen: 500,
-  };
-
-  const baseFactor = baseFactors[insulation] ?? 40;
-  let watts = area * baseFactor;
+function recommendedPower(area: number, roomType: string, insulation: string, windows: number, floor: string): number {
+  const baseFactors: Record<string, number> = { good: 30, avg: 40, poor: 50 };
+  const roomExtra: Record<string, number> = { bedroom: 0, living: 200, office: 300, kitchen: 500 };
+  let watts = area * (baseFactors[insulation] ?? 40);
   watts += (roomExtra[roomType] ?? 0);
   watts += windows * 100;
   if (floor === 'top') watts *= 1.15;
-
-  const powerKw = Math.ceil((watts / 1000) * 2) / 2;
-
-  const equipRanges: { max: number; min: number; maxPrice: number }[] = [
-    { max: 2.5, min: 550, maxPrice: 750 },
-    { max: 3.5, min: 700, maxPrice: 950 },
-    { max: 5.0, min: 900, maxPrice: 1200 },
-    { max: 7.0, min: 1150, maxPrice: 1600 },
-    { max: 99, min: 1500, maxPrice: 2200 },
-  ];
-
-  const range = equipRanges.find((r) => powerKw <= r.max) ?? equipRanges[equipRanges.length - 1];
-
-  return {
-    powerKw,
-    equipMin: range.min,
-    equipMax: range.maxPrice,
-    installMin: installBase,
-    installMax: installTop,
-  };
+  return Math.ceil((watts / 1000) * 2) / 2;
 }
 
-export default function Calculator({ installFrom = 250, installTo = 350 }: { installFrom?: number; installTo?: number }) {
+function getPriceRange(powerKw: number, products: ProductPrice[]): { min: number; max: number } {
+  const finalPrice = (p: ProductPrice) =>
+    p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price;
+
+  // Products that can handle the required power (power_kw >= recommended)
+  const suitable = products.filter(p => p.power_kw >= powerKw);
+
+  // If no exact-or-above match, take all products (edge case: only low-power in catalog)
+  const pool = suitable.length > 0 ? suitable : products;
+  if (pool.length === 0) return { min: 0, max: 0 };
+
+  // Use only the minimum matching power level to avoid mixing classes
+  const minPower = Math.min(...pool.map(p => p.power_kw));
+  const atMinPower = pool.filter(p => p.power_kw === minPower);
+
+  const prices = atMinPower.map(finalPrice).sort((a, b) => a - b);
+  return { min: prices[0], max: prices[prices.length - 1] };
+}
+
+export default function Calculator({ installFrom = 250, installTo = 350, products = [] }: { installFrom?: number; installTo?: number; products?: ProductPrice[] }) {
   const t = useTranslations('calculator');
   const router = useRouter();
 
@@ -75,7 +61,9 @@ export default function Calculator({ installFrom = 250, installTo = 350 }: { ins
   const handleCalc = () => {
     const areaNum = parseFloat(area);
     if (!areaNum || areaNum <= 0) return;
-    setResult(calculatePower(areaNum, roomType, insulation, parseInt(windows) || 0, floor, installFrom, installTo));
+    const powerKw = recommendedPower(areaNum, roomType, insulation, parseInt(windows) || 0, floor);
+    const { min: equipMin, max: equipMax } = getPriceRange(powerKw, products);
+    setResult({ powerKw, equipMin, equipMax, installMin: installFrom, installMax: installTo });
   };
 
   const handleGetOffer = () => {
@@ -235,7 +223,11 @@ export default function Calculator({ installFrom = 250, installTo = 350 }: { ins
                 <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
                   <span className="text-white/55 text-sm">{t('equipmentCost')}</span>
                   <span className="font-semibold text-white">
-                    {t('from')} {result.equipMin.toLocaleString('lv-LV')}–{result.equipMax.toLocaleString('lv-LV')} €
+                    {result.equipMin > 0
+                      ? result.equipMin === result.equipMax
+                        ? `${result.equipMin.toLocaleString('lv-LV')} €`
+                        : `${t('from')} ${result.equipMin.toLocaleString('lv-LV')}–${result.equipMax.toLocaleString('lv-LV')} €`
+                      : t('priceOnRequest')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
@@ -247,7 +239,9 @@ export default function Calculator({ installFrom = 250, installTo = 350 }: { ins
                 <div className="flex justify-between items-center py-3">
                   <span className="font-syne font-semibold">{t('totalCost')}</span>
                   <span className="font-syne font-bold text-xl text-[#27C4A0]">
-                    {t('from')} {(result.equipMin + result.installMin).toLocaleString('lv-LV')} €
+                    {result.equipMin > 0
+                      ? `${t('from')} ${(result.equipMin + result.installMin).toLocaleString('lv-LV')} €`
+                      : t('priceOnRequest')}
                   </span>
                 </div>
               </div>
