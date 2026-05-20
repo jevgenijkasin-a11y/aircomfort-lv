@@ -148,14 +148,16 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
 
   return (
     <Link href={`/catalog/${product.id}` as any} className="bg-white rounded-2xl overflow-hidden flex flex-col group border border-[#e6edf3] hover:border-[#B0BDD0] transition-all duration-200" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.07)' }}>
-      <div className="h-44 flex items-center justify-center relative rounded-t-2xl" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)' }}>
+      <div className="relative rounded-t-2xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', paddingTop: '62%' }}>
         {productImages(product)[0] ? (
-          <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-6" style={{ filter: 'drop-shadow(0 8px 14px rgba(15,23,42,0.10))' }} />
+          <img src={productImages(product)[0]} alt={name} className="absolute inset-0 w-full h-full object-contain p-4" style={{ filter: 'drop-shadow(0 6px 12px rgba(15,23,42,0.10))' }} />
         ) : (
-          <svg viewBox="0 0 24 24" className="w-10 h-10 opacity-20 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1">
-            <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg viewBox="0 0 24 24" className="w-10 h-10 opacity-20 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1">
+              <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
         )}
         <div className={`absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyCls}`}>{product.energy_class}</div>
         {(product.is_hit || product.is_promo || !!product.discount_percent) && (
