@@ -20,7 +20,7 @@ export default function CatalogClient({ initialProducts, locale, initialCategory
 
   const [brand, setBrand] = useState('');
   const [power, setPower] = useState('');
-  const [category, setCategory] = useState(initialCategory ?? '');
+  const [category, setCategory] = useState(initialCategory ?? 'home');
   const [sort, setSort] = useState('asc');
   const [ready, setReady] = useState(false);
 
@@ -29,7 +29,7 @@ export default function CatalogClient({ initialProducts, locale, initialCategory
     const p = new URLSearchParams(window.location.search);
     setBrand(p.get('brand') ?? '');
     setPower(p.get('power') ?? '');
-    setCategory(p.get('category') ?? initialCategory ?? '');
+    setCategory(p.get('category') ?? initialCategory ?? 'home');
     setSort(p.get('sort') ?? 'asc');
     setReady(true);
   }, []);
