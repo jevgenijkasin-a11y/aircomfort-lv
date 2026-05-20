@@ -32,18 +32,16 @@ function getPriceRange(powerKw: number, products: ProductPrice[]): { min: number
   const finalPrice = (p: ProductPrice) =>
     p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price;
 
-  // Products that can handle the required power (power_kw >= recommended)
   const suitable = products.filter(p => p.power_kw >= powerKw);
-
-  // If no exact-or-above match, take all products (edge case: only low-power in catalog)
   const pool = suitable.length > 0 ? suitable : products;
   if (pool.length === 0) return { min: 0, max: 0 };
 
-  // Use only the minimum matching power level to avoid mixing classes
-  const minPower = Math.min(...pool.map(p => p.power_kw));
-  const atMinPower = pool.filter(p => p.power_kw === minPower);
+  // Find the lowest available power level in the catalog
+  const minAvailPower = Math.min(...pool.map(p => p.power_kw));
+  // Include all products within +1.5 kW of that minimum — catches e.g. both 2.5 and 2.7 kW
+  const band = pool.filter(p => p.power_kw <= minAvailPower + 1.5);
 
-  const prices = atMinPower.map(finalPrice).sort((a, b) => a - b);
+  const prices = band.map(finalPrice).sort((a, b) => a - b);
   return { min: prices[0], max: prices[prices.length - 1] };
 }
 
