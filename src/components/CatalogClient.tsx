@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productImages } from '@/lib/supabase';
 
@@ -15,11 +16,35 @@ const energyColors: Record<string, string> = {
 export default function CatalogClient({ initialProducts, locale, initialCategory, installFrom = 250 }: { initialProducts: SupabaseProduct[]; locale: string; initialCategory?: string; installFrom?: number }) {
   const t = useTranslations('catalog');
   const tp = useTranslations('products');
+  const pathname = usePathname();
 
   const [brand, setBrand] = useState('');
   const [power, setPower] = useState('');
   const [category, setCategory] = useState(initialCategory ?? '');
   const [sort, setSort] = useState('asc');
+  const [ready, setReady] = useState(false);
+
+  // Read filters from URL on client mount
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    setBrand(p.get('brand') ?? '');
+    setPower(p.get('power') ?? '');
+    setCategory(p.get('category') ?? initialCategory ?? '');
+    setSort(p.get('sort') ?? 'asc');
+    setReady(true);
+  }, []);
+
+  // Sync filter state to URL without triggering Next.js navigation
+  useEffect(() => {
+    if (!ready) return;
+    const p = new URLSearchParams();
+    if (brand) p.set('brand', brand);
+    if (power) p.set('power', power);
+    if (category) p.set('category', category);
+    if (sort !== 'asc') p.set('sort', sort);
+    const q = p.toString();
+    window.history.replaceState(null, '', q ? `${pathname}?${q}` : pathname);
+  }, [brand, power, category, sort, ready, pathname]);
 
   const brands = useMemo(() => Array.from(new Set(initialProducts.map((p) => p.brand))), [initialProducts]);
   const powerLevels = useMemo(() => Array.from(new Set(initialProducts.map((p) => p.power_kw))).sort((a, b) => a - b), [initialProducts]);
@@ -163,7 +188,7 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
                 <span className="font-syne font-bold text-xl text-gray-900">{product.price.toLocaleString('lv-LV')} €</span>
               )}
             </div>
-            <span className="text-xs text-gray-400">{t('installFrom', { price: installFrom })}</span>
+            <span className="text-xs text-gray-400">{tCat('installFrom', { price: installFrom })}</span>
           </div>
           <div className="w-full flex items-center justify-center gap-2 bg-[#E4EAF3] hover:bg-[#27C4A0] border border-[#CDD5E0] hover:border-[#27C4A0] text-[#3D5270] hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47] group-hover:border-[#27C4A0]">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages, getSettings } from '@/lib/supabase';
 import ProductImageViewer from '@/components/ProductImageViewer';
+import BackLink from '@/components/BackLink';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -22,6 +23,36 @@ const energyColors: Record<string, string> = {
   'A++': 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10',
   'A+': 'text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10',
 };
+
+function buildContactMessage(p: SupabaseProduct, name: string, locale: string, installFrom: number): string {
+  const finalPrice = p.price && p.discount_percent
+    ? Math.round(p.price * (1 - p.discount_percent / 100))
+    : p.price;
+
+  if (locale === 'lv') {
+    const lines = [`Interesē: ${p.brand} ${name}`];
+    if (p.power_kw) lines.push(`Jauda: ${p.power_kw} kW`);
+    if (p.area_coverage) lines.push(`Platība: ${p.area_coverage} m²`);
+    if (finalPrice) lines.push(`Cena: ${finalPrice} €`);
+    lines.push(`Uzstādīšana no: ${installFrom} €`);
+    return lines.join('\n');
+  }
+  if (locale === 'en') {
+    const lines = [`Interested in: ${p.brand} ${name}`];
+    if (p.power_kw) lines.push(`Power: ${p.power_kw} kW`);
+    if (p.area_coverage) lines.push(`Area: ${p.area_coverage} m²`);
+    if (finalPrice) lines.push(`Price: ${finalPrice} €`);
+    lines.push(`Installation from: ${installFrom} €`);
+    return lines.join('\n');
+  }
+  // ru (default)
+  const lines = [`Интересует: ${p.brand} ${name}`];
+  if (p.power_kw) lines.push(`Мощность: ${p.power_kw} kW`);
+  if (p.area_coverage) lines.push(`Площадь: ${p.area_coverage} m²`);
+  if (finalPrice) lines.push(`Цена: ${finalPrice} €`);
+  lines.push(`Монтаж от: ${installFrom} €`);
+  return lines.join('\n');
+}
 
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
@@ -42,16 +73,16 @@ export default async function ProductPage({ params }: Props) {
   const images = productImages(p);
   const energyCls = energyColors[p.energy_class] ?? 'text-white/50 border-white/20 bg-white/5';
 
+  const contactMessage = buildContactMessage(p, name, locale, installFrom);
+  const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
+
   return (
     <>
       {/* Header */}
       <div className="pt-36 pb-6 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <Link href="/catalog" className="inline-flex items-center gap-2 text-white/40 hover:text-[#27C4A0] text-sm transition-colors mb-4">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            {t('backToCatalog')}
-          </Link>
+          <BackLink label={t('backToCatalog')} />
           <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-widest mb-1">{p.brand}</p>
           <h1 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{name}</h1>
           {(p.is_hit || p.is_promo || !!p.discount_percent) && (
@@ -154,7 +185,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             <Link
-              href="/contacts"
+              href={contactHref as any}
               className="w-full flex items-center justify-center gap-2 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold py-4 rounded-2xl transition-all duration-200 shadow-xl shadow-[#27C4A0]/25 hover:-translate-y-0.5 text-base"
             >
               {tp('order')}
