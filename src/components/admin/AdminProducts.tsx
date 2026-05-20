@@ -235,6 +235,15 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     { value: 'rooftop',  ru: 'Руфтоп',       en: 'Rooftop' },
   ];
 
+  const ELECTRICAL_OPTIONS = [
+    { value: '1ph_220',      ru: '1Ф, 220~240 В',          en: '1Ph, 220~240 V' },
+    { value: '1ph_220_50hz', ru: '1Ф, 220~240 В, 50 Гц',   en: '1Ph, 220~240 V, 50 Hz' },
+    { value: '2ph_220',      ru: '2Ф, 220~240 В',          en: '2Ph, 220~240 V' },
+    { value: '2ph_220_50hz', ru: '2Ф, 220~240 В, 50 Гц',   en: '2Ph, 220~240 V, 50 Hz' },
+    { value: '3ph_380',      ru: '3Ф, 380~415 В',          en: '3Ph, 380~415 V' },
+    { value: '3ph_380_50hz', ru: '3Ф, 380~415 В, 50 Гц',   en: '3Ph, 380~415 V, 50 Hz' },
+  ];
+
   return (
     <div className="p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
@@ -486,6 +495,20 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                           >
                             <option value="">{lang === 'ru' ? '— не указано —' : '— not set —'}</option>
                             {MOUNTING_OPTIONS.map(o => (
+                              <option key={o.value} value={o.value} style={{ background: '#0D2137' }}>
+                                {lang === 'ru' ? o.ru : o.en}
+                              </option>
+                            ))}
+                          </select>
+                        ) : key === 'electrical' ? (
+                          <select
+                            className={inp}
+                            value={(modal.product.specs as ProductSpecs)?.[key] ?? ''}
+                            onChange={(e) => setSpec(key, e.target.value)}
+                            style={{ background: '#0D2137' }}
+                          >
+                            <option value="">{lang === 'ru' ? '— не указано —' : '— not set —'}</option>
+                            {ELECTRICAL_OPTIONS.map(o => (
                               <option key={o.value} value={o.value} style={{ background: '#0D2137' }}>
                                 {lang === 'ru' ? o.ru : o.en}
                               </option>

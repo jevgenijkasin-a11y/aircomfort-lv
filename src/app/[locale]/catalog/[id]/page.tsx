@@ -66,9 +66,19 @@ const MOUNTING_VALUES: Record<string, Record<string, string>> = {
 
 const WIFI_VALUES: Record<string, string> = { ru: 'Да', lv: 'Jā', en: 'Yes' };
 
+const ELECTRICAL_VALUES: Record<string, Record<string, string>> = {
+  '1ph_220':      { ru: '1Ф, 220~240 В',        lv: '1Φ, 220~240 V',        en: '1Ph, 220~240 V' },
+  '1ph_220_50hz': { ru: '1Ф, 220~240 В, 50 Гц',  lv: '1Φ, 220~240 V, 50 Hz', en: '1Ph, 220~240 V, 50 Hz' },
+  '2ph_220':      { ru: '2Ф, 220~240 В',        lv: '2Φ, 220~240 V',        en: '2Ph, 220~240 V' },
+  '2ph_220_50hz': { ru: '2Ф, 220~240 В, 50 Гц',  lv: '2Φ, 220~240 V, 50 Hz', en: '2Ph, 220~240 V, 50 Hz' },
+  '3ph_380':      { ru: '3Ф, 380~415 В',        lv: '3Φ, 380~415 V',        en: '3Ph, 380~415 V' },
+  '3ph_380_50hz': { ru: '3Ф, 380~415 В, 50 Гц',  lv: '3Φ, 380~415 V, 50 Hz', en: '3Ph, 380~415 V, 50 Hz' },
+};
+
 function translateSpecValue(key: string, value: string, locale: string): string {
   if (key === 'mounting') return MOUNTING_VALUES[value]?.[locale] ?? MOUNTING_VALUES[value]?.en ?? value;
   if (key === 'wifi') return value === 'yes' ? (WIFI_VALUES[locale] ?? 'Yes') : '';
+  if (key === 'electrical') return ELECTRICAL_VALUES[value]?.[locale] ?? ELECTRICAL_VALUES[value]?.en ?? value;
   return value;
 }
 
