@@ -94,6 +94,7 @@
     "results": "rezultāti",
     "viewBtn": "Apskatīt",
     "orderBtn": "Pasūtīt",
+    "installFrom": "Uzstādīšana no {price} €",
     "installPrice": "Uzstādīšana",
     "backToCatalog": "← Atpakaļ uz katalogu",
     "specsTitle": "Tehniskie dati",

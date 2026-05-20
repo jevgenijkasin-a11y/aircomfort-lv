@@ -94,6 +94,7 @@
     "results": "результатов",
     "viewBtn": "Посмотреть",
     "orderBtn": "Заказать",
+    "installFrom": "Монтаж от {price} €",
     "installPrice": "Монтаж",
     "backToCatalog": "← Назад в каталог",
     "specsTitle": "Технические характеристики",

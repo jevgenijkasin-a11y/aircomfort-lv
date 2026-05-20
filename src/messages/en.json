@@ -94,6 +94,7 @@
     "results": "results",
     "viewBtn": "View",
     "orderBtn": "Order",
+    "installFrom": "Installation from {price} €",
     "installPrice": "Installation",
     "backToCatalog": "← Back to catalog",
     "specsTitle": "Specifications",
