@@ -121,9 +121,15 @@ export default async function ProductPage({ params }: Props) {
   const contactMessage = buildContactMessage(p, name, locale, installFrom);
   const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
   const description = productDescription(p, locale);
-  const specs = p.specs && typeof p.specs === 'object'
-    ? Object.entries(p.specs).map(([k, v]) => [k, translateSpecValue(k, v as string, locale)] as [string, string]).filter(([, v]) => v)
-    : [];
+  const SPEC_ORDER = [
+    'manufacturer', 'cooling_kw', 'heating_kw', 'scop', 'seer',
+    'noise_db', 'airflow', 'operating_temp', 'mounting', 'refrigerant',
+    'wifi', 'electrical', 'indoor_dims', 'outdoor_dims',
+  ];
+  const rawSpecs = p.specs && typeof p.specs === 'object' ? (p.specs as Record<string, string>) : {};
+  const specs = SPEC_ORDER
+    .map((k) => [k, translateSpecValue(k, rawSpecs[k] ?? '', locale)] as [string, string])
+    .filter(([, v]) => v);
 
   return (
     <>
