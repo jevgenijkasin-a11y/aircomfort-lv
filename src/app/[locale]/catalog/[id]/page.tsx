@@ -54,6 +54,24 @@ function buildContactMessage(p: SupabaseProduct, name: string, locale: string, i
   return lines.join('\n');
 }
 
+const MOUNTING_VALUES: Record<string, Record<string, string>> = {
+  wall:     { ru: 'Настенный',  lv: 'Sienas',    en: 'Wall-mounted' },
+  cassette: { ru: 'Кассетный',  lv: 'Kasetes',   en: 'Cassette' },
+  floor:    { ru: 'Напольный',  lv: 'Grīdas',    en: 'Floor-standing' },
+  ceiling:  { ru: 'Потолочный', lv: 'Griesta',   en: 'Ceiling' },
+  duct:     { ru: 'Канальный',  lv: 'Kanālu',    en: 'Ducted' },
+  column:   { ru: 'Колонный',   lv: 'Kolonnas',  en: 'Column' },
+  rooftop:  { ru: 'Руфтоп',     lv: 'Jumta',     en: 'Rooftop' },
+};
+
+const WIFI_VALUES: Record<string, string> = { ru: 'Да', lv: 'Jā', en: 'Yes' };
+
+function translateSpecValue(key: string, value: string, locale: string): string {
+  if (key === 'mounting') return MOUNTING_VALUES[value]?.[locale] ?? MOUNTING_VALUES[value]?.en ?? value;
+  if (key === 'wifi') return value === 'yes' ? (WIFI_VALUES[locale] ?? 'Yes') : '';
+  return value;
+}
+
 const SPEC_LABELS: Record<string, Record<string, string>> = {
   manufacturer:   { ru: 'Производитель', lv: 'Ražotājs', en: 'Manufacturer' },
   cooling_kw:     { ru: 'Холодопроизводительность', lv: 'Dzesēšanas jauda', en: 'Cooling Capacity' },
@@ -93,7 +111,9 @@ export default async function ProductPage({ params }: Props) {
   const contactMessage = buildContactMessage(p, name, locale, installFrom);
   const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
   const description = productDescription(p, locale);
-  const specs = p.specs && typeof p.specs === 'object' ? Object.entries(p.specs).filter(([, v]) => v) : [];
+  const specs = p.specs && typeof p.specs === 'object'
+    ? Object.entries(p.specs).map(([k, v]) => [k, translateSpecValue(k, v as string, locale)] as [string, string]).filter(([, v]) => v)
+    : [];
 
   return (
     <>

@@ -225,6 +225,16 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     { key: 'outdoor_dims', label: s.specOutdoorDims },
   ];
 
+  const MOUNTING_OPTIONS = [
+    { value: 'wall',     ru: 'Настенный',    en: 'Wall-mounted' },
+    { value: 'cassette', ru: 'Кассетный',    en: 'Cassette' },
+    { value: 'floor',    ru: 'Напольный',    en: 'Floor-standing' },
+    { value: 'ceiling',  ru: 'Потолочный',   en: 'Ceiling' },
+    { value: 'duct',     ru: 'Канальный',    en: 'Ducted' },
+    { value: 'column',   ru: 'Колонный',     en: 'Column' },
+    { value: 'rooftop',  ru: 'Руфтоп',       en: 'Rooftop' },
+  ];
+
   return (
     <div className="p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
@@ -454,12 +464,40 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                     {specFields.map(({ key, label }) => (
                       <div key={key}>
                         <label className={lbl}>{label}</label>
-                        <input
-                          className={inp}
-                          value={(modal.product.specs as ProductSpecs)?.[key] ?? ''}
-                          onChange={(e) => setSpec(key, e.target.value)}
-                          placeholder={key === 'wifi' ? (lang === 'ru' ? 'Да / Нет' : 'Yes / No') : ''}
-                        />
+                        {key === 'wifi' ? (
+                          <label className="relative inline-flex items-center cursor-pointer mt-1">
+                            <input
+                              type="checkbox"
+                              checked={(modal.product.specs as ProductSpecs)?.[key] === 'yes'}
+                              onChange={(e) => setSpec(key, e.target.checked ? 'yes' : '')}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#27C4A0]"></div>
+                            <span className="ml-3 text-sm text-white/50">
+                              {(modal.product.specs as ProductSpecs)?.[key] === 'yes' ? (lang === 'ru' ? 'Да' : 'Yes') : (lang === 'ru' ? 'Нет' : 'No')}
+                            </span>
+                          </label>
+                        ) : key === 'mounting' ? (
+                          <select
+                            className={inp}
+                            value={(modal.product.specs as ProductSpecs)?.[key] ?? ''}
+                            onChange={(e) => setSpec(key, e.target.value)}
+                            style={{ background: '#0D2137' }}
+                          >
+                            <option value="">{lang === 'ru' ? '— не указано —' : '— not set —'}</option>
+                            {MOUNTING_OPTIONS.map(o => (
+                              <option key={o.value} value={o.value} style={{ background: '#0D2137' }}>
+                                {lang === 'ru' ? o.ru : o.en}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            className={inp}
+                            value={(modal.product.specs as ProductSpecs)?.[key] ?? ''}
+                            onChange={(e) => setSpec(key, e.target.value)}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
