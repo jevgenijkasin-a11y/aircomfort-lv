@@ -28,11 +28,11 @@ function ProductCard({ product, locale, t, installFrom }: { product: SupabasePro
           </div>
         )}
         <div className={`absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyCls}`}>{product.energy_class}</div>
-        {(product.is_hit || product.is_promo || product.discount_percent) && (
+        {(product.is_hit || product.is_promo || !!product.discount_percent) && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white shadow-sm">{t('badgeHit')}</span>}
             {product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white shadow-sm">{t('badgePromo')}</span>}
-            {product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black shadow-sm">-{product.discount_percent}%</span>}
+            {!!product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black shadow-sm">-{product.discount_percent}%</span>}
           </div>
         )}
       </div>
@@ -61,7 +61,9 @@ function ProductCard({ product, locale, t, installFrom }: { product: SupabasePro
         <div className="border-t border-[#1A6B9A]/15 pt-4">
           <div className="flex items-end justify-between mb-3">
             <div>
-              {product.discount_percent ? (
+              {!product.price ? (
+                <p className="font-syne font-semibold text-base text-white/50">{t('priceOnRequest')}</p>
+              ) : product.discount_percent ? (
                 <>
                   <p className="text-xs text-white/35 mb-0.5">{t('from')}</p>
                   <div className="flex items-baseline gap-2">

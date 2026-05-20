@@ -61,7 +61,7 @@
     "power": "Power",
     "area": "Area",
     "from": "from",
-    "order": "Order",
+    "order": "Buy",
     "viewBtn": "View",
     "energyClass": "Energy class",
     "installIncluded": "Installation included",
@@ -69,7 +69,8 @@
     "badgeHit": "Hit",
     "badgePromo": "Sale",
     "wasPrice": "Was",
-    "nowPrice": "Now"
+    "nowPrice": "Now",
+    "priceOnRequest": "Price on request"
   },
   "catalog": {
     "title": "Air Conditioner Catalog",

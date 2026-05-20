@@ -61,7 +61,7 @@
     "power": "Jauda",
     "area": "Platība",
     "from": "no",
-    "order": "Pasūtīt",
+    "order": "Pirkt",
     "viewBtn": "Apskatīt",
     "energyClass": "Enerģijas klase",
     "installIncluded": "Uzstādīšana iekļauta",
@@ -69,7 +69,8 @@
     "badgeHit": "Hit",
     "badgePromo": "Akcija",
     "wasPrice": "Bija",
-    "nowPrice": "Tagad"
+    "nowPrice": "Tagad",
+    "priceOnRequest": "Cena pēc pieprasījuma"
   },
   "catalog": {
     "title": "Kondicionētāju katalogs",

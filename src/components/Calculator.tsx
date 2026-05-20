@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 
 interface CalcResult {
   powerKw: number;
@@ -63,6 +63,7 @@ function calculatePower(
 
 export default function Calculator({ installFrom = 250, installTo = 350 }: { installFrom?: number; installTo?: number }) {
   const t = useTranslations('calculator');
+  const router = useRouter();
 
   const [area, setArea] = useState('');
   const [roomType, setRoomType] = useState('living');
@@ -75,6 +76,22 @@ export default function Calculator({ installFrom = 250, installTo = 350 }: { ins
     const areaNum = parseFloat(area);
     if (!areaNum || areaNum <= 0) return;
     setResult(calculatePower(areaNum, roomType, insulation, parseInt(windows) || 0, floor, installFrom, installTo));
+  };
+
+  const handleGetOffer = () => {
+    if (!result) return;
+    const roomLabels: Record<string, string> = { bedroom: t('bedroom'), living: t('living'), office: t('office'), kitchen: t('kitchen') };
+    const insulationLabels: Record<string, string> = { good: t('goodInsulation'), avg: t('avgInsulation'), poor: t('poorInsulation') };
+    const message = [
+      `${t('area')}: ${area} m²`,
+      `${t('roomType')}: ${roomLabels[roomType] ?? roomType}`,
+      `${t('insulation')}: ${insulationLabels[insulation] ?? insulation}`,
+      `${t('recommendedPower')}: ${result.powerKw} ${t('kw')}`,
+      `${t('equipmentCost')}: ${result.equipMin}–${result.equipMax} €`,
+      `${t('installationCost')}: ${result.installMin}–${result.installMax} €`,
+      `${t('totalCost')}: ${t('from')} ${result.equipMin + result.installMin} €`,
+    ].join('\n');
+    router.push(`/contacts?service=consultation&message=${encodeURIComponent(message)}`);
   };
 
   const labelCls = 'block text-sm font-medium text-white/60 mb-1.5';
@@ -235,15 +252,15 @@ export default function Calculator({ installFrom = 250, installTo = 350 }: { ins
                 </div>
               </div>
 
-              <Link
-                href="/contacts"
+              <button
+                onClick={handleGetOffer}
                 className="w-full flex items-center justify-center gap-2 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-[#27C4A0]/20 text-base"
               >
                 {t('getOffer')}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
                 </svg>
-              </Link>
+              </button>
 
               <p className="text-white/25 text-xs mt-4 leading-relaxed">{t('disclaimer')}</p>
             </div>

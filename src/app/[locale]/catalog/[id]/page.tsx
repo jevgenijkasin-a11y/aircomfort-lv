@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages, getSettings } from '@/lib/supabase';
 import ProductImageViewer from '@/components/ProductImageViewer';
+import BackLink from '@/components/BackLink';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -22,6 +23,36 @@ const energyColors: Record<string, string> = {
   'A++': 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10',
   'A+': 'text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10',
 };
+
+function buildContactMessage(p: SupabaseProduct, name: string, locale: string, installFrom: number): string {
+  const finalPrice = p.price && p.discount_percent
+    ? Math.round(p.price * (1 - p.discount_percent / 100))
+    : p.price;
+
+  if (locale === 'lv') {
+    const lines = [`Interesē: ${p.brand} ${name}`];
+    if (p.power_kw) lines.push(`Jauda: ${p.power_kw} kW`);
+    if (p.area_coverage) lines.push(`Platība: ${p.area_coverage} m²`);
+    if (finalPrice) lines.push(`Cena: ${finalPrice} €`);
+    lines.push(`Uzstādīšana no: ${installFrom} €`);
+    return lines.join('\n');
+  }
+  if (locale === 'en') {
+    const lines = [`Interested in: ${p.brand} ${name}`];
+    if (p.power_kw) lines.push(`Power: ${p.power_kw} kW`);
+    if (p.area_coverage) lines.push(`Area: ${p.area_coverage} m²`);
+    if (finalPrice) lines.push(`Price: ${finalPrice} €`);
+    lines.push(`Installation from: ${installFrom} €`);
+    return lines.join('\n');
+  }
+  // ru (default)
+  const lines = [`Интересует: ${p.brand} ${name}`];
+  if (p.power_kw) lines.push(`Мощность: ${p.power_kw} kW`);
+  if (p.area_coverage) lines.push(`Площадь: ${p.area_coverage} m²`);
+  if (finalPrice) lines.push(`Цена: ${finalPrice} €`);
+  lines.push(`Монтаж от: ${installFrom} €`);
+  return lines.join('\n');
+}
 
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
@@ -42,23 +73,23 @@ export default async function ProductPage({ params }: Props) {
   const images = productImages(p);
   const energyCls = energyColors[p.energy_class] ?? 'text-white/50 border-white/20 bg-white/5';
 
+  const contactMessage = buildContactMessage(p, name, locale, installFrom);
+  const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
+
   return (
     <>
       {/* Header */}
-      <div className="pt-28 pb-6 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
+      <div className="pt-36 pb-6 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <Link href="/catalog" className="inline-flex items-center gap-2 text-white/40 hover:text-[#27C4A0] text-sm transition-colors mb-4">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            {t('backToCatalog')}
-          </Link>
+          <BackLink label={t('backToCatalog')} />
           <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-widest mb-1">{p.brand}</p>
           <h1 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{name}</h1>
-          {(p.is_hit || p.is_promo || p.discount_percent) && (
+          {(p.is_hit || p.is_promo || !!p.discount_percent) && (
             <div className="flex flex-wrap gap-2">
               {p.is_hit && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#f97316] text-white shadow-md">{tp('badgeHit')}</span>}
               {p.is_promo && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#e91e8c] text-white shadow-md">{tp('badgePromo')}</span>}
-              {p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#eab308] text-black shadow-md">−{p.discount_percent}%</span>}
+              {!!p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#eab308] text-black shadow-md">−{p.discount_percent}%</span>}
             </div>
           )}
         </div>
@@ -77,11 +108,11 @@ export default async function ProductPage({ params }: Props) {
               brand={p.brand}
             />
             <div className={`absolute top-4 right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>
-            {(p.is_hit || p.is_promo || p.discount_percent) && (
+            {(p.is_hit || p.is_promo || !!p.discount_percent) && (
               <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                 {p.is_hit && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#f97316] text-white shadow-sm">{tp('badgeHit')}</span>}
                 {p.is_promo && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#e91e8c] text-white shadow-sm">{tp('badgePromo')}</span>}
-                {p.discount_percent && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#eab308] text-black shadow-sm">−{p.discount_percent}%</span>}
+                {!!p.discount_percent && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#eab308] text-black shadow-sm">−{p.discount_percent}%</span>}
               </div>
             )}
 
@@ -119,7 +150,9 @@ export default async function ProductPage({ params }: Props) {
                   <p className={`font-syne font-bold text-xl ${energyColors[p.energy_class]?.split(' ')[0] ?? 'text-white'}`}>{p.energy_class}</p>
                 </div>
                 <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                  {p.discount_percent ? (
+                  {!p.price ? (
+                    <p className="font-syne font-semibold text-base text-white/50">{tp('priceOnRequest')}</p>
+                  ) : p.discount_percent ? (
                     <>
                       <p className="text-sm text-white/35 line-through leading-none mb-1">{p.price.toLocaleString('lv-LV')} €</p>
                       <p className="font-syne font-bold text-2xl text-[#27C4A0]">
@@ -131,7 +164,7 @@ export default async function ProductPage({ params }: Props) {
                   )}
                 </div>
               </div>
-              {p.discount_percent && (
+              {!!p.price && !!p.discount_percent && (
                 <div className="bg-[#eab308]/10 border border-[#eab308]/25 rounded-xl p-4 flex items-center justify-between">
                   <div>
                     <p className="text-white/50 text-xs mb-0.5">{tp('wasPrice')}</p>
@@ -152,7 +185,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             <Link
-              href="/contacts"
+              href={contactHref as any}
               className="w-full flex items-center justify-center gap-2 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold py-4 rounded-2xl transition-all duration-200 shadow-xl shadow-[#27C4A0]/25 hover:-translate-y-0.5 text-base"
             >
               {tp('order')}

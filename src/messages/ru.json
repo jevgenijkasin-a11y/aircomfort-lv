@@ -61,7 +61,7 @@
     "power": "Мощность",
     "area": "Площадь",
     "from": "от",
-    "order": "Заказать",
+    "order": "Купить",
     "viewBtn": "Посмотреть",
     "energyClass": "Класс энергоэффективности",
     "installIncluded": "Монтаж включён",
@@ -69,7 +69,8 @@
     "badgeHit": "Хит",
     "badgePromo": "Акция",
     "wasPrice": "Было",
-    "nowPrice": "Стало"
+    "nowPrice": "Стало",
+    "priceOnRequest": "Цена по запросу"
   },
   "catalog": {
     "title": "Каталог кондиционеров",

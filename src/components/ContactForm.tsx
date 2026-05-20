@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase';
 
@@ -10,6 +10,20 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
   const t = useTranslations('contacts.form');
   const [form, setForm] = useState({ name: '', phone: '', email: '', service: '', message: '' });
   const [status, setStatus] = useState<Status>('idle');
+
+  // Pre-fill service and message from URL params (e.g., from product page or calculator)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const service = params.get('service') ?? '';
+    const message = params.get('message') ?? '';
+    if (service || message) {
+      setForm((f) => ({
+        ...f,
+        service: service || f.service,
+        message: message || f.message,
+      }));
+    }
+  }, []);
 
   const set = (k: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>

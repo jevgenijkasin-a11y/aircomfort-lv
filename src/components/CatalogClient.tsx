@@ -1,25 +1,50 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productImages } from '@/lib/supabase';
 
 const energyColors: Record<string, string> = {
-  'A+++': 'text-[#27C4A0] border-[#27C4A0]/30 bg-[#27C4A0]/10',
-  'A++': 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10',
-  'A+': 'text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10',
+  'A+++': 'text-[#0D9B78] border-[#0D9B78]/40 bg-[#D4F5EC]',
+  'A++': 'text-[#16a34a] border-[#16a34a]/40 bg-[#dcfce7]',
+  'A+': 'text-[#15803d] border-[#15803d]/40 bg-[#bbf7d0]',
 };
 
 
 export default function CatalogClient({ initialProducts, locale, initialCategory, installFrom = 250 }: { initialProducts: SupabaseProduct[]; locale: string; initialCategory?: string; installFrom?: number }) {
   const t = useTranslations('catalog');
   const tp = useTranslations('products');
+  const pathname = usePathname();
 
   const [brand, setBrand] = useState('');
   const [power, setPower] = useState('');
   const [category, setCategory] = useState(initialCategory ?? '');
   const [sort, setSort] = useState('asc');
+  const [ready, setReady] = useState(false);
+
+  // Read filters from URL on client mount
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    setBrand(p.get('brand') ?? '');
+    setPower(p.get('power') ?? '');
+    setCategory(p.get('category') ?? initialCategory ?? '');
+    setSort(p.get('sort') ?? 'asc');
+    setReady(true);
+  }, []);
+
+  // Sync filter state to URL without triggering Next.js navigation
+  useEffect(() => {
+    if (!ready) return;
+    const p = new URLSearchParams();
+    if (brand) p.set('brand', brand);
+    if (power) p.set('power', power);
+    if (category) p.set('category', category);
+    if (sort !== 'asc') p.set('sort', sort);
+    const q = p.toString();
+    window.history.replaceState(null, '', q ? `${pathname}?${q}` : pathname);
+  }, [brand, power, category, sort, ready, pathname]);
 
   const brands = useMemo(() => Array.from(new Set(initialProducts.map((p) => p.brand))), [initialProducts]);
   const powerLevels = useMemo(() => Array.from(new Set(initialProducts.map((p) => p.power_kw))).sort((a, b) => a - b), [initialProducts]);
@@ -118,13 +143,13 @@ export default function CatalogClient({ initialProducts, locale, initialCategory
 
 function CatalogCard({ product, locale, t, tCat, installFrom }: { product: SupabaseProduct; locale: string; t: ReturnType<typeof useTranslations>; tCat: ReturnType<typeof useTranslations>; installFrom: number }) {
   const name = productName(product, locale);
-  const energyCls = energyColors[product.energy_class] ?? 'text-white/50 border-white/20 bg-white/5';
+  const energyCls = energyColors[product.energy_class] ?? 'text-gray-500 border-gray-300 bg-gray-100';
 
   return (
-    <Link href={`/catalog/${product.id}` as any} className="bg-white rounded-2xl overflow-hidden flex flex-col group border border-gray-100 hover:border-gray-300 hover:shadow-xl transition-all duration-200">
-      <div className="h-36 flex items-center justify-center relative bg-white">
+    <Link href={`/catalog/${product.id}` as any} className="bg-white rounded-2xl overflow-hidden flex flex-col group border border-[#e6edf3] hover:border-[#B0BDD0] transition-all duration-200" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.07)' }}>
+      <div className="h-44 flex items-center justify-center relative rounded-t-2xl" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)' }}>
         {productImages(product)[0] ? (
-          <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-3" />
+          <img src={productImages(product)[0]} alt={name} className="relative h-full w-full object-contain p-6" style={{ filter: 'drop-shadow(0 8px 14px rgba(15,23,42,0.10))' }} />
         ) : (
           <svg viewBox="0 0 24 24" className="w-10 h-10 opacity-20 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1">
             <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
@@ -132,11 +157,11 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
           </svg>
         )}
         <div className={`absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyCls}`}>{product.energy_class}</div>
-        {(product.is_hit || product.is_promo || product.discount_percent) && (
+        {(product.is_hit || product.is_promo || !!product.discount_percent) && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white shadow-sm">{t('badgeHit')}</span>}
             {product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white shadow-sm">{t('badgePromo')}</span>}
-            {product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black shadow-sm">-{product.discount_percent}%</span>}
+            {!!product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black shadow-sm">-{product.discount_percent}%</span>}
           </div>
         )}
       </div>
@@ -147,10 +172,12 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
           <span className="text-xs text-gray-400">{product.power_kw} kW</span>
           {product.area_coverage && <span className="text-xs text-gray-400">{product.area_coverage} m²</span>}
         </div>
-        <div className="border-t border-gray-100 pt-3 mt-auto">
+        <div className="border-t border-[#CDD5E0] pt-3 mt-auto">
           <div className="flex items-center justify-between mb-2.5">
             <div>
-              {product.discount_percent ? (
+              {!product.price ? (
+                <span className="font-syne font-semibold text-sm text-gray-500">{t('priceOnRequest')}</span>
+              ) : product.discount_percent ? (
                 <>
                   <span className="text-xs text-gray-400 line-through mr-1.5">{product.price.toLocaleString('lv-LV')} €</span>
                   <span className="font-syne font-bold text-xl text-[#27C4A0]">
@@ -161,9 +188,9 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
                 <span className="font-syne font-bold text-xl text-gray-900">{product.price.toLocaleString('lv-LV')} €</span>
               )}
             </div>
-            <span className="text-xs text-gray-400">{t('installFrom', { price: installFrom })}</span>
+            <span className="text-xs text-gray-400">{tCat('installFrom', { price: installFrom })}</span>
           </div>
-          <div className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-[#27C4A0] border border-gray-200 hover:border-[#27C4A0] text-gray-700 hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47] group-hover:border-[#27C4A0]">
+          <div className="w-full flex items-center justify-center gap-2 bg-[#E4EAF3] hover:bg-[#27C4A0] border border-[#CDD5E0] hover:border-[#27C4A0] text-[#3D5270] hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47] group-hover:border-[#27C4A0]">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
             {tCat('viewBtn')}
           </div>
