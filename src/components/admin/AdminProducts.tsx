@@ -67,6 +67,33 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   const hasFilters = filterBrand || filterPower || filterCategory;
 
   const openAdd = () => setModal({ open: true, product: { ...EMPTY, specs: { ...EMPTY_SPECS } } });
+
+  const parseProductForModal = (p: AdminProduct) => {
+    const hasLocale = p.features.some(f => /^(lv|ru|en):/.test(f));
+    let imgs: string[] = [];
+    if (p.image_url?.startsWith('[')) {
+      try { imgs = JSON.parse(p.image_url); } catch { imgs = p.image_url ? [p.image_url] : []; }
+    } else if (p.image_url) {
+      imgs = [p.image_url];
+    }
+    return {
+      ...p,
+      image_urls: imgs,
+      features_lv: hasLocale ? p.features.filter(f => f.startsWith('lv:')).map(f => f.slice(3)) : [],
+      features_ru: hasLocale ? p.features.filter(f => f.startsWith('ru:')).map(f => f.slice(3)) : [],
+      features_en: hasLocale ? p.features.filter(f => f.startsWith('en:')).map(f => f.slice(3)) : p.features,
+      description_lv: p.description_lv ?? '',
+      description_ru: p.description_ru ?? '',
+      description_en: p.description_en ?? '',
+      specs: { ...EMPTY_SPECS, ...(p.specs ?? {}) },
+    };
+  };
+
+  const openCopy = (p: AdminProduct) => {
+    const { id: _id, created_at: _ca, ...rest } = parseProductForModal(p) as AdminProduct & { image_urls: string[]; features_lv: string[]; features_ru: string[]; features_en: string[] };
+    setModal({ open: true, product: { ...rest } });
+  };
+
   const openEdit = (p: AdminProduct) => {
     const hasLocale = p.features.some(f => /^(lv|ru|en):/.test(f));
     let imgs: string[] = [];
@@ -356,6 +383,9 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                   <button onClick={() => openEdit(p)} className="flex-1 bg-white/8 hover:bg-white/12 text-white text-xs font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     {s.prodEdit}
+                  </button>
+                  <button onClick={() => openCopy(p)} title={lang === 'ru' ? 'Копировать' : 'Copy'} className="p-2 bg-[#27C4A0]/10 text-[#27C4A0] hover:bg-[#27C4A0]/20 rounded-lg transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                   </button>
                   <button onClick={() => setConfirmId(p.id)} className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
