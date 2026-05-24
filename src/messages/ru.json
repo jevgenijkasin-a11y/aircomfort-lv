@@ -70,7 +70,8 @@
     "badgePromo": "Акция",
     "wasPrice": "Было",
     "nowPrice": "Стало",
-    "priceOnRequest": "Цена по запросу"
+    "priceOnRequest": "Цена по запросу",
+    "enlarge": "увеличить"
   },
   "catalog": {
     "title": "Каталог кондиционеров",

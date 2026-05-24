@@ -70,7 +70,8 @@
     "badgePromo": "Sale",
     "wasPrice": "Was",
     "nowPrice": "Now",
-    "priceOnRequest": "Price on request"
+    "priceOnRequest": "Price on request",
+    "enlarge": "enlarge"
   },
   "catalog": {
     "title": "Air Conditioner Catalog",
