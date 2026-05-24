@@ -91,7 +91,15 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
 
   const openCopy = (p: AdminProduct) => {
     const { id: _id, created_at: _ca, ...rest } = parseProductForModal(p) as AdminProduct & { image_urls: string[]; features_lv: string[]; features_ru: string[]; features_en: string[] };
-    setModal({ open: true, product: { ...rest } });
+    setModal({
+      open: true,
+      product: {
+        ...rest,
+        name_lv: rest.name_lv ? rest.name_lv + ' (kopija)' : rest.name_lv,
+        name_ru: rest.name_ru ? rest.name_ru + ' (копия)' : rest.name_ru,
+        name_en: rest.name_en ? rest.name_en + ' (copy)' : rest.name_en,
+      },
+    });
   };
 
   const openEdit = (p: AdminProduct) => {
