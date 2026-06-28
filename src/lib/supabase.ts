@@ -1,23 +1,46 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+function getEnv() {
+  return {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+  };
+}
 
-// Client-side / admin panel client (normal caching)
-export const supabase = createClient(url, key);
+// Lazy singletons — created on first use, not at import time
+let _supabase: SupabaseClient | null = null;
+let _supabaseAdmin: SupabaseClient | null = null;
+let _supabaseServer: SupabaseClient | null = null;
 
-// Admin client with service role key — bypasses RLS, server-side only
-export const supabaseAdmin = createClient(
-  url,
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? key,
-);
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_, prop: string | symbol) {
+    if (!_supabase) { const e = getEnv(); _supabase = createClient(e.url, e.key); }
+    return Reflect.get(_supabase, prop, _supabase);
+  },
+});
 
-// Server-side client: passes cache:'no-store' on every fetch so Next.js
-// never caches Supabase responses between requests
-export const supabaseServer = createClient(url, key, {
-  global: {
-    fetch: (input: RequestInfo | URL, init?: RequestInit) =>
-      fetch(input, { ...init, cache: 'no-store' }),
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+  get(_, prop: string | symbol) {
+    if (!_supabaseAdmin) {
+      const e = getEnv();
+      _supabaseAdmin = createClient(e.url, process.env.SUPABASE_SERVICE_ROLE_KEY ?? e.key);
+    }
+    return Reflect.get(_supabaseAdmin, prop, _supabaseAdmin);
+  },
+});
+
+export const supabaseServer = new Proxy({} as SupabaseClient, {
+  get(_, prop: string | symbol) {
+    if (!_supabaseServer) {
+      const e = getEnv();
+      _supabaseServer = createClient(e.url, e.key, {
+        global: {
+          fetch: (input: RequestInfo | URL, init?: RequestInit) =>
+            fetch(input, { ...init, cache: 'no-store' }),
+        },
+      });
+    }
+    return Reflect.get(_supabaseServer, prop, _supabaseServer);
   },
 });
 
