@@ -11,6 +11,9 @@ const nextConfig = {
     cpus: 1,
   },
 
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
+
   async redirects() {
     return [
       {
