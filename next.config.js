@@ -6,6 +6,11 @@ const normalize = (str) => (str ? str.replace(/\\system32\\/gi, '\\System32\\') 
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
+  },
+
   async redirects() {
     return [
       {
