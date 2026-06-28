@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { readJson, writeJson } from '@/lib/jsonDb';
 import { randomUUID } from 'crypto';
