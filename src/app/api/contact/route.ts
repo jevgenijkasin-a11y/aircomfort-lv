@@ -99,29 +99,41 @@ async function sendAutoReply(entry: RequestEntry) {
     from: `"AirComfort.lv" <${user}>`,
     to: entry.email,
     subject: 'Paldies par pieprasījumu / Спасибо за заявку / Thank you',
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#222">
-        <div style="background:#072D47;padding:24px 32px;border-radius:8px 8px 0 0">
-          <h1 style="color:#27C4A0;margin:0;font-size:22px">AirComfort.lv</h1>
-        </div>
-        <div style="padding:28px 32px;background:#f9f9f9;border-radius:0 0 8px 8px">
-
-          <p style="margin-top:0"><b>Latvian:</b><br>
-          Paldies, <b>${entry.name}</b>! Jūsu pieprasījums ir saņemts. Mēs ar jums sazināsimies tuvākajā laikā.</p>
-
-          <p><b>Русский:</b><br>
-          Спасибо, <b>${entry.name}</b>! Ваша заявка получена. Мы свяжемся с вами в ближайшее время.</p>
-
-          <p><b>English:</b><br>
-          Thank you, <b>${entry.name}</b>! Your request has been received. We will contact you shortly.</p>
-
-          <hr style="border:none;border-top:1px solid #ddd;margin:20px 0">
-          <p style="color:#888;font-size:12px;margin:0">
-            Tel: +371 28828400 &nbsp;|&nbsp; Web: aircomfort.lv
-          </p>
-        </div>
-      </div>
-    `,
+    html: `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f4f7fa;font-family:Arial,sans-serif;">
+<div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+  <div style="background:linear-gradient(135deg,#27C4A0,#1A6B9A);padding:32px 40px;">
+    <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">AirComfort.lv</h1>
+    <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">Klimatiekārtu piegāde un uzstādīšana</p>
+  </div>
+  <div style="padding:36px 40px;">
+    <p style="margin:0 0 6px;color:#27C4A0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Latviešu</p>
+    <p style="margin:0 0 6px;color:#333;font-size:15px;line-height:1.6;">
+      Paldies par Jūsu ziņojumu! Mēs to esam saņēmuši un tuvākajā laikā ar Jums sazināsimies.
+    </p>
+    <p style="margin:0 0 24px;color:#1A6B9A;font-size:14px;font-weight:600;">Ar cieņu, AirComfort.lv</p>
+    <hr style="border:none;border-top:1px solid #eee;margin:0 0 24px;">
+    <p style="margin:0 0 6px;color:#27C4A0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Русский</p>
+    <p style="margin:0 0 6px;color:#333;font-size:15px;line-height:1.6;">
+      Спасибо за ваше письмо! Мы его получили и свяжемся с вами в ближайшее время.
+    </p>
+    <p style="margin:0 0 24px;color:#1A6B9A;font-size:14px;font-weight:600;">С уважением, AirComfort.lv</p>
+    <hr style="border:none;border-top:1px solid #eee;margin:0 0 24px;">
+    <p style="margin:0 0 6px;color:#27C4A0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">English</p>
+    <p style="margin:0 0 6px;color:#333;font-size:15px;line-height:1.6;">
+      Thank you for your message! We have received it and will get back to you shortly.
+    </p>
+    <p style="margin:0 0 28px;color:#1A6B9A;font-size:14px;font-weight:600;">Best regards, AirComfort.lv</p>
+    <div style="background:#f0faf7;border-left:4px solid #27C4A0;padding:14px 18px;border-radius:0 8px 8px 0;">
+      <p style="margin:0;color:#1A6B9A;font-size:14px;">Tel: +371 28828400</p>
+      <p style="margin:4px 0 0;color:#1A6B9A;font-size:14px;">Web: aircomfort.lv</p>
+      <p style="margin:4px 0 0;color:#999;font-size:12px;">P-Pt / Пн–Пт / Mon-Fri 9:00-18:00</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>`,
   });
   console.log('[SMTP] auto-reply sent to', entry.email);
 }
