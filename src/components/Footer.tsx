@@ -8,7 +8,7 @@ export default async function Footer() {
   const phone = settings.phone || t('contacts.phoneValue');
   const email = settings.email || t('contacts.emailValue');
   const address = settings.address || t('contacts.addressValue');
-  const hours = settings.hours || t('contacts.hoursValue');
+  const hours = t('contacts.hoursValue');
   const whatsapp = settings.whatsapp_number?.replace(/\s/g, '');
   const telegram = settings.telegram_username?.replace(/^@/, '');
 
