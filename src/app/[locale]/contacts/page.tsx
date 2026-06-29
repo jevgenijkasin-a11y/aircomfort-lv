@@ -48,7 +48,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
   const phone = settings.phone || t('phoneValue');
   const email = settings.email || t('emailValue');
   const address = settings.address || t('addressValue');
-  const hours = settings.hours || t('hoursValue');
+  const hours = t('hoursValue');
 
   const titleKey = `contacts_title_${locale}` as const;
   const subtitleKey = `contacts_subtitle_${locale}` as const;

@@ -35,7 +35,7 @@ export default function Header() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 lg:h-24">
+        <div className="flex items-center justify-between h-20 lg:h-24 pt-9 sm:pt-0">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#27C4A0] to-[#1A6B9A] flex items-center justify-center shadow-lg shadow-[#27C4A0]/20">
