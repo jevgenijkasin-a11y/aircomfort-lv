@@ -70,19 +70,21 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label className={labelCls}>{t('name')}</label>
-          <input type="text" name="name" autoComplete="name" value={form.name} onChange={set('name')} placeholder={t('namePlaceholder')} required className={inputCls} />
+          <label className={labelCls} htmlFor="fc-name">{t('name')}</label>
+          <input id="fc-name" type="text" name="name" autoComplete="name" value={form.name} onChange={set('name')} placeholder={t('namePlaceholder')} required className={inputCls} />
         </div>
         <div>
-          <label className={labelCls}>{t('phone')}</label>
-          <input type="tel" name="tel" autoComplete="tel" value={form.phone} onChange={set('phone')} placeholder={t('phonePlaceholder')} required className={inputCls} />
+          <label className={labelCls} htmlFor="fc-tel">{t('phone')}</label>
+          <input id="fc-tel" type="tel" name="tel" autoComplete="tel" value={form.phone}
+            onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value.replace(/[^\d+\-\s()]/g, '') }))}
+            placeholder={t('phonePlaceholder')} required className={inputCls} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label className={labelCls}>{t('email')}</label>
-          <input type="email" name="email" autoComplete="email" value={form.email} onChange={set('email')} placeholder={t('emailPlaceholder')} className={inputCls} />
+          <label className={labelCls} htmlFor="fc-email">{t('email')}</label>
+          <input id="fc-email" type="email" name="email" autoComplete="email" value={form.email} onChange={set('email')} placeholder={t('emailPlaceholder')} className={inputCls} />
         </div>
         <div>
           <label className={labelCls}>{t('service')}</label>

@@ -19,25 +19,43 @@ const SERVICE_LABELS: Record<string, string> = {
   other: 'Cits / Другое',
 };
 
-async function createTransport() {
+async function createTransport(forExternal = false) {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
   const configs: nodemailer.TransportOptions[] = [];
+
+  // Configured external SMTP host (if set)
   if (host && user && pass) {
     const port = Number(process.env.SMTP_PORT || 465);
     configs.push({ host, port, secure: port === 465, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
     if (port === 465) configs.push({ host, port: 587, secure: false, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
   }
-  configs.push({ host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+
+  // Try localhost with auth on submission ports (Plesk SMTP)
+  if (user && pass) {
+    configs.push({ host: 'localhost', port: 587, secure: false, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+    configs.push({ host: 'localhost', port: 465, secure: true, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+  }
+
+  // Postfix no-auth relay — works for local delivery, may not relay external
+  if (!forExternal) {
+    configs.push({ host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+  } else {
+    // For external: try localhost:25 last (may work if Postfix relays outbound)
+    configs.push({ host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+  }
 
   for (const config of configs) {
     try {
       const t = nodemailer.createTransport(config);
       await t.verify();
+      console.log('[SMTP] connected via', JSON.stringify({ host: (config as Record<string, unknown>).host, port: (config as Record<string, unknown>).port }));
       return t;
-    } catch { /* try next */ }
+    } catch (err) {
+      console.log('[SMTP] skipped', JSON.stringify({ host: (config as Record<string, unknown>).host, port: (config as Record<string, unknown>).port }), (err as Error)?.message);
+    }
   }
   return null;
 }
@@ -74,8 +92,8 @@ async function sendAutoReply(entry: RequestEntry) {
   if (!entry.email) return;
   const user = process.env.SMTP_USER || 'info@aircomfort.lv';
 
-  const t = await createTransport();
-  if (!t) return;
+  const t = await createTransport(true);
+  if (!t) { console.error('[SMTP] no transport for auto-reply'); return; }
 
   await t.sendMail({
     from: `"AirComfort.lv" <${user}>`,
