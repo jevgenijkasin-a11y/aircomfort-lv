@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { supabase } from '@/lib/supabase';
 
 type Status = 'idle' | 'sending' | 'success' | 'error';
 
@@ -33,15 +32,16 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
     e.preventDefault();
     if (!form.name || !form.phone) return;
     setStatus('sending');
-    const { error } = await supabase.from('contacts').insert([{
-      name: form.name,
-      phone: form.phone,
-      email: form.email,
-      service: form.service,
-      message: form.message,
-      status: 'new',
-    }]);
-    setStatus(error ? 'error' : 'success');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      setStatus(res.ok ? 'success' : 'error');
+    } catch {
+      setStatus('error');
+    }
   };
 
   const inputCls = 'w-full bg-[#0A3658]/60 border border-[#1A6B9A]/30 hover:border-[#1A6B9A]/50 text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-[#27C4A0]/60 transition-all placeholder-white/20';
@@ -71,18 +71,18 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
           <label className={labelCls}>{t('name')}</label>
-          <input type="text" value={form.name} onChange={set('name')} placeholder={t('namePlaceholder')} required className={inputCls} />
+          <input type="text" name="name" autoComplete="name" value={form.name} onChange={set('name')} placeholder={t('namePlaceholder')} required className={inputCls} />
         </div>
         <div>
           <label className={labelCls}>{t('phone')}</label>
-          <input type="tel" value={form.phone} onChange={set('phone')} placeholder={t('phonePlaceholder')} required className={inputCls} />
+          <input type="tel" name="tel" autoComplete="tel" value={form.phone} onChange={set('phone')} placeholder={t('phonePlaceholder')} required className={inputCls} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
           <label className={labelCls}>{t('email')}</label>
-          <input type="email" value={form.email} onChange={set('email')} placeholder={t('emailPlaceholder')} className={inputCls} />
+          <input type="email" name="email" autoComplete="email" value={form.email} onChange={set('email')} placeholder={t('emailPlaceholder')} className={inputCls} />
         </div>
         <div>
           <label className={labelCls}>{t('service')}</label>
@@ -101,7 +101,7 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
 
       <div>
         <label className={labelCls}>{t('message')}</label>
-        <textarea value={form.message} onChange={set('message')} placeholder={t('messagePlaceholder')} rows={4} className={`${inputCls} resize-none`} />
+        <textarea name="message" autoComplete="off" value={form.message} onChange={set('message')} placeholder={t('messagePlaceholder')} rows={4} className={`${inputCls} resize-none`} />
       </div>
 
       {status === 'error' && <p className="text-red-400 text-sm">{t('error')}</p>}

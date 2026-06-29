@@ -1,18 +1,15 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { readJson, writeJson } from '@/lib/jsonDb';
-import { randomUUID } from 'crypto';
+import { supabaseServer } from '@/lib/supabase';
 import nodemailer from 'nodemailer';
 
 interface RequestEntry {
-  id: string;
   name: string;
   phone: string;
   email: string;
+  service: string;
   message: string;
-  createdAt: string;
-  read: boolean;
 }
 
 async function sendNotification(entry: RequestEntry) {
@@ -29,8 +26,9 @@ async function sendNotification(entry: RequestEntry) {
       <tr><td style="color:#666;padding:4px 12px 4px 0">Vārds / Имя:</td><td><b>${entry.name}</b></td></tr>
       <tr><td style="color:#666;padding:4px 12px 4px 0">Telefons / Телефон:</td><td><b>${entry.phone}</b></td></tr>
       ${entry.email ? `<tr><td style="color:#666;padding:4px 12px 4px 0">E-pasts / Email:</td><td>${entry.email}</td></tr>` : ''}
+      ${entry.service ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Pakalpojums / Услуга:</td><td>${entry.service}</td></tr>` : ''}
       ${entry.message ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Ziņojums / Сообщение:</td><td>${entry.message}</td></tr>` : ''}
-      <tr><td style="color:#666;padding:4px 12px 4px 0">Laiks / Время:</td><td>${new Date(entry.createdAt).toLocaleString('lv-LV')}</td></tr>
+      <tr><td style="color:#666;padding:4px 12px 4px 0">Laiks / Время:</td><td>${new Date().toLocaleString('lv-LV')}</td></tr>
     </table>
     <p style="margin-top:16px;color:#888;font-size:12px;">AirComfort.lv</p>
   `;
@@ -65,22 +63,14 @@ async function sendNotification(entry: RequestEntry) {
 }
 
 export async function POST(req: NextRequest) {
-  const { name, phone, email, message } = await req.json();
+  const { name, phone, email, service, message } = await req.json();
   if (!name || !phone) {
     return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
   }
-  const entry: RequestEntry = {
-    id: randomUUID(),
-    name,
-    phone,
-    email: email || '',
-    message: message || '',
-    createdAt: new Date().toISOString(),
-    read: false,
-  };
-  const requests = await readJson<RequestEntry[]>('requests.json');
-  requests.push(entry);
-  await writeJson('requests.json', requests);
+  const entry: RequestEntry = { name, phone, email: email || '', service: service || '', message: message || '' };
+
+  // Save to Supabase contacts table (same as admin reads from)
+  await supabaseServer.from('contacts').insert([{ ...entry, status: 'new' }]);
 
   // Send email notification (non-blocking)
   sendNotification(entry).catch((err) => console.error('[SMTP]', err?.message || err));
