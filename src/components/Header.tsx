@@ -34,7 +34,7 @@ export default function Header() {
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 lg:h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group flex-shrink-0 mt-2">
@@ -91,7 +91,7 @@ export default function Header() {
 
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="lg:hidden p-2 text-white/70 hover:text-white transition-colors"
+              className="lg:hidden p-3 -mr-1 text-white/70 hover:text-white transition-colors"
               aria-label="Menu"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
