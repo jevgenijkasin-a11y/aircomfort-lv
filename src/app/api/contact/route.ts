@@ -50,7 +50,7 @@ async function sendNotification(entry: RequestEntry) {
   }
 
   // Postfix local relay — works on most Plesk servers without auth
-  transports.push({ host: 'localhost', port: 25, secure: false } as nodemailer.TransportOptions);
+  transports.push({ host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
 
   for (const config of transports) {
     try {

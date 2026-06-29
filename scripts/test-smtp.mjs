@@ -17,7 +17,7 @@ const configs = [
   },
   {
     label: 'localhost:25 (Postfix no-auth)',
-    config: { host: 'localhost', port: 25, secure: false },
+    config: { host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } },
   },
 ];
 
