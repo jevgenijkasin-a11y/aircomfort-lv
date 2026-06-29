@@ -21,33 +21,47 @@ async function sendNotification(entry: RequestEntry) {
   const pass = process.env.SMTP_PASS;
   const to = process.env.SMTP_TO || user;
 
-  if (!host || !user || !pass) return;
+  if (!to) return;
 
-  const port = Number(process.env.SMTP_PORT || 465);
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-    tls: { rejectUnauthorized: false },
-  });
+  const html = `
+    <h2>Jauns pieprasījums / Новая заявка</h2>
+    <table style="font-family:Arial,sans-serif;font-size:14px;">
+      <tr><td style="color:#666;padding:4px 12px 4px 0">Vārds / Имя:</td><td><b>${entry.name}</b></td></tr>
+      <tr><td style="color:#666;padding:4px 12px 4px 0">Telefons / Телефон:</td><td><b>${entry.phone}</b></td></tr>
+      ${entry.email ? `<tr><td style="color:#666;padding:4px 12px 4px 0">E-pasts / Email:</td><td>${entry.email}</td></tr>` : ''}
+      ${entry.message ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Ziņojums / Сообщение:</td><td>${entry.message}</td></tr>` : ''}
+      <tr><td style="color:#666;padding:4px 12px 4px 0">Laiks / Время:</td><td>${new Date(entry.createdAt).toLocaleString('lv-LV')}</td></tr>
+    </table>
+    <p style="margin-top:16px;color:#888;font-size:12px;">AirComfort.lv</p>
+  `;
+  const subject = `Jauns pieprasījums no ${entry.name}`;
+  const from = `"AirComfort.lv" <${user || 'info@aircomfort.lv'}>`;
 
-  await transporter.sendMail({
-    from: `"AirComfort.lv" <${user}>`,
-    to,
-    subject: `Jauns pieprasījums no ${entry.name}`,
-    html: `
-      <h2>Jauns pieprasījums / Новая заявка</h2>
-      <table style="font-family:Arial,sans-serif;font-size:14px;">
-        <tr><td style="color:#666;padding:4px 12px 4px 0">Vārds / Имя:</td><td><b>${entry.name}</b></td></tr>
-        <tr><td style="color:#666;padding:4px 12px 4px 0">Telefons / Телефон:</td><td><b>${entry.phone}</b></td></tr>
-        ${entry.email ? `<tr><td style="color:#666;padding:4px 12px 4px 0">E-pasts / Email:</td><td>${entry.email}</td></tr>` : ''}
-        ${entry.message ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Ziņojums / Сообщение:</td><td>${entry.message}</td></tr>` : ''}
-        <tr><td style="color:#666;padding:4px 12px 4px 0">Laiks / Время:</td><td>${new Date(entry.createdAt).toLocaleString('lv-LV')}</td></tr>
-      </table>
-      <p style="margin-top:16px;color:#888;font-size:12px;">AirComfort.lv</p>
-    `,
-  });
+  // Build list of transports to try in order
+  const transports: nodemailer.TransportOptions[] = [];
+
+  if (host && user && pass) {
+    const port = Number(process.env.SMTP_PORT || 465);
+    transports.push({ host, port, secure: port === 465, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+    // Also try STARTTLS on 587 if primary port is 465
+    if (port === 465) {
+      transports.push({ host, port: 587, secure: false, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+    }
+  }
+
+  // Postfix local relay — works on most Plesk servers without auth
+  transports.push({ host: 'localhost', port: 25, secure: false } as nodemailer.TransportOptions);
+
+  for (const config of transports) {
+    try {
+      const t = nodemailer.createTransport(config);
+      await t.sendMail({ from, to, subject, html });
+      console.log('[SMTP] sent via', JSON.stringify({ host: (config as Record<string, unknown>).host, port: (config as Record<string, unknown>).port }));
+      return;
+    } catch (err: unknown) {
+      console.error('[SMTP] failed:', JSON.stringify({ host: (config as Record<string, unknown>).host, port: (config as Record<string, unknown>).port }), (err as Error)?.message);
+    }
+  }
 }
 
 export async function POST(req: NextRequest) {
