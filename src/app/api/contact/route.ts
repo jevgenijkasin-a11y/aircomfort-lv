@@ -23,11 +23,13 @@ async function sendNotification(entry: RequestEntry) {
 
   if (!host || !user || !pass) return;
 
+  const port = Number(process.env.SMTP_PORT || 465);
   const transporter = nodemailer.createTransport({
     host,
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: true,
+    port,
+    secure: port === 465,
     auth: { user, pass },
+    tls: { rejectUnauthorized: false },
   });
 
   await transporter.sendMail({
@@ -67,7 +69,7 @@ export async function POST(req: NextRequest) {
   await writeJson('requests.json', requests);
 
   // Send email notification (non-blocking)
-  sendNotification(entry).catch(() => {});
+  sendNotification(entry).catch((err) => console.error('[SMTP]', err?.message || err));
 
   return NextResponse.json({ success: true });
 }
