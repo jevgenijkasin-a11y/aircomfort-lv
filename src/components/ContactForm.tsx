@@ -65,7 +65,7 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-7 space-y-5">
+    <form onSubmit={handleSubmit} autoComplete="on" className="glass-card rounded-2xl p-7 space-y-5">
       <h3 className="font-syne font-semibold text-xl mb-2">{formTitle || t('title')}</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

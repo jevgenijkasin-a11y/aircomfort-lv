@@ -12,6 +12,13 @@ interface RequestEntry {
   message: string;
 }
 
+const SERVICE_LABELS: Record<string, string> = {
+  install: 'Uzstādīšana / Установка',
+  maintenance: 'Apkope / Обслуживание',
+  consultation: 'Konsultācija / Консультация',
+  other: 'Cits / Другое',
+};
+
 async function createTransport() {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
@@ -53,7 +60,7 @@ async function sendNotification(entry: RequestEntry) {
         <tr><td style="color:#666;padding:4px 12px 4px 0">Vārds / Имя:</td><td><b>${entry.name}</b></td></tr>
         <tr><td style="color:#666;padding:4px 12px 4px 0">Telefons / Телефон:</td><td><b>${entry.phone}</b></td></tr>
         ${entry.email ? `<tr><td style="color:#666;padding:4px 12px 4px 0">E-pasts / Email:</td><td>${entry.email}</td></tr>` : ''}
-        ${entry.service ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Pakalpojums / Услуга:</td><td>${entry.service}</td></tr>` : ''}
+        ${entry.service ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Pakalpojums / Услуга:</td><td>${SERVICE_LABELS[entry.service] ?? entry.service}</td></tr>` : ''}
         ${entry.message ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Ziņojums / Сообщение:</td><td>${entry.message}</td></tr>` : ''}
         <tr><td style="color:#666;padding:4px 12px 4px 0">Laiks / Время:</td><td>${new Date().toLocaleString('lv-LV')}</td></tr>
       </table>
