@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Lang, T } from './adminStrings';
-import {
-  getCards,
-  createCard,
-  updateCard,
-  deleteCard,
-  EmployeeCard,
-} from '@/app/admin/actions/cards';
+import { EmployeeCard } from '@/app/admin/actions/cards';
+
+async function apiFetch(url: string, options?: RequestInit) {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
 
 const CARD_STR = {
   ru: {
@@ -126,7 +129,8 @@ export default function AdminCards({ lang }: { lang: Lang }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setCards(await getCards());
+      const data = await apiFetch('/api/admin/cards');
+      setCards(data as EmployeeCard[]);
     } finally {
       setLoading(false);
     }
@@ -147,9 +151,17 @@ export default function AdminCards({ lang }: { lang: Lang }) {
     setSaving(true);
     try {
       if (editId !== null) {
-        await updateCard(editId, form);
+        await apiFetch(`/api/admin/cards/${editId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
       } else {
-        await createCard(form);
+        await apiFetch('/api/admin/cards', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
       }
       setShowForm(false);
       await load();
@@ -164,7 +176,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
     if (!confirm(s.delConfirm)) return;
     setDeletingId(id);
     try {
-      await deleteCard(id);
+      await apiFetch(`/api/admin/cards/${id}`, { method: 'DELETE' });
       await load();
     } finally {
       setDeletingId(null);
