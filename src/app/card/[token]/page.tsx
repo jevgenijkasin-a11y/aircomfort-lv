@@ -91,7 +91,7 @@ export default async function CardPage({ params }: Props) {
         }}>
           {data.photo_url ? (
             <img className="card-photo" src={data.photo_url} alt={data.name} style={{
-              width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top',
+              width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center',
               border: '3px solid rgba(255,255,255,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
             }} />
           ) : (
