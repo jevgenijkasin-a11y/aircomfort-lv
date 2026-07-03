@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 export interface EmployeeCard {
   id: number;
   slug: string;
+  token: string;
   name: string;
   position: string;
   phone: string;
@@ -24,7 +25,7 @@ export async function getCards(): Promise<EmployeeCard[]> {
   return (data ?? []) as EmployeeCard[];
 }
 
-export async function createCard(card: Omit<EmployeeCard, 'id' | 'created_at'>) {
+export async function createCard(card: Omit<EmployeeCard, 'id' | 'created_at' | 'token'>) {
   const { error } = await supabaseAdmin.from('employees_cards').insert(card);
   if (error) throw error;
   revalidatePath('/card');

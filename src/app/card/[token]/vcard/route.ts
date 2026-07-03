@@ -2,13 +2,13 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export async function GET(_req: Request, { params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
 
   const { data } = await supabaseAdmin
     .from('employees_cards')
     .select('*')
-    .eq('slug', slug)
+    .eq('token', token)
     .eq('is_active', true)
     .single();
 
@@ -33,7 +33,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   return new Response(lines, {
     headers: {
       'Content-Type': 'text/vcard; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${slug}.vcf"`,
+      'Content-Disposition': `attachment; filename="${data.slug}.vcf"`,
     },
   });
 }

@@ -66,7 +66,7 @@ const CARD_STR = {
   },
 } as const;
 
-const BLANK: Omit<EmployeeCard, 'id' | 'created_at'> = {
+const BLANK: Omit<EmployeeCard, 'id' | 'created_at' | 'token'> = {
   slug: '',
   name: '',
   position: '',
@@ -115,7 +115,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
   const g = T[lang];
   const [cards, setCards] = useState<EmployeeCard[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState<Omit<EmployeeCard, 'id' | 'created_at'>>(BLANK);
+  const [form, setForm] = useState<Omit<EmployeeCard, 'id' | 'created_at' | 'token'>>(BLANK);
   const [editId, setEditId] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -188,7 +188,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
     }
   };
 
-  const cardUrl = (slug: string) => `https://aircomfort.lv/card/${slug}`;
+  const cardUrl = (token: string) => `https://aircomfort.lv/card/${token}`;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -335,7 +335,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                   <p className="text-[#27C4A0] text-sm">{card.position}</p>
                   <p className="text-white/40 text-xs mt-1">{card.phone} · {card.email}</p>
                   <a
-                    href={cardUrl(card.slug)}
+                    href={cardUrl(card.token)}
                     target="_blank"
                     rel="noreferrer"
                     className="text-xs text-white/30 hover:text-[#27C4A0] transition-colors font-mono mt-1 block truncate"
@@ -378,19 +378,19 @@ export default function AdminCards({ lang }: { lang: Lang }) {
               {/* QR panel */}
               {expandedQr === card.id && (
                 <div className="border-t border-white/8 p-5 flex flex-col sm:flex-row items-center gap-5 bg-white/2">
-                  <QrImage url={cardUrl(card.slug)} size={160} />
+                  <QrImage url={cardUrl(card.token)} size={160} />
                   <div className="space-y-3">
                     <p className="text-sm text-white/60">{s.link}:</p>
                     <a
-                      href={cardUrl(card.slug)}
+                      href={cardUrl(card.token)}
                       target="_blank"
                       rel="noreferrer"
                       className="text-[#27C4A0] text-sm font-mono break-all hover:underline"
                     >
-                      {cardUrl(card.slug)}
+                      {cardUrl(card.token)}
                     </a>
                     <button
-                      onClick={() => downloadQr(cardUrl(card.slug), card.slug)}
+                      onClick={() => downloadQr(cardUrl(card.token), card.slug)}
                       className="flex items-center gap-2 bg-white/8 hover:bg-white/14 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

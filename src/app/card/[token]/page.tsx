@@ -5,15 +5,15 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ token: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { token } = await params;
   const { data } = await supabaseAdmin
     .from('employees_cards')
     .select('name, position')
-    .eq('slug', slug)
+    .eq('token', token)
     .eq('is_active', true)
     .single();
   if (!data) return { title: 'AirComfort' };
@@ -25,18 +25,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CardPage({ params }: Props) {
-  const { slug } = await params;
+  const { token } = await params;
 
   const { data } = await supabaseAdmin
     .from('employees_cards')
     .select('*')
-    .eq('slug', slug)
+    .eq('token', token)
     .eq('is_active', true)
     .single();
 
   if (!data) notFound();
 
-  const vcardUrl = `/card/${slug}/vcard`;
+  const vcardUrl = `/card/${token}/vcard`;
 
   const initials = data.name
     .split(' ')
@@ -48,12 +48,9 @@ export default async function CardPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-[#0B1929] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Card */}
         <div className="bg-[#0D2137] rounded-3xl overflow-hidden shadow-2xl shadow-black/50">
-          {/* Header gradient */}
           <div className="h-24 bg-gradient-to-br from-[#27C4A0] to-[#1A6B9A]" />
 
-          {/* Avatar */}
           <div className="flex justify-center -mt-12 px-6">
             {data.photo_url ? (
               <img
@@ -68,17 +65,14 @@ export default async function CardPage({ params }: Props) {
             )}
           </div>
 
-          {/* Name & position */}
           <div className="text-center px-6 pt-4 pb-2">
             <h1 className="text-xl font-bold text-white">{data.name}</h1>
             <p className="text-[#27C4A0] text-sm font-medium mt-0.5">{data.position}</p>
             <p className="text-white/40 text-xs mt-1">AirComfort</p>
           </div>
 
-          {/* Divider */}
           <div className="mx-6 my-4 border-t border-white/8" />
 
-          {/* Action buttons */}
           <div className="px-6 pb-6 space-y-3">
             <a
               href={`tel:${data.phone.replace(/\s/g, '')}`}
@@ -102,7 +96,7 @@ export default async function CardPage({ params }: Props) {
 
             <a
               href={vcardUrl}
-              download={`${slug}.vcf`}
+              download={`${data.slug}.vcf`}
               className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-sm font-medium py-3 px-4 rounded-2xl transition-colors border border-white/8"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -112,7 +106,6 @@ export default async function CardPage({ params }: Props) {
             </a>
           </div>
 
-          {/* Footer */}
           <div className="border-t border-white/8 px-6 py-3 flex items-center justify-center gap-2">
             <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#27C4A0] to-[#1A6B9A] flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2">
