@@ -4,11 +4,11 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 
 export interface EmployeeCard {
-  id: number;
+  id: string;
   slug: string;
   token: string;
   name: string;
-  position: string;
+  title: string;
   phone: string;
   email: string;
   photo_url: string | null;
@@ -23,22 +23,4 @@ export async function getCards(): Promise<EmployeeCard[]> {
     .order('created_at', { ascending: true });
   if (error) throw error;
   return (data ?? []) as EmployeeCard[];
-}
-
-export async function createCard(card: Omit<EmployeeCard, 'id' | 'created_at' | 'token'>) {
-  const { error } = await supabaseAdmin.from('employees_cards').insert(card);
-  if (error) throw error;
-  revalidatePath('/card');
-}
-
-export async function updateCard(id: number, card: Partial<Omit<EmployeeCard, 'id' | 'created_at'>>) {
-  const { error } = await supabaseAdmin.from('employees_cards').update(card).eq('id', id);
-  if (error) throw error;
-  revalidatePath('/card');
-}
-
-export async function deleteCard(id: number) {
-  const { error } = await supabaseAdmin.from('employees_cards').delete().eq('id', id);
-  if (error) throw error;
-  revalidatePath('/card');
 }

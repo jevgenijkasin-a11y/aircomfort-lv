@@ -25,7 +25,7 @@ const CARD_STR = {
     addTitle: 'Новая визитка',
     editTitle: 'Редактировать визитку',
     name: 'Имя (полное)',
-    position: 'Должность',
+    jobTitle: 'Должность',
     phone: 'Телефон',
     email: 'Email',
     slug: 'URL-ключ (slug)',
@@ -51,7 +51,7 @@ const CARD_STR = {
     addTitle: 'New Card',
     editTitle: 'Edit Card',
     name: 'Full Name',
-    position: 'Position',
+    jobTitle: 'Job Title',
     phone: 'Phone',
     email: 'Email',
     slug: 'URL slug',
@@ -71,7 +71,7 @@ const CARD_STR = {
 const BLANK: Omit<EmployeeCard, 'id' | 'created_at' | 'token'> = {
   slug: '',
   name: '',
-  position: '',
+  title: '',
   phone: '',
   email: '',
   photo_url: null,
@@ -118,12 +118,12 @@ export default function AdminCards({ lang }: { lang: Lang }) {
   const [cards, setCards] = useState<EmployeeCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Omit<EmployeeCard, 'id' | 'created_at' | 'token'>>(BLANK);
-  const [editId, setEditId] = useState<number | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [expandedQr, setExpandedQr] = useState<number | null>(null);
+  const [expandedQr, setExpandedQr] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -141,7 +141,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
   const openAdd = () => { setForm(BLANK); setEditId(null); setShowForm(true); };
 
   const openEdit = (c: EmployeeCard) => {
-    setForm({ slug: c.slug, name: c.name, position: c.position, phone: c.phone, email: c.email, photo_url: c.photo_url, is_active: c.is_active });
+    setForm({ slug: c.slug, name: c.name, title: c.title, phone: c.phone, email: c.email, photo_url: c.photo_url, is_active: c.is_active });
     setEditId(c.id);
     setShowForm(true);
   };
@@ -172,7 +172,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm(s.delConfirm)) return;
     setDeletingId(id);
     try {
@@ -218,14 +218,12 @@ export default function AdminCards({ lang }: { lang: Lang }) {
         </button>
       </div>
 
-      {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
           <div className="bg-[#0D2137] rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold text-white mb-5">{editId !== null ? s.editTitle : s.addTitle}</h2>
 
             <div className="space-y-4">
-              {/* Photo */}
               <div>
                 <label className="block text-xs text-white/50 mb-1.5">{s.photo}</label>
                 <div className="flex items-center gap-3">
@@ -250,17 +248,17 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                 </div>
               </div>
 
-              {[
+              {([
                 { key: 'name', label: s.name },
-                { key: 'position', label: s.position },
+                { key: 'title', label: s.jobTitle },
                 { key: 'phone', label: s.phone },
                 { key: 'email', label: s.email },
-              ].map(({ key, label }) => (
+              ] as { key: keyof typeof form; label: string }[]).map(({ key, label }) => (
                 <div key={key}>
                   <label className="block text-xs text-white/50 mb-1.5">{label}</label>
                   <input
                     type="text"
-                    value={form[key as keyof typeof form] as string}
+                    value={form[key] as string ?? ''}
                     onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                     className="w-full bg-white/5 border border-white/15 text-white text-sm px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/60"
                   />
@@ -291,10 +289,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowForm(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm text-white/60 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
-              >
+              <button onClick={() => setShowForm(false)} className="flex-1 py-2.5 rounded-xl text-sm text-white/60 hover:text-white bg-white/5 hover:bg-white/10 transition-colors">
                 {s.cancel}
               </button>
               <button
@@ -309,7 +304,6 @@ export default function AdminCards({ lang }: { lang: Lang }) {
         </div>
       )}
 
-      {/* Cards list */}
       {loading ? (
         <div className="flex justify-center py-20">
           <div className="w-7 h-7 border-2 border-[#27C4A0]/30 border-t-[#27C4A0] rounded-full animate-spin" />
@@ -327,7 +321,6 @@ export default function AdminCards({ lang }: { lang: Lang }) {
           {cards.map((card) => (
             <div key={card.id} className="bg-[#0D2137] rounded-2xl border border-white/8 overflow-hidden">
               <div className="p-5 flex items-start gap-4">
-                {/* Avatar */}
                 {card.photo_url ? (
                   <img src={card.photo_url} alt={card.name} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
                 ) : (
@@ -345,42 +338,30 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                       <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">Неактивна</span>
                     )}
                   </div>
-                  <p className="text-[#27C4A0] text-sm">{card.position}</p>
+                  <p className="text-[#27C4A0] text-sm">{card.title}</p>
                   <p className="text-white/40 text-xs mt-1">{card.phone} · {card.email}</p>
-                  <a
-                    href={cardUrl(card.token)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-white/30 hover:text-[#27C4A0] transition-colors font-mono mt-1 block truncate"
-                  >
+                  <a href={cardUrl(card.token)} target="_blank" rel="noreferrer"
+                    className="text-xs text-white/30 hover:text-[#27C4A0] transition-colors font-mono mt-1 block truncate">
                     aircomfort.lv/card/{card.slug}
                   </a>
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => setExpandedQr(expandedQr === card.id ? null : card.id)}
-                    className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-colors"
-                    title={s.qr}
-                  >
+                  <button onClick={() => setExpandedQr(expandedQr === card.id ? null : card.id)}
+                    className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-colors" title={s.qr}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
                     </svg>
                   </button>
-                  <button
-                    onClick={() => openEdit(card)}
-                    className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-colors"
-                  >
+                  <button onClick={() => openEdit(card)}
+                    className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
                     </svg>
                   </button>
-                  <button
-                    onClick={() => handleDelete(card.id)}
-                    disabled={deletingId === card.id}
-                    className="p-2 rounded-xl text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                  >
+                  <button onClick={() => handleDelete(card.id)} disabled={deletingId === card.id}
+                    className="p-2 rounded-xl text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                     </svg>
@@ -388,24 +369,17 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                 </div>
               </div>
 
-              {/* QR panel */}
               {expandedQr === card.id && (
                 <div className="border-t border-white/8 p-5 flex flex-col sm:flex-row items-center gap-5 bg-white/2">
                   <QrImage url={cardUrl(card.token)} size={160} />
                   <div className="space-y-3">
                     <p className="text-sm text-white/60">{s.link}:</p>
-                    <a
-                      href={cardUrl(card.token)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[#27C4A0] text-sm font-mono break-all hover:underline"
-                    >
+                    <a href={cardUrl(card.token)} target="_blank" rel="noreferrer"
+                      className="text-[#27C4A0] text-sm font-mono break-all hover:underline">
                       {cardUrl(card.token)}
                     </a>
-                    <button
-                      onClick={() => downloadQr(cardUrl(card.token), card.slug)}
-                      className="flex items-center gap-2 bg-white/8 hover:bg-white/14 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
-                    >
+                    <button onClick={() => downloadQr(cardUrl(card.token), card.slug)}
+                      className="flex items-center gap-2 bg-white/8 hover:bg-white/14 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                       </svg>

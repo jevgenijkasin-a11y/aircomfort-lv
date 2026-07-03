@@ -21,7 +21,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     'VERSION:3.0',
     `FN:${data.name}`,
     `ORG:AirComfort`,
-    `TITLE:${data.position}`,
+    `TITLE:${data.title}`,
     `TEL;TYPE=CELL:${data.phone}`,
     `EMAIL:${data.email}`,
     `URL:https://aircomfort.lv`,

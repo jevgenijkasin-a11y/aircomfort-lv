@@ -12,14 +12,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
   const { data } = await supabaseAdmin
     .from('employees_cards')
-    .select('name, position')
+    .select('name, title')
     .eq('token', token)
     .eq('is_active', true)
     .single();
   if (!data) return { title: 'AirComfort' };
   return {
     title: `${data.name} — AirComfort`,
-    description: `${data.position} · AirComfort`,
+    description: `${data.title} · AirComfort`,
     robots: { index: false },
   };
 }
@@ -98,7 +98,7 @@ export default async function CardPage({ params }: Props) {
 
           <div style={{ textAlign: 'center' }}>
             <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, letterSpacing: '-0.3px' }}>{data.name}</h1>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginTop: 4 }}>{data.position}</p>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginTop: 4 }}>{data.title}</p>
           </div>
 
           {/* Action buttons: CALL / EMAIL */}
@@ -212,7 +212,7 @@ export default async function CardPage({ params }: Props) {
             </div>
             <div>
               <div style={{ color: '#1a1a1a', fontSize: 15, fontWeight: 500 }}>AirComfort</div>
-              <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{data.position}</div>
+              <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{data.title}</div>
             </div>
           </div>
 
