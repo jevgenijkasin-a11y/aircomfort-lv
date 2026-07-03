@@ -1,38 +1,87 @@
+# AirComfort.lv — llms.txt
+# Structured site description for AI crawlers and language models.
+# https://llmstxt.org
+
+---
+
+## Latviešu
+
 # AirComfort.lv
 
-> Klimatiekārtu piegāde un uzstādīšana Latvijā / Кондиционирование воздуха в Латвии / Air conditioning in Latvia
+> Klimatiekārtu piegāde, uzstādīšana un apkope Latvijā
 
-AirComfort.lv is a professional air conditioning and heat pump supplier and installer based in Riga, Latvia. The company serves residential and commercial clients throughout Latvia.
+AirComfort.lv ir Latvijas uzņēmums, kas nodarbojas ar gaisa kondicionieru un siltumsūkņu pārdošanu, profesionālu uzstādīšanu un apkopi privātpersonām un uzņēmumiem visā Latvijā.
 
-## Services
+### Pakalpojumi
+
+- **Pārdošana** — plašs kondicionēšanas iekārtu klāsts no vadošajiem ražotājiem
+- **Uzstādīšana** — profesionāla montāža no 1 dienas, 3 gadu garantija
+- **Apkope** — regulārs serviss, tīrīšana un remonts, ātra reaģēšana
+- **Konsultācija** — bezmaksas konsultācija un optimālā risinājuma izvēle
+
+### Produktu kategorijas
+
+- Mājas gaisa kondicionieri (split sistēmas dzīvokļiem un mājām, A+++ energoefektivitāte)
+- Gaiss-gaiss siltumsūkņi (apkurei un dzesēšanai visu gadu)
+- Komerciālās HVAC sistēmas (kasešu, kanālu un kolonnu bloki birojiem, veikaliem, rūpnīcām)
+- Gaiss-ūdens siltumsūkņi (grīdas apkurei un karstā ūdens sagatavošanai)
+
+### Zīmoli
+
+Daikin, Mitsubishi Electric, Hisense, HAVA, Midea, TCL, Toshiba
+
+### Kontakti
+
+- Vietne: https://aircomfort.lv/lv
+- E-pasts: info@aircomfort.lv
+- Tālrunis: +371 28828400
+- Atrašanās vieta: Rīga, Latvija
+- Darba laiks: Pirmdiena–Piektdiena 9:00–18:00
+
+### Valodu versijas
+
+- **Latviešu** (galvenā): https://aircomfort.lv/lv
+- Krievu: https://aircomfort.lv/ru
+- Angļu: https://aircomfort.lv/en
+
+---
+
+## English
+
+# AirComfort.lv
+
+> Air conditioner supply, installation and maintenance in Latvia
+
+AirComfort.lv is a Latvian company specialising in the sale, professional installation and maintenance of air conditioning systems and heat pumps for residential and commercial customers throughout Latvia.
+
+### Services
 
 - **Supply**: Wide range of air conditioning equipment from leading brands
 - **Installation**: Professional installation with a 3-year warranty, all work completed in one day
 - **Maintenance**: Regular servicing, cleaning and repairs, fast response
 - **Consultation**: Free consultation and selection of the optimal solution for your space
 
-## Product Categories
+### Product Categories
 
-- **Home air conditioners** (split systems for apartments and houses, A+++ efficiency)
-- **Air-to-Air heat pumps** (for home heating and cooling, year-round efficiency)
-- **Commercial HVAC** (cassette, ducted and column units for offices, shops and factories)
-- **Air-to-Water heat pumps** (for underfloor heating and domestic hot water in large buildings)
+- Home air conditioners (split systems for apartments and houses, A+++ efficiency)
+- Air-to-Air heat pumps (for home heating and cooling, year-round efficiency)
+- Commercial HVAC (cassette, ducted and column units for offices, shops and factories)
+- Air-to-Water heat pumps (for underfloor heating and domestic hot water in large buildings)
 
-## Brands
+### Brands
 
 Daikin, Mitsubishi Electric, Hisense, HAVA, Midea, TCL, Toshiba
 
-## Contact
+### Contact
 
-- Website: https://aircomfort.lv
+- Website: https://aircomfort.lv/en
 - Email: info@aircomfort.lv
 - Phone: +371 28828400
 - Location: Riga, Latvia
 - Working hours: Mon–Fri 9:00–18:00
 
-## Languages
+### Language Versions
 
-The website is available in Latvian (default), Russian, and English.
-- https://aircomfort.lv/lv (Latvian)
-- https://aircomfort.lv/ru (Russian)
-- https://aircomfort.lv/en (English)
+- **Latvian** (primary): https://aircomfort.lv/lv
+- Russian: https://aircomfort.lv/ru
+- English: https://aircomfort.lv/en

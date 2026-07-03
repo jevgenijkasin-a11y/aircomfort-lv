@@ -24,6 +24,24 @@ const nextConfig = {
     ];
   },
 
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Link',
+            value: '</sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby"',
+          },
+          {
+            key: 'Content-Signal',
+            value: 'search=yes, ai-input=yes, ai-train=no',
+          },
+        ],
+      },
+    ];
+  },
+
   webpack: (config) => {
     // Fix: Windows System32 path casing inconsistency causes webpack to load
     // the same module twice. Normalize all path fields that form module identifiers.
