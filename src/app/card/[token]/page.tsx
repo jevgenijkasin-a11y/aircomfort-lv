@@ -59,6 +59,7 @@ export default async function CardPage({ params }: Props) {
     background: '#f5f5f5',
     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   };
+  const rowClass = 'card-row';
   const row: React.CSSProperties = {
     textDecoration: 'none', display: 'flex', alignItems: 'center',
     gap: 16, padding: '18px 24px', borderBottom: '1px solid #f0f0f0',
@@ -69,18 +70,27 @@ export default async function CardPage({ params }: Props) {
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #1a1a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        @media (max-height: 750px) {
+          .card-header { padding: 24px 24px 16px !important; gap: 10px !important; }
+          .card-photo { width: 80px !important; height: 80px !important; }
+          .card-name { font-size: 22px !important; }
+          .card-title { font-size: 14px !important; }
+          .card-actions { margin-top: 4px !important; gap: 16px !important; }
+          .card-row { padding: 13px 24px !important; }
+          .card-icon { width: 36px !important; height: 36px !important; }
+        }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#1a1a2e', display: 'flex', flexDirection: 'column' }}>
 
         {/* Dark header */}
-        <div style={{
+        <div className="card-header" style={{
           background: 'linear-gradient(160deg, #0f2744 0%, #1a1a2e 100%)',
           padding: '48px 24px 32px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
         }}>
           {data.photo_url ? (
-            <img src={data.photo_url} alt={data.name} style={{
+            <img className="card-photo" src={data.photo_url} alt={data.name} style={{
               width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top',
               border: '3px solid rgba(255,255,255,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
             }} />
@@ -97,12 +107,12 @@ export default async function CardPage({ params }: Props) {
           )}
 
           <div style={{ textAlign: 'center' }}>
-            <h1 style={{ color: 'white', fontSize: 26, fontWeight: 700, letterSpacing: '-0.3px' }}>{data.name}</h1>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 16, marginTop: 4 }}>{data.title}</p>
+            <h1 className="card-name" style={{ color: 'white', fontSize: 26, fontWeight: 700, letterSpacing: '-0.3px' }}>{data.name}</h1>
+            <p className="card-title" style={{ color: 'rgba(255,255,255,0.6)', fontSize: 16, marginTop: 4 }}>{data.title}</p>
           </div>
 
           {/* Action buttons: CALL / WHATSAPP / EMAIL */}
-          <div style={{ display: 'flex', gap: 20, marginTop: 8 }}>
+          <div className="card-actions" style={{ display: 'flex', gap: 20, marginTop: 8 }}>
             <a href={`tel:${phoneClean}`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
               <div style={iconCircle}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -136,8 +146,8 @@ export default async function CardPage({ params }: Props) {
         {/* White card with details */}
         <div style={{ background: 'white', borderRadius: '20px 20px 0 0', flex: 1, paddingBottom: 100 }}>
 
-          <a href={`tel:${phoneClean}`} style={row}>
-            <div style={iconCircleWhite}>
+          <a href={`tel:${phoneClean}`} className={rowClass} style={row}>
+            <div className="card-icon" style={iconCircleWhite}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.02 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
               </svg>
@@ -148,8 +158,8 @@ export default async function CardPage({ params }: Props) {
             </div>
           </a>
 
-          <a href={`mailto:${data.email}`} style={row}>
-            <div style={iconCircleWhite}>
+          <a href={`mailto:${data.email}`} className={rowClass} style={row}>
+            <div className="card-icon" style={iconCircleWhite}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
@@ -161,8 +171,8 @@ export default async function CardPage({ params }: Props) {
             </div>
           </a>
 
-          <div style={{ ...row, borderBottom: '1px solid #f0f0f0' }}>
-            <div style={iconCircleWhite}>
+          <div className={rowClass} style={{ ...row, borderBottom: '1px solid #f0f0f0' }}>
+            <div className="card-icon" style={iconCircleWhite}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="7" width="20" height="14" rx="2"/>
                 <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
@@ -174,8 +184,8 @@ export default async function CardPage({ params }: Props) {
             </div>
           </div>
 
-          <a href="https://aircomfort.lv" target="_blank" rel="noreferrer" style={row}>
-            <div style={iconCircleWhite}>
+          <a href="https://aircomfort.lv" target="_blank" rel="noreferrer" className={rowClass} style={row}>
+            <div className="card-icon" style={iconCircleWhite}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="2" y1="12" x2="22" y2="12"/>
@@ -189,8 +199,8 @@ export default async function CardPage({ params }: Props) {
           </a>
 
           {/* Address + Show on map */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 24px' }}>
-            <div style={iconCircleWhite}>
+          <div className={rowClass} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 24px' }}>
+            <div className="card-icon" style={iconCircleWhite}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
                 <circle cx="12" cy="10" r="3"/>
