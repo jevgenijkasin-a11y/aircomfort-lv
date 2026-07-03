@@ -274,7 +274,7 @@ export default async function ProductPage({ params }: Props) {
           <div className="mt-10">
             <div className="glass-card rounded-2xl p-6">
               <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-5">
-                {locale === 'lv' ? 'Tehniskie dati' : locale === 'ru' ? 'Технические характеристики' : 'Technical Specifications'}
+                {t('specsLabel')}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
                 {specs.map(([key, value], i) => (

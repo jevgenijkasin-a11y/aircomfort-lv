@@ -71,7 +71,10 @@
     "wasPrice": "Bija",
     "nowPrice": "Tagad",
     "priceOnRequest": "Cena pēc pieprasījuma",
-    "enlarge": "palielināt"
+    "enlarge": "palielināt",
+    "prevImage": "Iepriekšējais attēls",
+    "nextImage": "Nākamais attēls",
+    "close": "Aizvērt"
   },
   "catalog": {
     "title": "Kondicionētāju katalogs",
@@ -99,6 +102,7 @@
     "installPrice": "Uzstādīšana",
     "backToCatalog": "← Atpakaļ uz katalogu",
     "specsTitle": "Tehniskie dati",
+    "specsLabel": "Tehniskie dati",
     "specPower": "Jauda",
     "specArea": "Platība",
     "specEnergy": "Enerģijas klase",

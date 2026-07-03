@@ -51,12 +51,14 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
             {hasMultiple && (
               <>
                 <button
+                  aria-label={t('prevImage')}
                   onClick={(e) => { e.stopPropagation(); setActive(i => (i - 1 + images.length) % images.length); }}
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/15 hover:bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 transition-colors z-10"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
                 </button>
                 <button
+                  aria-label={t('nextImage')}
                   onClick={(e) => { e.stopPropagation(); setActive(i => (i + 1) % images.length); }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/15 hover:bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 transition-colors z-10"
                 >
@@ -87,6 +89,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
           {images.map((src, i) => (
             <button
               key={i}
+              aria-label={`${alt} ${i + 1}`}
               onClick={() => setActive(i)}
               className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all bg-white ${
                 active === i
@@ -107,6 +110,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
           onClick={() => setLightbox(false)}
         >
           <button
+            aria-label={t('close')}
             className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
             onClick={(e) => { e.stopPropagation(); setLightbox(false); }}
           >
@@ -122,6 +126,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
           <div className="relative flex items-center justify-center max-w-5xl w-full h-[72vh]" onClick={(e) => e.stopPropagation()}>
             {hasMultiple && (
               <button
+                aria-label={t('prevImage')}
                 onClick={(e) => { e.stopPropagation(); prev(); }}
                 className="absolute -left-2 sm:left-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0 z-10"
               >
@@ -137,6 +142,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
             </div>
             {hasMultiple && (
               <button
+                aria-label={t('nextImage')}
                 onClick={(e) => { e.stopPropagation(); next(); }}
                 className="absolute -right-2 sm:right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0 z-10"
               >

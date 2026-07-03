@@ -71,7 +71,10 @@
     "wasPrice": "Was",
     "nowPrice": "Now",
     "priceOnRequest": "Price on request",
-    "enlarge": "enlarge"
+    "enlarge": "enlarge",
+    "prevImage": "Previous image",
+    "nextImage": "Next image",
+    "close": "Close"
   },
   "catalog": {
     "title": "Air Conditioner Catalog",
@@ -99,6 +102,7 @@
     "installPrice": "Installation",
     "backToCatalog": "← Back to catalog",
     "specsTitle": "Specifications",
+    "specsLabel": "Technical Specifications",
     "specPower": "Power",
     "specArea": "Area coverage",
     "specEnergy": "Energy class",
