@@ -1,5 +1,5 @@
 export type Lang = 'ru' | 'en';
-export type Section = 'requests' | 'products' | 'slider' | 'reviews' | 'texts' | 'settings' | 'password';
+export type Section = 'requests' | 'products' | 'slider' | 'reviews' | 'texts' | 'settings' | 'password' | 'cards';
 
 export interface AdminRequest {
   id: number;
@@ -205,6 +205,7 @@ export const T = {
     specElectrical: 'Электрическое соединение',
     specIndoorDims: 'Габариты внутреннего блока',
     specOutdoorDims: 'Габариты наружного блока',
+    navCards: 'Визитки',
     navReviews: 'Отзывы',
     revTitle: 'Отзывы клиентов',
     revAdd: 'Добавить отзыв',
@@ -401,6 +402,7 @@ export const T = {
     specElectrical: 'Electrical Connection',
     specIndoorDims: 'Indoor Unit Dimensions',
     specOutdoorDims: 'Outdoor Unit Dimensions',
+    navCards: 'Cards',
     navReviews: 'Reviews',
     revTitle: 'Customer Reviews',
     revAdd: 'Add Review',

@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api/
+Disallow: /card/
 
 # AI crawlers — allowed for search and ai-input, not for training
 User-agent: GPTBot
