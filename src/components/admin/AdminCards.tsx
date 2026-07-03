@@ -138,6 +138,14 @@ export default function AdminCards({ lang }: { lang: Lang }) {
 
   useEffect(() => { load(); }, [load]);
 
+  const toSlug = (name: string) =>
+    name.toLowerCase()
+      .replace(/[āàáâä]/g, 'a').replace(/[čç]/g, 'c').replace(/[ēèéê]/g, 'e')
+      .replace(/[ģ]/g, 'g').replace(/[īìíî]/g, 'i').replace(/[ķ]/g, 'k')
+      .replace(/[ļ]/g, 'l').replace(/[ņ]/g, 'n').replace(/[šß]/g, 's')
+      .replace(/[ūùúû]/g, 'u').replace(/[žź]/g, 'z').replace(/[ö]/g, 'o')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
   const openAdd = () => { setForm(BLANK); setEditId(null); setShowForm(true); };
 
   const openEdit = (c: EmployeeCard) => {
@@ -248,8 +256,17 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-xs text-white/50 mb-1.5">{s.name}</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value, slug: editId ? f.slug : toSlug(e.target.value) }))}
+                  className="w-full bg-white/5 border border-white/15 text-white text-sm px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/60"
+                />
+              </div>
+
               {([
-                { key: 'name', label: s.name },
                 { key: 'title', label: s.jobTitle },
                 { key: 'phone', label: s.phone },
                 { key: 'email', label: s.email },
@@ -264,18 +281,6 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                   />
                 </div>
               ))}
-
-              <div>
-                <label className="block text-xs text-white/50 mb-1.5">{s.slug}</label>
-                <input
-                  type="text"
-                  value={form.slug}
-                  onChange={e => setForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))}
-                  className="w-full bg-white/5 border border-white/15 text-white text-sm px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/60 font-mono"
-                  placeholder="ivans-berzins"
-                />
-                <p className="text-xs text-white/30 mt-1">{s.slugHint}</p>
-              </div>
 
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
