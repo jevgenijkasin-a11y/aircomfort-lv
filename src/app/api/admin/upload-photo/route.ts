@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
     });
 
   if (error) {
-    console.error('[upload-photo] Supabase Storage error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[upload-photo] Supabase Storage error:', JSON.stringify(error));
+    return NextResponse.json({ error: error.message, details: JSON.stringify(error) }, { status: 500 });
   }
 
   const { data: { publicUrl } } = supabaseAdmin.storage
