@@ -25,7 +25,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     `TEL;TYPE=CELL:${data.phone}`,
     `EMAIL:${data.email}`,
     `URL:https://aircomfort.lv`,
-    `ADR;TYPE=WORK:;;Rīga;;; ;Latvija`,
     data.photo_url ? `PHOTO;VALUE=URI:${data.photo_url}` : '',
     'END:VCARD',
   ].filter(Boolean).join('\r\n');

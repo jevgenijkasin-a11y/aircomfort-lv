@@ -37,6 +37,7 @@ export default async function CardPage({ params }: Props) {
   if (!data) notFound();
 
   const vcardUrl = `/card/${token}/vcard`;
+  const phoneClean = data.phone.replace(/[\s\-()]/g, '');
 
   const initials = data.name
     .split(' ')
@@ -46,77 +47,228 @@ export default async function CardPage({ params }: Props) {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#0B1929] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="bg-[#0D2137] rounded-3xl overflow-hidden shadow-2xl shadow-black/50">
-          <div className="h-24 bg-gradient-to-br from-[#27C4A0] to-[#1A6B9A]" />
+    <>
+      <style>{`
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #1a1a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      `}</style>
 
-          <div className="flex justify-center -mt-12 px-6">
-            {data.photo_url ? (
-              <img
-                src={data.photo_url}
-                alt={data.name}
-                className="w-24 h-24 rounded-2xl object-cover border-4 border-[#0D2137] shadow-xl"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#27C4A0] to-[#1A6B9A] border-4 border-[#0D2137] flex items-center justify-center shadow-xl">
-                <span className="text-3xl font-bold text-white">{initials}</span>
-              </div>
-            )}
-          </div>
+      <div style={{ minHeight: '100vh', background: '#1a1a2e', display: 'flex', flexDirection: 'column' }}>
 
-          <div className="text-center px-6 pt-4 pb-2">
-            <h1 className="text-xl font-bold text-white">{data.name}</h1>
-            <p className="text-[#27C4A0] text-sm font-medium mt-0.5">{data.position}</p>
-            <p className="text-white/40 text-xs mt-1">AirComfort</p>
-          </div>
-
-          <div className="mx-6 my-4 border-t border-white/8" />
-
-          <div className="px-6 pb-6 space-y-3">
-            <a
-              href={`tel:${data.phone.replace(/\s/g, '')}`}
-              className="flex items-center gap-3 w-full bg-[#27C4A0] hover:bg-[#1fa389] text-[#0B1929] font-semibold py-3.5 px-4 rounded-2xl transition-colors"
-            >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.338c0-1.074.822-1.97 1.895-2.054C5.19 4.207 6.3 4.125 7.5 4.125c.69 0 1.313.405 1.604 1.031l.686 1.524A1.875 1.875 0 019.183 8.5l-.688.687A16.5 16.5 0 0015 14.75l.687-.688a1.875 1.875 0 011.819-.607l1.524.686A1.875 1.875 0 0119.875 16.5c0 1.2-.082 2.31-.16 3.355-.084 1.073-.98 1.895-2.054 1.895-8.284 0-15-6.716-15-15z" />
-              </svg>
-              <span>{data.phone}</span>
-            </a>
-
-            <a
-              href={`mailto:${data.email}`}
-              className="flex items-center gap-3 w-full bg-white/8 hover:bg-white/14 text-white font-medium py-3.5 px-4 rounded-2xl transition-colors border border-white/10"
-            >
-              <svg className="w-5 h-5 flex-shrink-0 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-              </svg>
-              <span>{data.email}</span>
-            </a>
-
-            <a
-              href={vcardUrl}
-              download={`${data.slug}.vcf`}
-              className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-sm font-medium py-3 px-4 rounded-2xl transition-colors border border-white/8"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 5.25 5.25 0 011.226 9.095M6.75 19.5h10.5" />
-              </svg>
-              Saglabāt kontaktu / Сохранить контакт
-            </a>
-          </div>
-
-          <div className="border-t border-white/8 px-6 py-3 flex items-center justify-center gap-2">
-            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#27C4A0] to-[#1A6B9A] flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" d="M12 3v18M3 12h18" />
-                <circle cx="12" cy="12" r="2.5" fill="white" stroke="none" />
-              </svg>
+        {/* Dark header with photo */}
+        <div style={{
+          background: 'linear-gradient(160deg, #0f2744 0%, #1a1a2e 100%)',
+          padding: '48px 24px 32px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px',
+        }}>
+          {/* Avatar */}
+          {data.photo_url ? (
+            <img
+              src={data.photo_url}
+              alt={data.name}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '3px solid rgba(255,255,255,0.2)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: 100,
+              height: 100,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #27C4A0, #1A6B9A)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 36,
+              fontWeight: 700,
+              color: 'white',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            }}>
+              {initials}
             </div>
-            <span className="text-white/40 text-xs">aircomfort.lv</span>
+          )}
+
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, letterSpacing: '-0.3px' }}>{data.name}</h1>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginTop: 4 }}>{data.position}</p>
+          </div>
+
+          {/* Action buttons: CALL / EMAIL */}
+          <div style={{ display: 'flex', gap: 24, marginTop: 8 }}>
+            <a href={`tel:${phoneClean}`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.02 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
+                </svg>
+              </div>
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: 500, letterSpacing: '0.5px' }}>CALL</span>
+            </a>
+
+            <a href={`mailto:${data.email}`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </div>
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: 500, letterSpacing: '0.5px' }}>EMAIL</span>
+            </a>
           </div>
         </div>
+
+        {/* White card with details */}
+        <div style={{
+          background: 'white',
+          borderRadius: '20px 20px 0 0',
+          flex: 1,
+          marginTop: 0,
+          paddingBottom: 100,
+        }}>
+          {/* Phone row */}
+          <a href={`tel:${phoneClean}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 16, padding: '18px 24px', borderBottom: '1px solid #f0f0f0' }}>
+            <div style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              background: '#f5f5f5',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.02 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ color: '#1a1a1a', fontSize: 15, fontWeight: 500 }}>{data.phone}</div>
+              <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>Mobile</div>
+            </div>
+          </a>
+
+          {/* Email row */}
+          <a href={`mailto:${data.email}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 16, padding: '18px 24px', borderBottom: '1px solid #f0f0f0' }}>
+            <div style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              background: '#f5f5f5',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ color: '#1a1a1a', fontSize: 15, fontWeight: 500 }}>{data.email}</div>
+              <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>Email</div>
+            </div>
+          </a>
+
+          {/* Company row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '18px 24px', borderBottom: '1px solid #f0f0f0' }}>
+            <div style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              background: '#f5f5f5',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"/>
+                <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ color: '#1a1a1a', fontSize: 15, fontWeight: 500 }}>AirComfort</div>
+              <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{data.position}</div>
+            </div>
+          </div>
+
+          {/* Website row */}
+          <a href="https://aircomfort.lv" target="_blank" rel="noreferrer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 16, padding: '18px 24px' }}>
+            <div style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              background: '#f5f5f5',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ color: '#1a1a1a', fontSize: 15, fontWeight: 500 }}>aircomfort.lv</div>
+              <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>Website</div>
+            </div>
+          </a>
+        </div>
+
+        {/* Floating add contact button */}
+        <a
+          href={vcardUrl}
+          download={`${data.slug}.vcf`}
+          style={{
+            position: 'fixed',
+            bottom: 32,
+            right: 24,
+            width: 60,
+            height: 60,
+            borderRadius: '50%',
+            background: '#27C4A0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 20px rgba(39,196,160,0.5)',
+            textDecoration: 'none',
+          }}
+          title="Saglabāt kontaktu / Сохранить контакт"
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/>
+            <line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+        </a>
       </div>
-    </div>
+    </>
   );
 }
