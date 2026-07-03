@@ -42,17 +42,3 @@ export async function deleteCard(id: number) {
   if (error) throw error;
   revalidatePath('/card');
 }
-
-export async function uploadPhoto(formData: FormData): Promise<string> {
-  const file = formData.get('file') as File;
-  if (!file) throw new Error('No file provided');
-  const ext = file.name.split('.').pop() ?? 'jpg';
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const bytes = await file.arrayBuffer();
-  const { error } = await supabaseAdmin.storage
-    .from('employee-photos')
-    .upload(path, bytes, { contentType: file.type, upsert: false });
-  if (error) throw error;
-  const { data } = supabaseAdmin.storage.from('employee-photos').getPublicUrl(path);
-  return data.publicUrl;
-}

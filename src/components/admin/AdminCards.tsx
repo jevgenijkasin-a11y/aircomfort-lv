@@ -7,7 +7,6 @@ import {
   createCard,
   updateCard,
   deleteCard,
-  uploadPhoto,
   EmployeeCard,
 } from '@/app/admin/actions/cards';
 
@@ -179,7 +178,9 @@ export default function AdminCards({ lang }: { lang: Lang }) {
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const url = await uploadPhoto(fd);
+      const res = await fetch('/api/admin/upload-photo', { method: 'POST', body: fd });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload failed'); }
+      const { url } = await res.json();
       setForm(f => ({ ...f, photo_url: url }));
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Upload error');
