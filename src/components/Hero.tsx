@@ -100,7 +100,7 @@ export default async function Hero() {
           <div className="flex flex-col sm:flex-row gap-5">
             <Link
               href="/catalog"
-              className="inline-flex items-center justify-center gap-3 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 shadow-[0_8px_40px_rgba(39,196,160,0.5)] hover:shadow-[0_12px_50px_rgba(39,196,160,0.65)] hover:-translate-y-1.5 tracking-wide"
+              className="magnetic inline-flex items-center justify-center gap-3 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 shadow-[0_8px_40px_rgba(39,196,160,0.5)] hover:shadow-[0_12px_50px_rgba(39,196,160,0.65)] tracking-wide"
             >
               {t('ctaCatalog')}
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -109,19 +109,36 @@ export default async function Hero() {
             </Link>
             <Link
               href="/calculator"
-              className="inline-flex items-center justify-center gap-3 bg-white/12 hover:bg-white/20 border-2 border-white/40 hover:border-white/70 text-white font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 backdrop-blur-sm hover:-translate-y-1.5 tracking-wide"
+              className="magnetic inline-flex items-center justify-center gap-3 bg-white/12 hover:bg-white/20 border-2 border-white/40 hover:border-white/70 text-white font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 backdrop-blur-sm tracking-wide"
             >
               {t('ctaCalculator')}
             </Link>
           </div>
 
           <div className="mt-16 flex flex-wrap gap-x-10 gap-y-6">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col">
-                <span className="font-syne font-bold text-3xl text-[#27C4A0]">{stat.value}</span>
-                <span className="text-sm text-white/45 mt-0.5">{stat.label}</span>
-              </div>
-            ))}
+            {stats.map((stat) => {
+              // Extract numeric part and suffix (e.g. "10+" → "10", "+")
+              const match = stat.value.match(/^([\d.]+)(.*)$/);
+              const numPart = match ? match[1] : null;
+              const suffix = match ? match[2] : '';
+              return (
+                <div key={stat.label} className="flex flex-col">
+                  {numPart ? (
+                    <span
+                      className="font-syne font-bold text-3xl text-[#27C4A0]"
+                      data-count={numPart}
+                      data-suffix={suffix}
+                      suppressHydrationWarning
+                    >
+                      0{suffix}
+                    </span>
+                  ) : (
+                    <span className="font-syne font-bold text-3xl text-[#27C4A0]">{stat.value}</span>
+                  )}
+                  <span className="text-sm text-white/45 mt-0.5">{stat.label}</span>
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3">

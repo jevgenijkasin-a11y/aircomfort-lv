@@ -10,6 +10,7 @@ import Footer from '@/components/Footer';
 import FloatingButtons from '@/components/FloatingButtons';
 import ScrollToTop from '@/components/ScrollToTop';
 import CookieBanner from '@/components/CookieBanner';
+import SiteAnimations from '@/components/SiteAnimations';
 import '../globals.css';
 
 const syne = Syne({
@@ -109,6 +110,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${syne.variable} ${inter.variable}`}>
       <body className="bg-[#0A1628] text-white font-sans antialiased">
+        <div id="scroll-progress-bar" aria-hidden="true" />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
           <TrustBar />
@@ -117,6 +119,7 @@ export default async function LocaleLayout({
           <FloatingButtons />
           <ScrollToTop />
           <CookieBanner />
+          <SiteAnimations />
         </NextIntlClientProvider>
       </body>
     </html>
