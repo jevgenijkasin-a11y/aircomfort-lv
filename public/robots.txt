@@ -4,7 +4,7 @@ Disallow: /admin
 Disallow: /api/
 Disallow: /card/
 
-# AI crawlers — allowed for search and ai-input, not for training
+# AI crawlers - allowed for search and ai-input, not for training
 User-agent: GPTBot
 Allow: /
 
@@ -14,10 +14,25 @@ Allow: /
 User-agent: Claude-Web
 Allow: /
 
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
 User-agent: anthropic-ai
 Allow: /
 
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
 User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
 Allow: /
 
 User-agent: Google-Extended
