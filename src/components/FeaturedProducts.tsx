@@ -14,7 +14,7 @@ function ProductCard({ product, locale, t, installFrom }: { product: SupabasePro
   const energyCls = energyColors[product.energy_class] ?? 'text-white/50 border-white/20 bg-white/5';
 
   return (
-    <div className="glass-card product-card-hover rounded-2xl overflow-hidden flex flex-col group">
+    <div className="glass-card glass-card-hover rounded-2xl overflow-hidden flex flex-col group">
       <div className="h-44 flex items-center justify-center relative overflow-hidden bg-white">
         {productImages(product)[0] ? (
           <img src={productImages(product)[0]} alt={name} className="h-full w-full object-contain p-4" />
@@ -123,7 +123,7 @@ export default async function FeaturedProducts() {
     <section className="section-padding relative overflow-hidden">
       <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-[#1A6B9A]/8 blur-[80px]" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="reveal flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
             <h2 className="font-syne font-bold text-3xl sm:text-4xl mb-2">{t('featured')}</h2>
             <p className="text-white/45">{t('featuredSubtitle')}</p>
@@ -136,10 +136,8 @@ export default async function FeaturedProducts() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((p, i) => (
-            <div key={p.id} className="reveal" data-stagger={i}>
-              <ProductCard product={p as SupabaseProduct} locale={locale} t={(k, v) => t(k as Parameters<typeof t>[0], v as any)} installFrom={installFrom} />
-            </div>
+          {products.map((p) => (
+            <ProductCard key={p.id} product={p as SupabaseProduct} locale={locale} t={(k, v) => t(k as Parameters<typeof t>[0], v as any)} installFrom={installFrom} />
           ))}
         </div>
       </div>

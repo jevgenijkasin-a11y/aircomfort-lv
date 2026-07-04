@@ -18,7 +18,7 @@ export default function ProductCard({ product }: Props) {
   const energyCls = energyColors[product.energyClass] ?? 'text-white/50 border-white/20 bg-white/5';
 
   return (
-    <div className="glass-card product-card-hover rounded-2xl overflow-hidden flex flex-col group">
+    <div className="glass-card glass-card-hover rounded-2xl overflow-hidden flex flex-col group">
       {/* Image area */}
       <div
         className="h-44 flex items-center justify-center relative overflow-hidden"

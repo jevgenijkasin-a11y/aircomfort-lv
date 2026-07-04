@@ -84,7 +84,7 @@ export default function Header() {
 
             <Link
               href="/contacts"
-              className="magnetic hidden sm:flex items-center gap-1.5 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-semibold text-base px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-[#27C4A0]/20 hover:shadow-[#27C4A0]/30"
+              className="hidden sm:flex items-center gap-1.5 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-semibold text-base px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-[#27C4A0]/20 hover:shadow-[#27C4A0]/30"
             >
               {t('getQuote')}
             </Link>
