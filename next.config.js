@@ -31,7 +31,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Link',
-            value: '</sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby"',
+            value: '</sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby", </.well-known/ai-plugin.json>; rel="ai-catalog"',
           },
           {
             key: 'Content-Signal',
