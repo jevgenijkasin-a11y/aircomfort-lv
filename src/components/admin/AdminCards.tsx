@@ -32,6 +32,7 @@ const CARD_STR = {
     slugHint: 'Только латинские буквы, цифры, дефис. Пример: ivans-berzins',
     photo: 'Фото',
     photoClick: 'Нажмите для загрузки фото',
+    photoPosition: 'Позиция фото (по вертикали)',
     active: 'Активна (видна по ссылке)',
     qr: 'QR-код',
     downloadQr: 'Скачать QR',
@@ -58,6 +59,7 @@ const CARD_STR = {
     slugHint: 'Latin letters, digits, hyphens only. E.g. ivans-berzins',
     photo: 'Photo',
     photoClick: 'Click to upload photo',
+    photoPosition: 'Photo position (vertical)',
     active: 'Active (visible by link)',
     qr: 'QR Code',
     downloadQr: 'Download QR',
@@ -75,6 +77,7 @@ const BLANK: Omit<EmployeeCard, 'id' | 'created_at' | 'token'> = {
   phone: '',
   email: '',
   photo_url: null,
+  photo_position: 50,
   is_active: true,
 };
 
@@ -149,7 +152,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
   const openAdd = () => { setForm(BLANK); setEditId(null); setShowForm(true); };
 
   const openEdit = (c: EmployeeCard) => {
-    setForm({ slug: c.slug, name: c.name, title: c.title, phone: c.phone, email: c.email, photo_url: c.photo_url, is_active: c.is_active });
+    setForm({ slug: c.slug, name: c.name, title: c.title, phone: c.phone, email: c.email, photo_url: c.photo_url, photo_position: c.photo_position ?? 50, is_active: c.is_active });
     setEditId(c.id);
     setShowForm(true);
   };
@@ -254,6 +257,30 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                   </button>
                   <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                 </div>
+
+                {form.photo_url && (
+                  <div className="mt-3">
+                    <label className="block text-xs text-white/50 mb-2">{s.photoPosition}: {form.photo_position ?? 50}%</label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-16 h-16 rounded-full overflow-hidden border border-white/20 flex-shrink-0">
+                        <img
+                          src={form.photo_url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          style={{ objectPosition: `center ${form.photo_position ?? 50}%` }}
+                        />
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={form.photo_position ?? 50}
+                        onChange={e => setForm(f => ({ ...f, photo_position: Number(e.target.value) }))}
+                        className="flex-1 accent-[#27C4A0]"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

@@ -72,7 +72,7 @@ export default async function CardPage({ params }: Props) {
         body { background: #1a1a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         @media (max-height: 750px) {
           .card-header { padding: 24px 24px 16px !important; gap: 10px !important; }
-          .card-photo { width: 80px !important; height: 80px !important; }
+          .card-photo { width: 100px !important; height: 100px !important; }
           .card-name { font-size: 22px !important; }
           .card-title { font-size: 14px !important; }
           .card-actions { margin-top: 4px !important; gap: 16px !important; }
@@ -91,12 +91,13 @@ export default async function CardPage({ params }: Props) {
         }}>
           {data.photo_url ? (
             <img className="card-photo" src={data.photo_url} alt={data.name} style={{
-              width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center',
+              width: 130, height: 130, borderRadius: '50%', objectFit: 'cover',
+              objectPosition: `center ${data.photo_position ?? 50}%`,
               border: '3px solid rgba(255,255,255,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
             }} />
           ) : (
             <div style={{
-              width: 100, height: 100, borderRadius: '50%',
+              width: 130, height: 130, borderRadius: '50%',
               background: 'linear-gradient(135deg, #27C4A0, #1A6B9A)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 36, fontWeight: 700, color: 'white',

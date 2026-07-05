@@ -12,6 +12,7 @@ export interface EmployeeCard {
   phone: string;
   email: string;
   photo_url: string | null;
+  photo_position: number; // 0-100, vertical % for objectPosition
   is_active: boolean;
   created_at: string;
 }
