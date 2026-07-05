@@ -65,14 +65,14 @@ export default async function Services() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#1A6B9A]/40 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
+        <div className="reveal text-center mb-14">
           <h2 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{title}</h2>
           <p className="text-white/45 text-lg">{subtitle}</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {cards.map(({ Icon, name, desc }) => (
-            <div key={name} className="glass-card glass-card-hover rounded-2xl p-7 group">
+          {cards.map(({ Icon, name, desc }, i) => (
+            <div key={name} className="reveal glass-card product-card-hover rounded-2xl p-7 group" data-stagger={i}>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#27C4A0]/20 to-[#1A6B9A]/10 border border-[#27C4A0]/20 flex items-center justify-center text-[#27C4A0] mb-5 group-hover:scale-110 transition-transform duration-300">
                 <Icon />
               </div>

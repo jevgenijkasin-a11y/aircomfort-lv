@@ -43,7 +43,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Reviews />
       <section className="section-padding bg-[#051e31] relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#27C4A0]/5 blur-[100px]" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="reveal relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 bg-[#27C4A0]/10 border border-[#27C4A0]/25 text-[#27C4A0] text-sm font-medium px-4 py-1.5 rounded-full mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-[#27C4A0]" />
             {th('badge')}
@@ -55,13 +55,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/contacts"
-              className="inline-flex items-center justify-center gap-2 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold text-base px-8 py-3.5 rounded-xl transition-all shadow-xl shadow-[#27C4A0]/25 hover:-translate-y-0.5"
+              className="magnetic inline-flex items-center justify-center gap-2 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold text-base px-8 py-3.5 rounded-xl transition-all shadow-xl shadow-[#27C4A0]/25"
             >
               {tn('getQuote')}
             </Link>
             <Link
               href="/calculator"
-              className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold text-base px-8 py-3.5 rounded-xl transition-all backdrop-blur-sm"
+              className="magnetic inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold text-base px-8 py-3.5 rounded-xl transition-all backdrop-blur-sm"
             >
               {th('ctaCalculator')}
             </Link>

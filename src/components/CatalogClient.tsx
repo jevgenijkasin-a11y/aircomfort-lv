@@ -147,7 +147,7 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
   const energyCls = energyColors[product.energy_class] ?? 'text-gray-500 border-gray-300 bg-gray-100';
 
   return (
-    <Link href={`/catalog/${product.id}` as any} className="bg-white rounded-2xl overflow-hidden flex flex-col group border border-[#e6edf3] hover:border-[#B0BDD0] transition-all duration-200" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.07)' }}>
+    <Link href={`/catalog/${product.id}` as any} className="catalog-card-hover bg-white rounded-2xl overflow-hidden flex flex-col group border border-[#e6edf3]" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.07)' }}>
       <div className="relative rounded-t-2xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', paddingTop: '62%' }}>
         {productImages(product)[0] ? (
           <img src={productImages(product)[0]} alt={name} className="absolute inset-0 w-full h-full object-contain p-4" style={{ filter: 'drop-shadow(0 6px 12px rgba(15,23,42,0.10))' }} />
