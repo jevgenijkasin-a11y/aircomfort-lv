@@ -128,3 +128,14 @@ body {
   }
 }
 
+/* ── AIR FLOW STREAMS ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes airflow-drift {
+    from { stroke-dashoffset: 0;   opacity: 0.04; }
+    to   { stroke-dashoffset: -60; opacity: 0.09; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .airflow-layer { display: none !important; }
+}
+

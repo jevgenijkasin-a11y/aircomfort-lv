@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation';
 import { getSettings, getHeroSlides } from '@/lib/supabase';
 import HeroSlider from './HeroSlider';
 import CoolWidget from './CoolWidget';
+import AirFlow from './AirFlow';
 
 const DEFAULT_SLIDES = [
   'https://images.unsplash.com/photo-1631545806609-bbb02e574b74?w=1920&q=80',
@@ -73,6 +74,7 @@ export default async function Hero() {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       <HeroSlider slides={slideUrls} />
       <div className="absolute inset-0 bg-gradient-to-br from-[#040f18]/90 via-[#072D47]/80 to-[#0b3d5c]/85" />
+      <AirFlow />
       {/* Diagonal lines decorative accent */}
       <div className="absolute top-0 right-0 w-1/2 h-full opacity-5 pointer-events-none z-10">
         <svg viewBox="0 0 500 800" className="w-full h-full" preserveAspectRatio="none">
