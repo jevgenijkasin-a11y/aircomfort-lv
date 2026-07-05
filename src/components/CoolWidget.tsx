@@ -57,7 +57,7 @@ export default function CoolWidget({ label }: Props) {
   const fadeOut = Math.max(0, 1 - progress * 1.5); // fades out by ~67% progress
 
   return (
-    <div ref={ref} className="flex flex-col">
+    <div ref={ref} className="flex flex-col items-center sm:items-start">
       <div className="flex items-baseline">
         <span
           className="font-syne font-bold text-2xl overflow-hidden whitespace-nowrap"
