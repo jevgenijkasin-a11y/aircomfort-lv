@@ -128,6 +128,20 @@ body {
   }
 }
 
+/* ── FLOATING BUTTONS ─────────────────────────────────────────────── */
+@keyframes ring-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.6; }
+  50%       { transform: scale(1.25); opacity: 0.1; }
+}
+@keyframes ring-pulse-slow {
+  0%, 100% { transform: scale(1);    opacity: 0.4; }
+  50%       { transform: scale(1.35); opacity: 0.05; }
+}
+@keyframes icon-rock {
+  0%, 100% { transform: rotate(-45deg); }
+  50%       { transform: rotate(45deg); }
+}
+
 /* ── AIR FLOW STREAMS ──────────────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
   @keyframes airflow-drift {
