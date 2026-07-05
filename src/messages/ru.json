@@ -22,7 +22,8 @@
     "serviceHome": "Бытовые кондиционеры",
     "serviceHeatPump": "Тепловые насосы",
     "serviceCommercial": "Коммерческие",
-    "serviceMaintenance": "Обслуживание"
+    "serviceMaintenance": "Обслуживание",
+    "coolWidget": "Быстрое охлаждение"
   },
   "trustbar": {
     "warranty": "Гарантия",

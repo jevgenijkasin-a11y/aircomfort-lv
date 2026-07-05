@@ -22,7 +22,8 @@
     "serviceHome": "Mājas kondicionētāji",
     "serviceHeatPump": "Siltumsūkņi",
     "serviceCommercial": "Komerciālie",
-    "serviceMaintenance": "Apkope"
+    "serviceMaintenance": "Apkope",
+    "coolWidget": "Ātra dzesēšana"
   },
   "trustbar": {
     "warranty": "Garantija",

@@ -2,6 +2,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { getSettings, getHeroSlides } from '@/lib/supabase';
 import HeroSlider from './HeroSlider';
+import CoolWidget from './CoolWidget';
 
 const DEFAULT_SLIDES = [
   'https://images.unsplash.com/photo-1631545806609-bbb02e574b74?w=1920&q=80',
@@ -115,7 +116,7 @@ export default async function Hero() {
             </Link>
           </div>
 
-          <div className="mt-16 flex flex-wrap gap-x-10 gap-y-6">
+          <div className="mt-16 flex flex-wrap items-end justify-center sm:justify-start gap-x-10 gap-y-6">
             {stats.map((stat) => {
               const match = stat.value.match(/^([\d.]+)(.*)$/);
               const numPart = match ? match[1] : null;
@@ -138,6 +139,7 @@ export default async function Hero() {
                 </div>
               );
             })}
+            <CoolWidget label={t('coolWidget')} />
           </div>
 
           <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3">

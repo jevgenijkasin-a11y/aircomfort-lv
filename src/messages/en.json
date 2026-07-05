@@ -22,7 +22,8 @@
     "serviceHome": "Home A/C",
     "serviceHeatPump": "Heat Pumps",
     "serviceCommercial": "Commercial",
-    "serviceMaintenance": "Maintenance"
+    "serviceMaintenance": "Maintenance",
+    "coolWidget": "Fast cooling"
   },
   "trustbar": {
     "warranty": "Warranty",
