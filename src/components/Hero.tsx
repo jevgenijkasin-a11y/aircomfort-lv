@@ -85,7 +85,7 @@ export default async function Hero() {
       </div>
 
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 w-full">
-        <div className="max-w-3xl">
+        <div className="max-w-3xl text-center sm:text-left">
           <div className="inline-flex items-center gap-2 bg-[#27C4A0]/10 border border-[#27C4A0]/25 text-[#27C4A0] text-sm font-medium px-4 py-1.5 rounded-full mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-[#27C4A0] animate-pulse" />
             {t('badge')}
@@ -96,11 +96,11 @@ export default async function Hero() {
             {showAccent && <span className="gradient-text">{t('titleAccent')}</span>}
           </h1>
 
-          <p className="text-lg sm:text-xl text-white/55 mb-10 leading-relaxed max-w-xl">
+          <p className="text-lg sm:text-xl text-white/55 mb-10 leading-relaxed max-w-xl mx-auto sm:mx-0">
             {subtitle}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-5">
+          <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
             <Link
               href="/catalog"
               className="magnetic inline-flex items-center justify-center gap-3 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 shadow-[0_8px_40px_rgba(39,196,160,0.5)] hover:shadow-[0_12px_50px_rgba(39,196,160,0.65)] tracking-wide"
@@ -118,13 +118,13 @@ export default async function Hero() {
             </Link>
           </div>
 
-          <div className="mt-16 flex flex-wrap items-end justify-center sm:justify-start gap-x-10 gap-y-6">
+          <div className="mt-16 grid grid-cols-2 sm:flex sm:flex-wrap sm:items-end sm:justify-start gap-x-10 gap-y-6 pr-20 sm:pr-0">
             {stats.map((stat) => {
               const match = stat.value.match(/^([\d.]+)(.*)$/);
               const numPart = match ? match[1] : null;
               const suffix = match ? match[2] : '';
               return (
-                <div key={stat.label} className="flex flex-col">
+                <div key={stat.label} className="flex flex-col items-center sm:items-start">
                   {numPart ? (
                     <span
                       className="font-syne font-bold text-3xl text-[#27C4A0]"
@@ -137,7 +137,7 @@ export default async function Hero() {
                   ) : (
                     <span className="font-syne font-bold text-3xl text-[#27C4A0]">{stat.value}</span>
                   )}
-                  <span className="text-sm text-white/45 mt-0.5">{stat.label}</span>
+                  <span className="text-sm text-white/45 mt-0.5 text-center sm:text-left">{stat.label}</span>
                 </div>
               );
             })}

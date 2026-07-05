@@ -72,12 +72,12 @@ export default async function Services() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map(({ Icon, name, desc }, i) => (
-            <div key={name} className="reveal glass-card product-card-hover rounded-2xl p-7 group" data-stagger={i}>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#27C4A0]/20 to-[#1A6B9A]/10 border border-[#27C4A0]/20 flex items-center justify-center text-[#27C4A0] mb-5 group-hover:scale-110 transition-transform duration-300">
+            <div key={name} className="reveal glass-card product-card-hover rounded-2xl p-7 group h-full flex flex-col" data-stagger={i}>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#27C4A0]/20 to-[#1A6B9A]/10 border border-[#27C4A0]/20 flex items-center justify-center text-[#27C4A0] mb-5 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                 <Icon />
               </div>
               <h3 className="font-syne font-semibold text-lg mb-2">{name}</h3>
-              <p className="text-white/50 text-sm leading-relaxed">{desc}</p>
+              <p className="text-white/50 text-sm leading-relaxed flex-1">{desc}</p>
             </div>
           ))}
         </div>
