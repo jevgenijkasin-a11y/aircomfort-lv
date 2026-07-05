@@ -3,12 +3,12 @@ import Services from '@/components/Services';
 import Categories from '@/components/Categories';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import Reviews from '@/components/Reviews';
+import BrandMarquee from '@/components/BrandMarquee';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 
 export const dynamic = 'force-dynamic';
 
-const brandList = ['Daikin', 'Mitsubishi', 'LG', 'TCL', 'Midea', 'Nordis', 'Hisense', 'Toshiba'];
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -23,20 +23,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <Hero />
-      <section className="py-14 border-y border-[#1A6B9A]/15">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
-            {brandList.map((b) => (
-              <span
-                key={b}
-                className="font-syne font-bold text-xl text-white/20 hover:text-white/50 transition-colors cursor-default tracking-wide"
-              >
-                {b}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      <BrandMarquee />
       <Services />
       <Categories />
       <FeaturedProducts />
