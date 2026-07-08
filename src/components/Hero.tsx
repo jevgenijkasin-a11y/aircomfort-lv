@@ -1,6 +1,6 @@
-import { getTranslations, getLocale } from 'next-intl/server';
+﻿import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { getSettings, getHeroSlides } from '@/lib/supabase';
+import { getSettings, getHeroSlides } from '@/lib/db';
 import HeroSlider from './HeroSlider';
 import CoolWidget from './CoolWidget';
 import AirFlow from './AirFlow';

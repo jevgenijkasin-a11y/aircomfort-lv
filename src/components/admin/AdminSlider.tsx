@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { T, Lang } from './adminStrings';
-import { supabase, SupabaseHeroSlide } from '@/lib/supabase';
+import { SupabaseHeroSlide } from '@/lib/types';
 
 export default function AdminSlider({ lang }: { lang: Lang }) {
   const s = T[lang];
@@ -15,10 +15,8 @@ export default function AdminSlider({ lang }: { lang: Lang }) {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('hero_slides')
-      .select('*')
-      .order('sort_order', { ascending: true });
+    const r = await fetch('/api/admin/slides');
+    const data = r.ok ? await r.json() : [];
     setSlides((data ?? []) as SupabaseHeroSlide[]);
     setLoading(false);
   };
@@ -33,8 +31,11 @@ export default function AdminSlider({ lang }: { lang: Lang }) {
     const r = await fetch('/api/admin/upload', { method: 'POST', body: fd });
     const json = await r.json().catch(() => ({}));
     if (r.ok && json.url) {
-      const maxOrder = slides.length > 0 ? Math.max(...slides.map((s) => s.sort_order)) : -1;
-      await supabase.from('hero_slides').insert([{ image_url: json.url, sort_order: maxOrder + 1, is_visible: true }]);
+      await fetch('/api/admin/slides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_url: json.url }),
+      });
       await load();
     } else {
       setUploadError(json.error || `HTTP ${r.status}`);
@@ -43,8 +44,15 @@ export default function AdminSlider({ lang }: { lang: Lang }) {
     if (fileRef.current) fileRef.current.value = '';
   };
 
+  const patchSlide = (id: number, patch: { sort_order?: number; is_visible?: boolean }) =>
+    fetch(`/api/admin/slides/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    });
+
   const toggleVisible = async (slide: SupabaseHeroSlide) => {
-    await supabase.from('hero_slides').update({ is_visible: !slide.is_visible }).eq('id', slide.id);
+    await patchSlide(slide.id, { is_visible: !slide.is_visible });
     setSlides((prev) => prev.map((s) => s.id === slide.id ? { ...s, is_visible: !s.is_visible } : s));
   };
 
@@ -53,8 +61,8 @@ export default function AdminSlider({ lang }: { lang: Lang }) {
     const a = slides[index];
     const b = slides[index - 1];
     await Promise.all([
-      supabase.from('hero_slides').update({ sort_order: b.sort_order }).eq('id', a.id),
-      supabase.from('hero_slides').update({ sort_order: a.sort_order }).eq('id', b.id),
+      patchSlide(a.id, { sort_order: b.sort_order }),
+      patchSlide(b.id, { sort_order: a.sort_order }),
     ]);
     const updated = [...slides];
     updated[index] = { ...a, sort_order: b.sort_order };
@@ -67,8 +75,8 @@ export default function AdminSlider({ lang }: { lang: Lang }) {
     const a = slides[index];
     const b = slides[index + 1];
     await Promise.all([
-      supabase.from('hero_slides').update({ sort_order: b.sort_order }).eq('id', a.id),
-      supabase.from('hero_slides').update({ sort_order: a.sort_order }).eq('id', b.id),
+      patchSlide(a.id, { sort_order: b.sort_order }),
+      patchSlide(b.id, { sort_order: a.sort_order }),
     ]);
     const updated = [...slides];
     updated[index] = { ...a, sort_order: b.sort_order };
@@ -77,7 +85,7 @@ export default function AdminSlider({ lang }: { lang: Lang }) {
   };
 
   const deleteSlide = async (id: number) => {
-    await supabase.from('hero_slides').delete().eq('id', id);
+    await fetch(`/api/admin/slides/${id}`, { method: 'DELETE' });
     setSlides((prev) => prev.filter((s) => s.id !== id));
     setConfirmId(null);
   };

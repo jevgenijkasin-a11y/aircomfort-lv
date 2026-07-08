@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { T, Lang } from './adminStrings';
-import { supabase } from '@/lib/supabase';
 
 type TextsState = Record<string, string>;
 
@@ -54,7 +53,7 @@ export default function AdminTexts({ lang }: { lang: Lang }) {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    supabase.from('settings').select('key,value').then(({ data }) => {
+    fetch('/api/admin/settings').then(r => r.ok ? r.json() : []).then((data: { key: string; value: string }[]) => {
       if (data) {
         const map: Record<string, string> = {};
         data.forEach((r: { key: string; value: string }) => { map[r.key] = r.value; });
@@ -73,7 +72,11 @@ export default function AdminTexts({ lang }: { lang: Lang }) {
   const save = async () => {
     setSaving(true);
     const rows = Object.entries(texts).map(([key, value]) => ({ key, value }));
-    await supabase.from('settings').upsert(rows, { onConflict: 'key' });
+    await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(rows),
+    });
     await fetch('/api/admin/revalidate', { method: 'POST' });
     setSaving(false);
     setSaved(true);

@@ -4,3 +4,8 @@ node_modules
 .env.local
 .vercel
 .claude
+
+# Live data: SQLite DB + uploaded images (deployed via FTP, never via git)
+data/
+migration/
+tsconfig.tsbuildinfo

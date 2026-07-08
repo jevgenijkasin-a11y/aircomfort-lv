@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import ContactForm from '@/components/ContactForm';
-import { getSettings } from '@/lib/supabase';
+import { getSettings } from '@/lib/db';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('contacts');

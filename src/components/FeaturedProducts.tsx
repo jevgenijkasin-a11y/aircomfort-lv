@@ -1,6 +1,7 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages, getSettings } from '@/lib/supabase';
+import { type SupabaseProduct, productName, productFeatures, productImages } from '@/lib/types';
+import { listProducts, getSettings } from '@/lib/db';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-[#27C4A0] border-[#27C4A0]/30 bg-[#27C4A0]/10',
@@ -110,12 +111,7 @@ export default async function FeaturedProducts() {
   const [t, locale, settings] = await Promise.all([getTranslations('products'), getLocale(), getSettings()]);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
 
-  const { data } = await supabaseServer
-    .from('products')
-    .select('*')
-    .eq('in_stock', true);
-
-  const all = data ?? [];
+  const all = await listProducts({ inStockOnly: true });
   if (!all.length) return null;
   const products = dailyShuffle(all).slice(0, 3);
 

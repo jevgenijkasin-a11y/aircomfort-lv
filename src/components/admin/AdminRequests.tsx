@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { T, Lang, AdminRequest } from './adminStrings';
-import { supabase } from '@/lib/supabase';
 
 export default function AdminRequests({ lang }: { lang: Lang }) {
   const s = T[lang];
@@ -14,10 +13,8 @@ export default function AdminRequests({ lang }: { lang: Lang }) {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('contacts')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const r = await fetch('/api/admin/requests');
+    const data = r.ok ? await r.json() : [];
     setRequests((data ?? []) as AdminRequest[]);
     setLoading(false);
   };
@@ -25,12 +22,20 @@ export default function AdminRequests({ lang }: { lang: Lang }) {
   useEffect(() => { load(); }, []);
 
   const markRead = async (id: number) => {
-    await supabase.from('contacts').update({ status: 'read' }).eq('id', id);
+    await fetch('/api/admin/requests', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status: 'read' }),
+    });
     setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'read' } : r)));
   };
 
   const deleteRequest = async (id: number) => {
-    await supabase.from('contacts').delete().eq('id', id);
+    await fetch('/api/admin/requests', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
     setRequests((prev) => prev.filter((r) => r.id !== id));
     setConfirmId(null);
   };

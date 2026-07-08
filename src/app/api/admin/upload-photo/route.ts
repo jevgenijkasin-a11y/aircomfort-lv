@@ -1,8 +1,10 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
+import { promises as fs } from 'fs';
+import path from 'path';
 import { verifySession } from '@/lib/adminAuth';
-import { supabaseAdmin } from '@/lib/supabase';
+import { UPLOADS_DIR } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   if (!(await verifySession(req))) {
@@ -14,24 +16,13 @@ export async function POST(req: NextRequest) {
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
 
   const bytes = await file.arrayBuffer();
-  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const ext = /^[a-z0-9]{1,5}$/.test(rawExt) ? rawExt : 'jpg';
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-  const { error } = await supabaseAdmin.storage
-    .from('employee-photos')
-    .upload(filename, Buffer.from(bytes), {
-      contentType: file.type || 'image/jpeg',
-      upsert: false,
-    });
+  const dir = path.join(UPLOADS_DIR, 'employee-photos');
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(dir, filename), Buffer.from(bytes));
 
-  if (error) {
-    console.error('[upload-photo] Supabase Storage error:', JSON.stringify(error));
-    return NextResponse.json({ error: error.message, details: JSON.stringify(error) }, { status: 500 });
-  }
-
-  const { data: { publicUrl } } = supabaseAdmin.storage
-    .from('employee-photos')
-    .getPublicUrl(filename);
-
-  return NextResponse.json({ url: publicUrl });
+  return NextResponse.json({ url: `/uploads/employee-photos/${filename}` });
 }

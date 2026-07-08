@@ -30,7 +30,7 @@ export interface ProductSpecs {
 }
 
 export interface AdminProduct {
-  id: number;
+  id: string;
   brand: string;
   name_lv: string;
   name_ru: string;

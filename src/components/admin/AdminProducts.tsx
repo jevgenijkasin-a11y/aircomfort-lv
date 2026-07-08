@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { T, Lang, AdminProduct, ProductSpecs } from './adminStrings';
-import { supabase } from '@/lib/supabase';
 
-type ProductForm = Omit<AdminProduct, 'id' | 'created_at'> & { id?: number };
+type ProductForm = Omit<AdminProduct, 'id' | 'created_at'> & { id?: string };
 
 const EMPTY_SPECS: ProductSpecs = {
   manufacturer: '', cooling_kw: '', heating_kw: '',
@@ -32,7 +31,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<{ open: boolean; product: ProductForm }>({ open: false, product: EMPTY });
   const [saving, setSaving] = useState(false);
-  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [filterBrand, setFilterBrand] = useState('');
   const [filterPower, setFilterPower] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -42,10 +41,8 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const r = await fetch('/api/admin/products');
+    const data = r.ok ? await r.json() : [];
     setProducts((data ?? []) as AdminProduct[]);
     setLoading(false);
   };
@@ -205,19 +202,20 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     };
 
     if (id) {
-      const { data } = await supabase
-        .from('products')
-        .update(payload)
-        .eq('id', id)
-        .select()
-        .single();
+      const r = await fetch(`/api/admin/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = r.ok ? await r.json() : null;
       if (data) setProducts((prev) => prev.map((p) => (p.id === id ? (data as AdminProduct) : p)));
     } else {
-      const { data } = await supabase
-        .from('products')
-        .insert([payload])
-        .select()
-        .single();
+      const r = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = r.ok ? await r.json() : null;
       if (data) setProducts((prev) => [data as AdminProduct, ...prev]);
     }
     await fetch('/api/admin/revalidate', { method: 'POST' });
@@ -225,8 +223,8 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     closeModal();
   };
 
-  const deleteProduct = async (id: number) => {
-    await supabase.from('products').delete().eq('id', id);
+  const deleteProduct = async (id: string) => {
+    await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
     setProducts((prev) => prev.filter((p) => p.id !== id));
     setConfirmId(null);
     await fetch('/api/admin/revalidate', { method: 'POST' });

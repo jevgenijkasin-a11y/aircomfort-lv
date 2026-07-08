@@ -1,6 +1,6 @@
-import { getTranslations, getLocale } from 'next-intl/server';
+﻿import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { getSettings } from '@/lib/supabase';
+import { getSettings } from '@/lib/db';
 
 function HomeIcon() {
   return (

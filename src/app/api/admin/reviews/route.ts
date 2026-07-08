@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/adminAuth';
-import { getSettingsRows, upsertSettings } from '@/lib/db';
+import { listReviews, createReview } from '@/lib/db';
 
 function unauth() {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -10,14 +10,11 @@ function unauth() {
 
 export async function GET(req: NextRequest) {
   if (!(await verifySession(req))) return unauth();
-  return NextResponse.json(await getSettingsRows());
+  return NextResponse.json(await listReviews());
 }
 
-// Body: [{ key, value }, ...]
-export async function PUT(req: NextRequest) {
+export async function POST(req: NextRequest) {
   if (!(await verifySession(req))) return unauth();
-  const rows = await req.json();
-  if (!Array.isArray(rows)) return NextResponse.json({ error: 'Expected an array' }, { status: 400 });
-  await upsertSettings(rows);
+  await createReview(await req.json());
   return NextResponse.json({ success: true });
 }

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getCardByToken } from '@/lib/db';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -10,12 +10,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
-  const { data } = await supabaseAdmin
-    .from('employees_cards')
-    .select('name, title')
-    .eq('token', token)
-    .eq('is_active', true)
-    .single();
+  const data = await getCardByToken(token);
   if (!data) return { title: 'AirComfort' };
   return {
     title: `${data.name} — AirComfort`,
@@ -29,12 +24,7 @@ const MAPS_URL = 'https://maps.google.com/?q=Katlakalna+iela+8,+Rīga,+LV-1073';
 export default async function CardPage({ params }: Props) {
   const { token } = await params;
 
-  const { data } = await supabaseAdmin
-    .from('employees_cards')
-    .select('*')
-    .eq('token', token)
-    .eq('is_active', true)
-    .single();
+  const data = await getCardByToken(token);
 
   if (!data) notFound();
 

@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/adminAuth';
-import { updateProduct, deleteProduct } from '@/lib/db';
+import { updateHeroSlide, deleteHeroSlide } from '@/lib/db';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -13,15 +13,13 @@ function unauth() {
 export async function PUT(req: NextRequest, { params }: Params) {
   if (!(await verifySession(req))) return unauth();
   const { id } = await params;
-  const payload = await req.json();
-  const product = await updateProduct(id, payload);
-  if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json(product);
+  await updateHeroSlide(Number(id), await req.json());
+  return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: NextRequest, { params }: Params) {
   if (!(await verifySession(req))) return unauth();
   const { id } = await params;
-  await deleteProduct(id);
+  await deleteHeroSlide(Number(id));
   return NextResponse.json({ success: true });
 }

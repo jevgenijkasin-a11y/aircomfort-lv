@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Calculator from '@/components/Calculator';
-import { getSettings, supabaseServer } from '@/lib/supabase';
+import { getSettings, listProducts } from '@/lib/db';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('calculator');
@@ -14,16 +14,15 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [t, tn, settings, { data: productPrices }] = await Promise.all([
+  const [t, tn, settings, allProducts] = await Promise.all([
     getTranslations('calculator'),
     getTranslations('nav'),
     getSettings(),
-    supabaseServer
-      .from('products')
-      .select('power_kw, price, discount_percent')
-      .eq('in_stock', true)
-      .gt('price', 0),
+    listProducts({ inStockOnly: true }),
   ]);
+  const productPrices = allProducts
+    .filter((p) => p.price > 0)
+    .map(({ power_kw, price, discount_percent }) => ({ power_kw, price, discount_percent }));
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
   const installTo = parseInt(settings.install_price_to || '350') || 350;
 

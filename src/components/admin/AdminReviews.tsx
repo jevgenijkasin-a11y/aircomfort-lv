@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import type { SupabaseReview } from '@/lib/supabase';
+import type { SupabaseReview } from '@/lib/types';
 import { T, type Lang } from './adminStrings';
 
 function Stars({ value, onChange }: { value: number; onChange?: (v: number) => void }) {
@@ -43,10 +42,8 @@ export default function AdminReviews({ lang }: { lang: Lang }) {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('reviews')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const r = await fetch('/api/admin/reviews');
+    const data = r.ok ? await r.json() : [];
     setReviews(data ?? []);
     setLoading(false);
   };
@@ -71,9 +68,17 @@ export default function AdminReviews({ lang }: { lang: Lang }) {
     if (!form.author_name.trim()) return;
     setSaving(true);
     if (editing) {
-      await supabase.from('reviews').update(form).eq('id', editing.id);
+      await fetch(`/api/admin/reviews/${editing.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
     } else {
-      await supabase.from('reviews').insert(form);
+      await fetch('/api/admin/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
     }
     setSaving(false);
     closeForm();
@@ -81,13 +86,17 @@ export default function AdminReviews({ lang }: { lang: Lang }) {
   };
 
   const toggleVisible = async (r: SupabaseReview) => {
-    await supabase.from('reviews').update({ is_visible: !r.is_visible }).eq('id', r.id);
+    await fetch(`/api/admin/reviews/${r.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_visible: !r.is_visible }),
+    });
     setReviews((prev) => prev.map((x) => x.id === r.id ? { ...x, is_visible: !x.is_visible } : x));
   };
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-    await supabase.from('reviews').delete().eq('id', deleteId);
+    await fetch(`/api/admin/reviews/${deleteId}`, { method: 'DELETE' });
     setDeleteId(null);
     load();
   };

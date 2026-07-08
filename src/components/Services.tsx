@@ -1,5 +1,5 @@
-import { getTranslations, getLocale } from 'next-intl/server';
-import { getSettings } from '@/lib/supabase';
+﻿import { getTranslations, getLocale } from 'next-intl/server';
+import { getSettings } from '@/lib/db';
 
 function SupplyIcon() {
   return (

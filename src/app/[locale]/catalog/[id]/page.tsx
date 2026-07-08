@@ -4,7 +4,8 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { supabaseServer, type SupabaseProduct, productName, productFeatures, productImages, productDescription, getSettings } from '@/lib/supabase';
+import { type SupabaseProduct, productName, productFeatures, productImages, productDescription } from '@/lib/types';
+import { getProduct, getSettings } from '@/lib/db';
 import ProductImageViewer from '@/components/ProductImageViewer';
 import BackLink from '@/components/BackLink';
 
@@ -14,7 +15,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id, locale } = await params;
-  const { data } = await supabaseServer.from('products').select('name_lv,name_ru,name_en').eq('id', id).single();
+  const data = await getProduct(id);
   if (!data) return { title: 'Product' };
   const name = locale === 'lv' ? data.name_lv : locale === 'ru' ? data.name_ru : data.name_en;
   return { title: name || 'Product' };
@@ -104,10 +105,10 @@ const SPEC_LABELS: Record<string, Record<string, string>> = {
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
   setRequestLocale(locale);
-  const [t, tp, { data: product }, settings] = await Promise.all([
+  const [t, tp, product, settings] = await Promise.all([
     getTranslations('catalog'),
     getTranslations('products'),
-    supabaseServer.from('products').select('*').eq('id', id).single(),
+    getProduct(id),
     getSettings(),
   ]);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;

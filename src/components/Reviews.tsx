@@ -1,5 +1,6 @@
 import { getTranslations, getLocale } from 'next-intl/server';
-import { supabaseServer, type SupabaseReview } from '@/lib/supabase';
+import { type SupabaseReview } from '@/lib/types';
+import { listReviews } from '@/lib/db';
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -20,12 +21,7 @@ function getInitials(name: string): string {
 export default async function Reviews() {
   const [t, locale] = await Promise.all([getTranslations('reviews'), getLocale()]);
 
-  const { data } = await supabaseServer
-    .from('reviews')
-    .select('*')
-    .eq('is_visible', true)
-    .order('created_at', { ascending: false })
-    .limit(6);
+  const data = await listReviews({ visibleOnly: true, limit: 6 });
 
   type ReviewItem = { id: string | number; author_name: string; text: string; rating: number; dateStr?: string; fromDb: boolean };
 

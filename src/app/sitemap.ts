@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { supabaseServer } from '@/lib/supabase';
+import { listProducts } from '@/lib/db';
 
 const BASE_URL = 'https://aircomfort.lv';
 const locales = ['lv', 'ru', 'en'] as const;
@@ -7,10 +7,7 @@ const locales = ['lv', 'ru', 'en'] as const;
 const staticPaths = ['', '/catalog', '/calculator', '/contacts', '/privacy'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { data: products } = await supabaseServer
-    .from('products')
-    .select('id, created_at')
-    .eq('in_stock', true);
+  const products = await listProducts({ inStockOnly: true });
 
   const staticEntries: MetadataRoute.Sitemap = staticPaths.flatMap((path) =>
     locales.map((locale) => ({

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase';
+import { createContact } from '@/lib/db';
 import nodemailer from 'nodemailer';
 
 interface RequestEntry {
@@ -145,8 +145,8 @@ export async function POST(req: NextRequest) {
   }
   const entry: RequestEntry = { name, phone, email: email || '', service: service || '', message: message || '' };
 
-  // Save to Supabase contacts table (same as admin reads from)
-  await supabaseServer.from('contacts').insert([{ ...entry, status: 'new' }]);
+  // Save to contacts table (same as admin reads from)
+  await createContact(entry);
 
   // Send notification to admin + auto-reply to customer (non-blocking)
   sendNotification(entry).catch((err) => console.error('[SMTP notify]', err?.message || err));

@@ -1,6 +1,6 @@
-import { getTranslations } from 'next-intl/server';
+﻿import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { getSettings } from '@/lib/supabase';
+import { getSettings } from '@/lib/db';
 
 export default async function Footer() {
   const [t, settings] = await Promise.all([getTranslations(), getSettings()]);

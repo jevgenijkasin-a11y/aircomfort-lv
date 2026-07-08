@@ -1,27 +1,10 @@
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase';
-import { revalidatePath } from 'next/cache';
+import { listCards } from '@/lib/db';
+import type { EmployeeCard } from '@/lib/types';
 
-export interface EmployeeCard {
-  id: string;
-  slug: string;
-  token: string;
-  name: string;
-  title: string;
-  phone: string;
-  email: string;
-  photo_url: string | null;
-  photo_position: number; // 0-100, vertical % for objectPosition
-  is_active: boolean;
-  created_at: string;
-}
+export type { EmployeeCard };
 
 export async function getCards(): Promise<EmployeeCard[]> {
-  const { data, error } = await supabaseAdmin
-    .from('employees_cards')
-    .select('*')
-    .order('created_at', { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as EmployeeCard[];
+  return listCards();
 }

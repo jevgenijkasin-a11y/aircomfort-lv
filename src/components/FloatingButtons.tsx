@@ -1,4 +1,4 @@
-import { getSettings } from '@/lib/supabase';
+﻿import { getSettings } from '@/lib/db';
 import FloatingButtonsClient from './FloatingButtonsClient';
 
 export default async function FloatingButtons() {

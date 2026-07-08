@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { type SupabaseProduct, productName, productImages } from '@/lib/supabase';
+import { type SupabaseProduct, productName, productImages } from '@/lib/types';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-[#0D9B78] border-[#0D9B78]/40 bg-[#D4F5EC]',

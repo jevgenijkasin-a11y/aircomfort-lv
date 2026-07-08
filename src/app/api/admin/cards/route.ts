@@ -2,18 +2,13 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/adminAuth';
-import { supabaseAdmin } from '@/lib/supabase';
+import { listCards, createCard } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   if (!(await verifySession(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const { data, error } = await supabaseAdmin
-    .from('employees_cards')
-    .select('*')
-    .order('created_at', { ascending: true });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  return NextResponse.json(await listCards());
 }
 
 export async function POST(req: NextRequest) {
@@ -21,7 +16,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const body = await req.json();
-  const { error } = await supabaseAdmin.from('employees_cards').insert(body);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    await createCard(body);
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }
