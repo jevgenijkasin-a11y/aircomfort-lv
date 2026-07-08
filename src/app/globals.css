@@ -45,8 +45,11 @@ body {
    :hover transform, so the two never fight. Before JS runs we hide the
    wrapper to prevent a flash; .gsap-ready flips it to visible if GSAP
    never initializes (reduced motion / JS disabled). */
+/* Cards are visible by default. JS adds .reveal-init the moment it takes
+   over, which hides them so GSAP can animate them in. If JS never runs or
+   throws before init, the cards simply stay visible (no blank sections). */
 @media (prefers-reduced-motion: no-preference) {
-  .reveal-3d { opacity: 0; will-change: opacity, transform; }
+  .reveal-3d.reveal-init { opacity: 0; will-change: opacity, transform; }
 }
 .reveal-3d.is-revealed { opacity: 1; }
 /* Parent needs perspective for the rotateX to read as depth */

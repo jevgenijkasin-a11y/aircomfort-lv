@@ -29,13 +29,17 @@ export default function SiteAnimations() {
     // GSAP animates the wrapper only; the inner card keeps its :hover.
     const reveal3d = gsap.utils.toArray<HTMLElement>('.reveal-3d');
     const revealTriggers: ScrollTrigger[] = [];
+    const revealTimeouts: ReturnType<typeof setTimeout>[] = [];
     if (reveal3d.length) {
-      gsap.set(reveal3d, { opacity: 0, y: 55, rotateX: 18 });
-      const st = ScrollTrigger.batch(reveal3d, {
-        start: 'top 85%',
-        onEnter: (batch) => {
-          batch.forEach((el) => (el as HTMLElement).classList.add('revealing'));
-          gsap.to(batch, {
+      const shown = new WeakSet<HTMLElement>();
+
+      const showCards = (cards: HTMLElement[], animate: boolean) => {
+        const todo = cards.filter((el) => !shown.has(el));
+        if (!todo.length) return;
+        todo.forEach((el) => shown.add(el));
+        if (animate) {
+          todo.forEach((el) => el.classList.add('revealing'));
+          gsap.to(todo, {
             opacity: 1,
             y: 0,
             rotateX: 0,
@@ -43,15 +47,49 @@ export default function SiteAnimations() {
             stagger: 0.11,
             ease: 'power2.out',
             overwrite: true,
-            onComplete: () => batch.forEach((el) => (el as HTMLElement).classList.remove('revealing')),
+            onComplete: () => todo.forEach((el) => el.classList.remove('revealing')),
           });
-        },
+        } else {
+          // No animation — just make them visible (fallback path)
+          gsap.set(todo, { opacity: 1, y: 0, rotateX: 0 });
+        }
+      };
+
+      reveal3d.forEach((el) => el.classList.add('reveal-init'));
+      gsap.set(reveal3d, { opacity: 0, y: 55, rotateX: 18 });
+
+      // Cards already in the viewport on load: reveal them right away, so a
+      // section that never crosses the trigger line can't stay blank.
+      const vh = window.innerHeight;
+      const inView = reveal3d.filter((el) => {
+        const top = el.getBoundingClientRect().top;
+        return top < vh && top > -el.offsetHeight;
+      });
+      if (inView.length) showCards(inView, true);
+
+      // Everything else animates in on scroll.
+      const st = ScrollTrigger.batch(reveal3d, {
+        start: 'top 88%',
+        onEnter: (batch) => showCards(batch as HTMLElement[], true),
       });
       revealTriggers.push(...st);
-      // Recalculate positions after fonts/images settle so triggers fire correctly
-      const rt1 = setTimeout(() => ScrollTrigger.refresh(), 300);
-      const rt2 = setTimeout(() => ScrollTrigger.refresh(), 900);
-      revealTriggers.push({ kill: () => { clearTimeout(rt1); clearTimeout(rt2); } } as unknown as ScrollTrigger);
+
+      // Recalculate after fonts/images settle so triggers fire correctly.
+      revealTimeouts.push(setTimeout(() => ScrollTrigger.refresh(), 300));
+      revealTimeouts.push(setTimeout(() => ScrollTrigger.refresh(), 1000));
+
+      // Safety net: after 1.8s force-show any card that is in (or near) the
+      // viewport but still hidden — guarantees no permanently-blank section.
+      revealTimeouts.push(
+        setTimeout(() => {
+          const near = reveal3d.filter((el) => {
+            if (shown.has(el)) return false;
+            const top = el.getBoundingClientRect().top;
+            return top < window.innerHeight + 300;
+          });
+          if (near.length) showCards(near, false);
+        }, 1800)
+      );
     }
 
     // ── REVEAL ──────────────────────────────────────────────────────────
@@ -210,6 +248,7 @@ export default function SiteAnimations() {
         }
       });
       revealTriggers.forEach((st) => st.kill());
+      revealTimeouts.forEach((id) => clearTimeout(id));
       // Reset reveal wrappers to visible so a remount starts clean
       gsap.set('.reveal-3d', { clearProps: 'all' });
       document.querySelectorAll('.reveal-3d').forEach((n) => (n as HTMLElement).classList.add('is-revealed'));
