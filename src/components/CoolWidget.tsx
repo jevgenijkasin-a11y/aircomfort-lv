@@ -90,7 +90,7 @@ export default function CoolWidget({ label }: Props) {
           +{temp}°
         </span>
       </div>
-      <span className="text-sm text-white/45 mt-0.5">{label}</span>
+      <span className="text-sm text-white/75 mt-0.5">{label}</span>
     </div>
   );
 }
