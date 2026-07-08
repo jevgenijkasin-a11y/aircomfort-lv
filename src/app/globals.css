@@ -40,6 +40,26 @@ body {
   #scroll-progress-bar { display: none; }
 }
 
+/* ── SCROLL REVEAL (3D depth, driven by GSAP ScrollTrigger) ─────────────
+   GSAP animates the wrapper (.reveal-3d); the inner card keeps its own
+   :hover transform, so the two never fight. Before JS runs we hide the
+   wrapper to prevent a flash; .gsap-ready flips it to visible if GSAP
+   never initializes (reduced motion / JS disabled). */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-3d { opacity: 0; will-change: opacity, transform; }
+}
+.reveal-3d.is-revealed { opacity: 1; }
+/* Parent needs perspective for the rotateX to read as depth */
+.reveal-grid { perspective: 900px; }
+
+/* While a card is animating in, glow its direct card child so the motion
+   reads against the dark background. Fades out after the reveal. */
+.reveal-3d.revealing > * {
+  border-color: rgba(39, 196, 160, 0.55) !important;
+  box-shadow: 0 12px 40px var(--color-accent-glow, rgba(39, 196, 160, 0.25));
+  transition: border-color 0.6s ease, box-shadow 0.6s ease;
+}
+
 /* ── PRODUCT CARD HOVER ────────────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
   .product-card-hover {

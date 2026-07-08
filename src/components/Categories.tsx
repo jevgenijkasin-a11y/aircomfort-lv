@@ -70,12 +70,12 @@ export default async function Categories() {
           <p className="text-white/45 text-lg">{subtitle}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {cards.map(({ slug, Icon, accent, name, desc, explore }) => (
+        <div className="reveal-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {cards.map(({ slug, Icon, accent, name, desc, explore }, i) => (
+            <div key={slug} className="reveal-3d flex flex-col" data-stagger={i}>
             <Link
-              key={slug}
               href={`/catalog?category=${slug}`}
-              className="glass-card glass-card-hover rounded-2xl p-7 group flex flex-col"
+              className="glass-card glass-card-hover rounded-2xl p-7 group flex flex-col h-full"
             >
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 border"
@@ -99,6 +99,7 @@ export default async function Categories() {
                 </svg>
               </div>
             </Link>
+            </div>
           ))}
         </div>
       </div>

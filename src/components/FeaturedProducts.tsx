@@ -131,9 +131,9 @@ export default async function FeaturedProducts() {
             </svg>
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="reveal-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((p, i) => (
-            <div key={p.id} className="reveal flex flex-col" data-stagger={i}>
+            <div key={p.id} className="reveal-3d flex flex-col" data-stagger={i}>
               <ProductCard product={p as SupabaseProduct} locale={locale} t={(k, v) => t(k as Parameters<typeof t>[0], v as any)} installFrom={installFrom} />
             </div>
           ))}

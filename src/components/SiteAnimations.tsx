@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function SiteAnimations() {
   useEffect(() => {
@@ -16,7 +20,38 @@ export default function SiteAnimations() {
     window.addEventListener('scroll', onScroll, { passive: true });
 
     if (reduced) {
+      // Ensure 3D-reveal elements are visible when motion is reduced
+      document.querySelectorAll('.reveal-3d').forEach((n) => (n as HTMLElement).classList.add('is-revealed'));
       return () => window.removeEventListener('scroll', onScroll);
+    }
+
+    // ── REVEAL 3D (GSAP ScrollTrigger — depth reveal like the landing) ───
+    // GSAP animates the wrapper only; the inner card keeps its :hover.
+    const reveal3d = gsap.utils.toArray<HTMLElement>('.reveal-3d');
+    const revealTriggers: ScrollTrigger[] = [];
+    if (reveal3d.length) {
+      gsap.set(reveal3d, { opacity: 0, y: 55, rotateX: 18 });
+      const st = ScrollTrigger.batch(reveal3d, {
+        start: 'top 85%',
+        onEnter: (batch) => {
+          batch.forEach((el) => (el as HTMLElement).classList.add('revealing'));
+          gsap.to(batch, {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            duration: 0.8,
+            stagger: 0.11,
+            ease: 'power2.out',
+            overwrite: true,
+            onComplete: () => batch.forEach((el) => (el as HTMLElement).classList.remove('revealing')),
+          });
+        },
+      });
+      revealTriggers.push(...st);
+      // Recalculate positions after fonts/images settle so triggers fire correctly
+      const rt1 = setTimeout(() => ScrollTrigger.refresh(), 300);
+      const rt2 = setTimeout(() => ScrollTrigger.refresh(), 900);
+      revealTriggers.push({ kill: () => { clearTimeout(rt1); clearTimeout(rt2); } } as unknown as ScrollTrigger);
     }
 
     // ── REVEAL ──────────────────────────────────────────────────────────
@@ -148,6 +183,10 @@ export default function SiteAnimations() {
           delete el.dataset.willReveal;
         }
       });
+      revealTriggers.forEach((st) => st.kill());
+      // Reset reveal wrappers to visible so a remount starts clean
+      gsap.set('.reveal-3d', { clearProps: 'all' });
+      document.querySelectorAll('.reveal-3d').forEach((n) => (n as HTMLElement).classList.add('is-revealed'));
       fadeObs.disconnect();
       counterObs.disconnect();
       cleanups.forEach((fn) => fn());
