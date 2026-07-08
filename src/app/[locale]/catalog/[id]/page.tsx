@@ -252,12 +252,6 @@ export default async function ProductPage({ params }: Props) {
               </svg>
             </Link>
 
-            <p className="text-white/25 text-xs text-center">
-              {locale === 'lv' ? 'Bezmaksas piegāde un profesionāla uzstādīšana' :
-               locale === 'ru' ? 'Бесплатная доставка и профессиональная установка' :
-               'Free delivery and professional installation'}
-            </p>
-
             {/* Description */}
             {description && (
               <div className="glass-card rounded-2xl p-6">
