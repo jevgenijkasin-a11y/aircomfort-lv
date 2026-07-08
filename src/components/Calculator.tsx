@@ -254,7 +254,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                 </svg>
               </button>
 
-              <p className="text-white/25 text-xs mt-4 leading-relaxed">{t('disclaimer')}</p>
+              <p className="text-white/50 text-xs mt-4 leading-relaxed">{t('disclaimer')}</p>
             </div>
           ) : (
             <div className="glass-card rounded-2xl p-10 text-center flex flex-col items-center justify-center min-h-[360px]">
