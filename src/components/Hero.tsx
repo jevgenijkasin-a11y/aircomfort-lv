@@ -138,7 +138,7 @@ export default async function Hero() {
                     ) : (
                       <span className="font-syne font-bold text-3xl text-[#27C4A0]">{stat.value}</span>
                     )}
-                    <span className="text-sm text-white/45 mt-0.5 text-center sm:text-left">{stat.label}</span>
+                    <span className="text-sm text-white/75 mt-0.5 text-center sm:text-left">{stat.label}</span>
                   </div>
                 );
               })}

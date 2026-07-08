@@ -117,11 +117,19 @@ export default function SiteAnimations() {
       requestAnimationFrame(tick);
     };
 
+    // Guard so each counter runs exactly once, whichever path triggers it
+    const ranCounters = new WeakSet<HTMLElement>();
+    const runCounter = (el: HTMLElement) => {
+      if (ranCounters.has(el)) return;
+      ranCounters.add(el);
+      animateCounter(el);
+    };
+
     const counterObs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            animateCounter(e.target as HTMLElement);
+            runCounter(e.target as HTMLElement);
             counterObs.unobserve(e.target);
           }
         });
@@ -129,14 +137,31 @@ export default function SiteAnimations() {
       { threshold: 0.5 }
     );
 
+    const counterEls: HTMLElement[] = [];
     document.querySelectorAll('[data-count]').forEach((node) => {
       const el = node as HTMLElement;
       const raw = el.getAttribute('data-count') || '0';
       const suffix = el.getAttribute('data-suffix') || '';
       const isFloat = raw.includes('.');
       el.textContent = (isFloat ? '0.0' : '0') + suffix;
-      counterObs.observe(el);
+      counterEls.push(el);
+      // Already on screen (e.g. hero stats): run immediately so it can't
+      // get stuck at 0 when the observer's first callback never flips.
+      if (el.getBoundingClientRect().top < window.innerHeight) {
+        runCounter(el);
+      } else {
+        counterObs.observe(el);
+      }
     });
+    // Safety net: any counter still at 0 after 1.2s gets forced to run.
+    const counterFallback = setTimeout(() => {
+      counterEls.forEach((el) => {
+        if (!ranCounters.has(el) && el.getBoundingClientRect().top < window.innerHeight + 200) {
+          counterObs.unobserve(el);
+          runCounter(el);
+        }
+      });
+    }, 1200);
 
     // ── MAGNETIC BUTTONS ────────────────────────────────────────────────
     const hasMouse = window.matchMedia('(hover: hover)').matches;
@@ -174,6 +199,7 @@ export default function SiteAnimations() {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
+      clearTimeout(counterFallback);
       // On cleanup: show all hidden reveals so next mount starts clean
       document.querySelectorAll('.reveal').forEach((node) => {
         const el = node as HTMLElement;
