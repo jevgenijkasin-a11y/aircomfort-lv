@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AirComfort.lv Public API",
+    "description": "Public API of aircomfort.lv — air conditioning sales and installation in Latvia. Covers the contact/lead endpoint and service health.",
+    "version": "1.0.0",
+    "contact": { "email": "info@aircomfort.lv", "url": "https://aircomfort.lv" }
+  },
+  "servers": [{ "url": "https://aircomfort.lv" }],
+  "paths": {
+    "/api/contact": {
+      "post": {
+        "operationId": "submitContactRequest",
+        "summary": "Submit a contact / quote request",
+        "description": "Creates a customer request (lead). The team responds during business hours (Mon-Fri 9:00-18:00, Europe/Riga).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "phone"],
+                "properties": {
+                  "name": { "type": "string", "description": "Customer name" },
+                  "phone": { "type": "string", "description": "Customer phone number" },
+                  "email": { "type": "string", "format": "email", "description": "Optional email for a confirmation reply" },
+                  "service": {
+                    "type": "string",
+                    "enum": ["install", "maintenance", "consultation", "other"],
+                    "description": "Requested service type"
+                  },
+                  "message": { "type": "string", "description": "Free-form message" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request accepted",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "success": { "type": "boolean" } } }
+              }
+            }
+          },
+          "400": { "description": "Name and phone are required" }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "getHealth",
+        "summary": "Service health",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "status": { "type": "string", "example": "ok" } } }
+              }
+            }
+          },
+          "503": { "description": "Service unavailable" }
+        }
+      }
+    }
+  }
+}

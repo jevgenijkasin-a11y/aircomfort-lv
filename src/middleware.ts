@@ -1,10 +1,25 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
-import { routing } from './src/i18n/routing';
+import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
 export default function middleware(request: NextRequest) {
+  // ── Markdown for Agents ─────────────────────────────────────────────
+  // Requests with `Accept: text/markdown` get a markdown rendition of the
+  // page (converted from the HTML response). Browsers keep getting HTML.
+  const accept = request.headers.get('accept') || '';
+  if (
+    request.method === 'GET' &&
+    accept.includes('text/markdown') &&
+    !request.headers.get('x-md-internal')
+  ) {
+    const url = request.nextUrl.clone();
+    const target = new URL('/api/md', request.url);
+    target.searchParams.set('path', url.pathname + url.search);
+    return NextResponse.rewrite(target);
+  }
+
   const response = intlMiddleware(request);
 
   // Pass redirects through unchanged
@@ -35,5 +50,7 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(lv|ru|en)/:path*', '/((?!_next|_vercel|admin|api|.*\\..*).*)'],
+  // card/uploads are excluded so the intl middleware never rewrites or
+  // redirects employee business-card and uploaded-file URLs.
+  matcher: ['/', '/(lv|ru|en)/:path*', '/((?!_next|_vercel|admin|api|card|uploads|.*\\..*).*)'],
 };
