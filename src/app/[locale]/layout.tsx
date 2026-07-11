@@ -87,6 +87,11 @@ export async function generateMetadata({
       alternateLocale: ['lv_LV', 'ru_RU', 'en_US'].filter((l) => l !== meta.ogLocale),
       siteName: 'AirComfort.lv',
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: meta.title,
+      description: meta.description,
+    },
   };
 }
 

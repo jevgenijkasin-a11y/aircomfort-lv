@@ -52,7 +52,7 @@ export default async function CardPage({ params }: Props) {
   const rowClass = 'card-row';
   const row: React.CSSProperties = {
     textDecoration: 'none', display: 'flex', alignItems: 'center',
-    gap: 16, padding: '18px 24px', borderBottom: '1px solid #f0f0f0',
+    gap: 16, padding: '13px 24px', borderBottom: '1px solid #f0f0f0',
   };
 
   return (
@@ -61,13 +61,13 @@ export default async function CardPage({ params }: Props) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #1a1a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         @media (max-height: 750px) {
-          .card-header { padding: 24px 24px 16px !important; gap: 10px !important; }
-          .card-photo { width: 100px !important; height: 100px !important; }
+          .card-header { padding: 16px 24px 12px !important; gap: 8px !important; }
+          .card-photo { width: 96px !important; height: 96px !important; }
           .card-name { font-size: 22px !important; }
           .card-title { font-size: 14px !important; }
-          .card-actions { margin-top: 4px !important; gap: 16px !important; }
-          .card-row { padding: 13px 24px !important; }
-          .card-icon { width: 36px !important; height: 36px !important; }
+          .card-actions { margin-top: 2px !important; gap: 16px !important; }
+          .card-row { padding: 10px 24px !important; }
+          .card-icon { width: 34px !important; height: 34px !important; }
         }
       `}</style>
 
@@ -76,8 +76,8 @@ export default async function CardPage({ params }: Props) {
         {/* Dark header */}
         <div className="card-header" style={{
           background: 'linear-gradient(160deg, #0f2744 0%, #1a1a2e 100%)',
-          padding: '48px 24px 32px',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
+          padding: '26px 24px 18px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
         }}>
           {data.photo_url ? (
             <img className="card-photo" src={data.photo_url} alt={data.name} style={{
@@ -135,7 +135,7 @@ export default async function CardPage({ params }: Props) {
         </div>
 
         {/* White card with details */}
-        <div style={{ background: 'white', borderRadius: '20px 20px 0 0', flex: 1, paddingBottom: 100 }}>
+        <div style={{ background: 'white', borderRadius: '20px 20px 0 0', flex: 1, paddingBottom: 64 }}>
 
           <a href={`tel:${phoneClean}`} className={rowClass} style={row}>
             <div className="card-icon" style={iconCircleWhite}>
@@ -190,7 +190,7 @@ export default async function CardPage({ params }: Props) {
           </a>
 
           {/* Address + Show on map */}
-          <div className={rowClass} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 24px' }}>
+          <div className={rowClass} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '13px 24px' }}>
             <div className="card-icon" style={iconCircleWhite}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
@@ -211,21 +211,22 @@ export default async function CardPage({ params }: Props) {
         {/* Floating add contact button */}
         <a href={vcardUrl} download={`${data.slug}.vcf`}
           style={{
-            position: 'fixed', bottom: 32, right: 24,
-            width: 60, height: 60, borderRadius: '50%',
+            position: 'fixed', bottom: 26, right: 20,
+            display: 'flex', alignItems: 'center', gap: 8,
             background: '#27C4A0',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            borderRadius: 99, padding: '13px 20px 13px 16px',
             boxShadow: '0 4px 20px rgba(39,196,160,0.5)',
             textDecoration: 'none',
           }}
           title="Saglabāt kontaktu / Сохранить контакт"
         >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
             <line x1="19" y1="8" x2="19" y2="14"/>
             <line x1="22" y1="11" x2="16" y2="11"/>
           </svg>
+          <span style={{ color: 'white', fontSize: 13, fontWeight: 600, letterSpacing: '0.4px' }}>Save</span>
         </a>
       </div>
     </>
