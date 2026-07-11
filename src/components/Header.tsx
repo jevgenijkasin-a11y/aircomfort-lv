@@ -28,14 +28,16 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'top-0' : 'top-8 sm:top-9'
+      } ${
         scrolled || menuOpen
           ? 'bg-[#072D47]/98 backdrop-blur-xl shadow-lg shadow-black/20 border-b border-[#1A6B9A]/20'
           : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 lg:h-24 pt-9 sm:pt-0">
+        <div className="flex items-center justify-between h-20 lg:h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#27C4A0] to-[#1A6B9A] flex items-center justify-center shadow-lg shadow-[#27C4A0]/20">

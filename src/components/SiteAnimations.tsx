@@ -55,6 +55,16 @@ export default function SiteAnimations() {
         }
       };
 
+      // When cards drop back out of view below the viewport (user scrolled
+      // up), reset them so the reveal replays on the next scroll down.
+      const resetCards = (cards: HTMLElement[]) => {
+        cards.forEach((el) => {
+          shown.delete(el);
+          el.classList.remove('revealing');
+        });
+        gsap.set(cards, { opacity: 0, y: 55, rotateX: 18, overwrite: true });
+      };
+
       reveal3d.forEach((el) => el.classList.add('reveal-init'));
       gsap.set(reveal3d, { opacity: 0, y: 55, rotateX: 18 });
 
@@ -67,12 +77,34 @@ export default function SiteAnimations() {
       });
       if (inView.length) showCards(inView, true);
 
-      // Everything else animates in on scroll.
+      // Animate on every pass in BOTH directions:
+      // - onEnter: entering from below while scrolling down
+      // - onLeave: fully exited above -> reset so the return replays
+      // - onEnterBack: re-entering from above while scrolling up
       const st = ScrollTrigger.batch(reveal3d, {
         start: 'top 88%',
+        end: 'bottom top',
         onEnter: (batch) => showCards(batch as HTMLElement[], true),
+        onLeave: (batch) => resetCards(batch as HTMLElement[]),
+        onEnterBack: (batch) => showCards(batch as HTMLElement[], true),
       });
       revealTriggers.push(...st);
+
+      // Replay: reset a card only when it is COMPLETELY below the viewport
+      // (user scrolled back up past it), so it never blinks out while still
+      // visible. Next scroll down re-fires the batch onEnter.
+      const resetObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (!e.isIntersecting && e.boundingClientRect.top >= window.innerHeight) {
+              resetCards([e.target as HTMLElement]);
+            }
+          });
+        },
+        { threshold: 0 }
+      );
+      reveal3d.forEach((el) => resetObs.observe(el));
+      revealTriggers.push({ kill: () => resetObs.disconnect() } as unknown as ScrollTrigger);
 
       // Recalculate after fonts/images settle so triggers fire correctly.
       revealTimeouts.push(setTimeout(() => ScrollTrigger.refresh(), 300));
@@ -96,14 +128,22 @@ export default function SiteAnimations() {
     const fadeObs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
-          if (!e.isIntersecting) return;
           const el = e.target as HTMLElement;
-          const delay = el.dataset.stagger ? parseInt(el.dataset.stagger) * 90 : 0;
-          setTimeout(() => {
-            el.style.opacity = '1';
-            el.style.transform = 'translateY(0)';
-          }, delay);
-          fadeObs.unobserve(el);
+          if (e.isIntersecting) {
+            const delay = el.dataset.stagger ? parseInt(el.dataset.stagger) * 90 : 0;
+            setTimeout(() => {
+              el.style.opacity = '1';
+              el.style.transform = 'translateY(0)';
+            }, delay);
+          } else if (
+            e.boundingClientRect.top >= window.innerHeight ||
+            e.boundingClientRect.bottom <= 0
+          ) {
+            // Completely out of view (below OR above the viewport) — reset
+            // so the reveal replays on the next entrance from either side.
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(18px)';
+          }
         });
       },
       { threshold: 0.05, rootMargin: '0px 0px 0px 0px' }
@@ -155,7 +195,8 @@ export default function SiteAnimations() {
       requestAnimationFrame(tick);
     };
 
-    // Guard so each counter runs exactly once, whichever path triggers it
+    // Guard so a counter doesn't restart while it's visible; the guard is
+    // cleared when it fully leaves the viewport, so it re-counts on return.
     const ranCounters = new WeakSet<HTMLElement>();
     const runCounter = (el: HTMLElement) => {
       if (ranCounters.has(el)) return;
@@ -166,9 +207,11 @@ export default function SiteAnimations() {
     const counterObs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
+          const el = e.target as HTMLElement;
           if (e.isIntersecting) {
-            runCounter(e.target as HTMLElement);
-            counterObs.unobserve(e.target);
+            runCounter(el);
+          } else {
+            ranCounters.delete(el);
           }
         });
       },
@@ -187,15 +230,14 @@ export default function SiteAnimations() {
       // get stuck at 0 when the observer's first callback never flips.
       if (el.getBoundingClientRect().top < window.innerHeight) {
         runCounter(el);
-      } else {
-        counterObs.observe(el);
       }
+      // Keep observing regardless, so the counter replays on re-entry.
+      counterObs.observe(el);
     });
     // Safety net: any counter still at 0 after 1.2s gets forced to run.
     const counterFallback = setTimeout(() => {
       counterEls.forEach((el) => {
         if (!ranCounters.has(el) && el.getBoundingClientRect().top < window.innerHeight + 200) {
-          counterObs.unobserve(el);
           runCounter(el);
         }
       });
