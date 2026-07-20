@@ -4,10 +4,12 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Calculator from '@/components/Calculator';
 import { getSettings, listProducts } from '@/lib/db';
+import { localizedAlternates } from '@/lib/seo';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('calculator');
-  return { title: t('title') };
+  return { title: t('title'), alternates: localizedAlternates(locale, '/calculator') };
 }
 
 export default async function CalculatorPage({ params }: { params: Promise<{ locale: string }> }) {

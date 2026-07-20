@@ -3,12 +3,14 @@ import { getTranslations, getLocale, setRequestLocale } from 'next-intl/server';
 import { type SupabaseProduct } from '@/lib/types';
 import { listProducts, getSettings } from '@/lib/db';
 import CatalogClient from '@/components/CatalogClient';
+import { localizedAlternates } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('catalog');
-  return { title: t('title') };
+  return { title: t('title'), alternates: localizedAlternates(locale, '/catalog') };
 }
 
 export default async function CatalogPage({

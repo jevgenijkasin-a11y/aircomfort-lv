@@ -11,6 +11,7 @@ import FloatingButtons from '@/components/FloatingButtons';
 import ScrollToTop from '@/components/ScrollToTop';
 import CookieBanner from '@/components/CookieBanner';
 import SiteAnimations from '@/components/SiteAnimations';
+import { localizedAlternates } from '@/lib/seo';
 import '../globals.css';
 
 const syne = Syne({
@@ -69,15 +70,7 @@ export async function generateMetadata({
     description: meta.description,
     keywords: ['kondicionētāji', 'кондиционеры', 'air conditioners', 'Latvija', 'Rīga', 'uzstādīšana', 'Daikin', 'Hisense'],
     metadataBase: new URL(BASE_URL),
-    alternates: {
-      canonical: url,
-      languages: {
-        lv: `${BASE_URL}/lv`,
-        ru: `${BASE_URL}/ru`,
-        en: `${BASE_URL}/en`,
-        'x-default': `${BASE_URL}/lv`,
-      },
-    },
+    alternates: localizedAlternates(locale, ''),
     openGraph: {
       type: 'website',
       url,

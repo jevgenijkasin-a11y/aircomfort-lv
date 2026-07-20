@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productFeatures, productImages, productDescription } from '@/lib/types';
 import { getProduct, getSettings } from '@/lib/db';
+import { localizedAlternates } from '@/lib/seo';
 import ProductImageViewer from '@/components/ProductImageViewer';
 import BackLink from '@/components/BackLink';
 
@@ -18,7 +19,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getProduct(id);
   if (!data) return { title: 'Product' };
   const name = locale === 'lv' ? data.name_lv : locale === 'ru' ? data.name_ru : data.name_en;
-  return { title: name || 'Product' };
+  return {
+    title: name || 'Product',
+    alternates: localizedAlternates(locale, `/catalog/${id}`),
+  };
 }
 
 const energyColors: Record<string, string> = {
