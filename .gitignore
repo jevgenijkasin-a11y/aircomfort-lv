@@ -1,9 +1,12 @@
 node_modules
-.next
 .env
 .env.local
 .vercel
 .claude
+
+# Server RAM (1 GB) can't run `next build`, so we commit a locally-built .next
+# and deploy without building on the server. Ignore only the build cache.
+.next/cache
 
 # Live data: SQLite DB + uploaded images (deployed via FTP, never via git)
 data/
