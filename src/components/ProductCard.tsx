@@ -1,106 +1,106 @@
+// Single product card used everywhere (home "featured", catalog, landing
+// pages, similar models, calculator suggestions). Works in both server and
+// client trees. Images go through next/image — originals never reach the client.
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import type { Product } from '@/data/products';
-
-interface Props {
-  product: Product;
-}
+import { type SupabaseProduct, productName, productImages } from '@/lib/types';
+import { areaLabel, roomCount, asLoc } from '@/lib/productSeo';
 
 const energyColors: Record<string, string> = {
-  'A+++': 'text-[#27C4A0] border-[#27C4A0]/30 bg-[#27C4A0]/10',
-  'A++': 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10',
-  'A+': 'text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10',
+  'A+++': 'text-[#27C4A0] border-[#27C4A0]/40 bg-[#27C4A0]/10',
+  'A++': 'text-[#4ade80] border-[#4ade80]/40 bg-[#4ade80]/10',
+  'A+': 'text-[#86efac] border-[#86efac]/40 bg-[#86efac]/10',
 };
 
-export default function ProductCard({ product }: Props) {
-  const t = useTranslations('products');
+const ROOMS = { lv: 'telpas', ru: 'комн.', en: 'rooms' };
 
-  const energyCls = energyColors[product.energyClass] ?? 'text-white/50 border-white/20 bg-white/5';
+/** Category icon for the no-photo placeholder (same icons as the category tiles). */
+function CategoryIcon({ category }: { category: string }) {
+  const d: Record<string, string> = {
+    home: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+    heat_pump: 'M13 10V3L4 14h7v7l9-11h-7z',
+    commercial: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    commercial_heat_pump: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18',
+  };
+  return (
+    <svg viewBox="0 0 24 24" className="w-10 h-10 text-[#5B7A99]" fill="none" stroke="currentColor" strokeWidth={1.4} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d={d[category] ?? d.home} />
+    </svg>
+  );
+}
+
+export default function ProductCard({ product, locale, installFrom }: { product: SupabaseProduct; locale: string; installFrom: number }) {
+  const t = useTranslations('products');
+  const l = asLoc(locale);
+  const name = productName(product, locale);
+  const image = productImages(product)[0];
+  const area = areaLabel(product, l);
+  const rooms = roomCount(product);
+  const price = product.price
+    ? product.discount_percent ? Math.round(product.price * (1 - product.discount_percent / 100)) : product.price
+    : 0;
 
   return (
-    <div className="glass-card glass-card-hover rounded-2xl overflow-hidden flex flex-col group">
-      {/* Image area */}
-      <div
-        className="h-44 flex items-center justify-center relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${product.brandColor}18, ${product.brandColor}08)` }}
-      >
-        <div className="absolute inset-0 opacity-10"
-          style={{ background: `radial-gradient(circle at 60% 40%, ${product.brandColor}, transparent 70%)` }}
-        />
-        {/* Brand initial with snowflake */}
-        <div className="relative flex flex-col items-center gap-2">
-          <svg viewBox="0 0 24 24" className="w-14 h-14 opacity-30" fill="none" stroke="currentColor" strokeWidth="1">
-            <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-          <span
-            className="text-2xl font-syne font-bold opacity-70"
-            style={{ color: product.brandColor === '#072D47' ? '#fff' : product.brandColor }}
-          >
-            {product.brand}
-          </span>
+    <Link
+      href={`/catalog/${product.id}` as any}
+      className="glass-card product-card-hover rounded-2xl overflow-hidden flex flex-col group h-full p-3"
+    >
+      {/* Photo on a light plate — same height on every card */}
+      <div className="relative h-48 rounded-xl overflow-hidden bg-[#F3F6F9]">
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
+            quality={75}
+            className="object-contain p-4"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+            <CategoryIcon category={product.category} />
+            <span className="text-sm font-semibold text-[#3D5270]">{product.brand}</span>
+          </div>
+        )}
+        <div className={`absolute top-2.5 right-2.5 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyColors[product.energy_class] ?? 'text-[#3D5270] border-[#3D5270]/30 bg-white/70'}`}>
+          {product.energy_class}
         </div>
-        {/* Energy class badge */}
-        <div className={`absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyCls}`}>
-          {product.energyClass}
-        </div>
+        {(product.is_hit || product.is_promo || !!product.discount_percent) && (
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white">{t('badgeHit')}</span>}
+            {product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white">{t('badgePromo')}</span>}
+            {!!product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black">-{product.discount_percent}%</span>}
+          </div>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="p-5 flex flex-col flex-1">
-        <div className="mb-auto">
-          <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-wider mb-1">
-            {product.brand}
-          </p>
-          <h3 className="font-syne font-semibold text-base text-white mb-3 leading-tight">
-            {product.model}
-          </h3>
+      <div className="px-2 pt-4 pb-1 flex flex-col flex-1">
+        <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
+        <h3 className="font-syne font-semibold text-sm text-white mb-2 leading-snug">{name}</h3>
+        <p className="text-xs text-white/75 mb-4">
+          {product.power_kw} kW
+          {area ? ` · ${area} m²` : rooms ? ` · ${rooms} ${ROOMS[l]}` : ''}
+        </p>
 
-          <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-4">
-            <div className="flex items-center gap-1.5 text-xs text-white/50">
-              <svg className="w-3.5 h-3.5 text-[#1A6B9A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span>{t('power')}: <strong className="text-white/70">{product.powerKw} kW</strong></span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-white/50">
-              <svg className="w-3.5 h-3.5 text-[#1A6B9A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
-              <span>{product.areaCoverage} m²</span>
-            </div>
+        <div className="mt-auto border-t border-white/10 pt-3 flex items-end justify-between gap-2">
+          <div>
+            {!price ? (
+              <span className="font-syne font-semibold text-sm text-white/80">{t('priceOnRequest')}</span>
+            ) : (
+              <>
+                {!!product.discount_percent && (
+                  <span className="block text-xs text-white/60 line-through">{product.price.toLocaleString('lv-LV')} €</span>
+                )}
+                <span className={`font-syne font-bold text-xl ${product.discount_percent ? 'text-[#27C4A0]' : 'text-white'}`}>
+                  {price.toLocaleString('lv-LV')} €
+                </span>
+              </>
+            )}
           </div>
-
-          <div className="flex flex-wrap gap-1.5 mb-5">
-            {product.features.map((f) => (
-              <span
-                key={f}
-                className="text-xs text-white/40 bg-white/5 border border-white/8 px-2 py-0.5 rounded-md"
-              >
-                {f}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="border-t border-[#1A6B9A]/15 pt-4">
-          <div className="flex items-end justify-between mb-3">
-            <div>
-              <p className="text-xs text-white/35 mb-0.5">{t('from')}</p>
-              <p className="font-syne font-bold text-2xl text-white">
-                {product.price.toLocaleString('lv-LV')} €
-              </p>
-            </div>
-            <p className="text-xs text-white/35 text-right">{t('installFrom', { price: 250 })}</p>
-          </div>
-          <Link
-            href="/contacts"
-            className="w-full flex items-center justify-center bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-semibold text-sm py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-[#27C4A0]/15 group-hover:shadow-[#27C4A0]/25"
-          >
-            {t('order')}
-          </Link>
+          <span className="text-xs text-white/70 text-right">{t('installFrom', { price: installFrom })}</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

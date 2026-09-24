@@ -4,13 +4,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { type SupabaseProduct, productName, productImages } from '@/lib/types';
+import { type SupabaseProduct } from '@/lib/types';
+import ProductCard from '@/components/ProductCard';
 
-const energyColors: Record<string, string> = {
-  'A+++': 'text-[#0D9B78] border-[#0D9B78]/40 bg-[#D4F5EC]',
-  'A++': 'text-[#16a34a] border-[#16a34a]/40 bg-[#dcfce7]',
-  'A+': 'text-[#15803d] border-[#15803d]/40 bg-[#bbf7d0]',
-};
 
 
 import { CATALOG_PAGE_SIZE } from '@/lib/catalogData';
@@ -23,7 +19,7 @@ export function ProductGrid({ products, locale, installFrom = 250 }: { products:
   const tp = useTranslations('products');
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-      {products.map((p) => <CatalogCard key={p.id} product={p} locale={locale} t={tp} tCat={t} installFrom={installFrom} />)}
+      {products.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
     </div>
   );
 }
@@ -159,7 +155,7 @@ export default function CatalogClient({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {shown.map((p) => <CatalogCard key={p.id} product={p} locale={locale} t={tp} tCat={t} installFrom={installFrom} />)}
+          {shown.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
         </div>
       )}
 
@@ -182,72 +178,5 @@ export default function CatalogClient({
         </nav>
       )}
     </div>
-  );
-}
-
-function CatalogCard({ product, locale, t, tCat, installFrom }: { product: SupabaseProduct; locale: string; t: ReturnType<typeof useTranslations>; tCat: ReturnType<typeof useTranslations>; installFrom: number }) {
-  const name = productName(product, locale);
-  const energyCls = energyColors[product.energy_class] ?? 'text-gray-500 border-gray-300 bg-gray-100';
-
-  return (
-    <Link href={`/catalog/${product.id}` as any} className="catalog-card-hover bg-white rounded-2xl overflow-hidden flex flex-col group border border-[#e6edf3]" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.07)' }}>
-      <div className="relative rounded-t-2xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', paddingTop: '62%' }}>
-        {productImages(product)[0] ? (
-          <img src={productImages(product)[0]} alt={name} className="absolute inset-0 w-full h-full object-contain p-4" style={{ filter: 'drop-shadow(0 6px 12px rgba(15,23,42,0.10))' }} />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-10 h-10 opacity-20 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1">
-              <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </div>
-        )}
-        <div className={`absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyCls}`}>{product.energy_class}</div>
-        {(product.is_hit || product.is_promo || !!product.discount_percent) && (
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white shadow-sm">{t('badgeHit')}</span>}
-            {product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white shadow-sm">{t('badgePromo')}</span>}
-            {!!product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black shadow-sm">-{product.discount_percent}%</span>}
-          </div>
-        )}
-      </div>
-      <div className="p-4 flex flex-col flex-1">
-        <p className="text-[#1A9A7A] text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
-        <h3 className="font-syne font-semibold text-sm text-gray-900 mb-2 leading-snug">{name}</h3>
-        <div className="flex gap-3 mb-3">
-          <span className="text-xs text-gray-400">{product.power_kw} kW</span>
-          {product.area_coverage && (
-            <span className="text-xs text-gray-400">
-              {/telp/i.test(product.area_coverage)
-                ? `${product.area_coverage.match(/\d+/)?.[0]} ${locale === 'ru' ? 'комн.' : locale === 'en' ? 'rooms' : 'telpas'}`
-                : `${product.area_coverage.replace(/līdz/i, locale === 'ru' ? 'до' : locale === 'en' ? 'up to' : 'līdz')} m²`}
-            </span>
-          )}
-        </div>
-        <div className="border-t border-[#CDD5E0] pt-3 mt-auto">
-          <div className="flex items-center justify-between mb-2.5">
-            <div>
-              {!product.price ? (
-                <span className="font-syne font-semibold text-sm text-gray-500">{t('priceOnRequest')}</span>
-              ) : product.discount_percent ? (
-                <>
-                  <span className="text-xs text-gray-400 line-through mr-1.5">{product.price.toLocaleString('lv-LV')} €</span>
-                  <span className="font-syne font-bold text-xl text-[#27C4A0]">
-                    {Math.round(product.price * (1 - product.discount_percent / 100)).toLocaleString('lv-LV')} €
-                  </span>
-                </>
-              ) : (
-                <span className="font-syne font-bold text-xl text-gray-900">{product.price.toLocaleString('lv-LV')} €</span>
-              )}
-            </div>
-            <span className="text-xs text-gray-400">{tCat('installFrom', { price: installFrom })}</span>
-          </div>
-          <div className="w-full flex items-center justify-center gap-2 bg-[#E4EAF3] hover:bg-[#27C4A0] border border-[#CDD5E0] hover:border-[#27C4A0] text-[#3D5270] hover:text-[#072D47] font-semibold text-sm py-2 rounded-xl transition-all duration-200 group-hover:bg-[#27C4A0] group-hover:text-[#072D47] group-hover:border-[#27C4A0]">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-            {tCat('viewBtn')}
-          </div>
-        </div>
-      </div>
-    </Link>
   );
 }
