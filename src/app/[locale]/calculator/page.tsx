@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Calculator from '@/components/Calculator';
 import { getSettings, listProducts } from '@/lib/db';
+import { visibleProducts } from '@/lib/catalogData';
 import { localizedAlternates } from '@/lib/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -22,9 +23,10 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
     getSettings(),
     listProducts({ inStockOnly: true }),
   ]);
-  const productPrices = allProducts
-    .filter((p) => p.price > 0)
-    .map(({ power_kw, price, discount_percent }) => ({ power_kw, price, discount_percent }));
+  // Room calculator → residential air-to-air units only (home ACs + air-to-air heat pumps)
+  const residential = visibleProducts(allProducts).filter(
+    (p) => p.price > 0 && (p.category === 'home' || p.category === 'heat_pump')
+  );
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
   const installTo = parseInt(settings.install_price_to || '350') || 350;
 
@@ -47,7 +49,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
           <p className="text-white/45 text-lg max-w-xl mx-auto">{t('subtitle')}</p>
         </div>
       </div>
-      <Calculator installFrom={installFrom} installTo={installTo} products={(productPrices ?? []) as { power_kw: number; price: number; discount_percent: number | null }[]} />
+      <Calculator installFrom={installFrom} installTo={installTo} products={residential} locale={locale} />
     </>
   );
 }

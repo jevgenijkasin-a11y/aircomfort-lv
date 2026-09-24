@@ -1,14 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-
-interface ProductPrice {
-  power_kw: number;
-  price: number;
-  discount_percent: number | null;
-}
+import type { SupabaseProduct } from '@/lib/types';
+import { recommendedPowerKw, matchingPowerRange } from '@/lib/calc';
+import { ProductGrid } from '@/components/CatalogClient';
 
 interface CalcResult {
   powerKw: number;
@@ -16,38 +13,31 @@ interface CalcResult {
   equipMax: number;
   installMin: number;
   installMax: number;
+  models: SupabaseProduct[];
 }
 
-function recommendedPower(area: number, roomType: string, insulation: string, windows: number, floor: string): number {
-  const baseFactors: Record<string, number> = { good: 30, avg: 40, poor: 50 };
-  const roomExtra: Record<string, number> = { bedroom: 0, living: 200, office: 300, kitchen: 500 };
-  let watts = area * (baseFactors[insulation] ?? 40);
-  watts += (roomExtra[roomType] ?? 0);
-  watts += windows * 100;
-  if (floor === 'top') watts *= 1.15;
-  return Math.ceil((watts / 1000) * 2) / 2;
+const finalPrice = (p: SupabaseProduct) =>
+  p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price;
+
+/** Models whose capacity fits the recommended size, cheapest first. Falls back to the next larger capacity available. */
+function matchingModels(powerKw: number, products: SupabaseProduct[]): SupabaseProduct[] {
+  const { min, max } = matchingPowerRange(powerKw);
+  let list = products.filter((p) => p.power_kw >= min && p.power_kw <= max);
+  if (!list.length) {
+    const bigger = products.filter((p) => p.power_kw >= min);
+    const nearest = bigger.length ? Math.min(...bigger.map((p) => p.power_kw)) : null;
+    list = nearest !== null ? bigger.filter((p) => p.power_kw <= nearest + 0.5) : [];
+  }
+  return list.sort((a, b) => finalPrice(a) - finalPrice(b));
 }
 
-function getPriceRange(powerKw: number, products: ProductPrice[]): { min: number; max: number } {
-  const finalPrice = (p: ProductPrice) =>
-    p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price;
+const SUITABLE = { lv: 'Piemēroti modeļi', ru: 'Подходящие модели', en: 'Suitable models' };
 
-  const suitable = products.filter(p => p.power_kw >= powerKw);
-  const pool = suitable.length > 0 ? suitable : products;
-  if (pool.length === 0) return { min: 0, max: 0 };
-
-  // Find the lowest available power level in the catalog
-  const minAvailPower = Math.min(...pool.map(p => p.power_kw));
-  // Include all products within +1.5 kW of that minimum — catches e.g. both 2.5 and 2.7 kW
-  const band = pool.filter(p => p.power_kw <= minAvailPower + 1.5);
-
-  const prices = band.map(finalPrice).sort((a, b) => a - b);
-  return { min: prices[0], max: prices[prices.length - 1] };
-}
-
-export default function Calculator({ installFrom = 250, installTo = 350, products = [] }: { installFrom?: number; installTo?: number; products?: ProductPrice[] }) {
+export default function Calculator({ installFrom = 250, installTo = 350, products = [], locale = 'lv' }: { installFrom?: number; installTo?: number; products?: SupabaseProduct[]; locale?: string }) {
   const t = useTranslations('calculator');
   const router = useRouter();
+  const resultRef = useRef<HTMLDivElement>(null);
+  const L = (locale === 'ru' || locale === 'en' ? locale : 'lv') as 'lv' | 'ru' | 'en';
 
   const [area, setArea] = useState('');
   const [roomType, setRoomType] = useState('living');
@@ -59,10 +49,26 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
   const handleCalc = () => {
     const areaNum = parseFloat(area);
     if (!areaNum || areaNum <= 0) return;
-    const powerKw = recommendedPower(areaNum, roomType, insulation, parseInt(windows) || 0, floor);
-    const { min: equipMin, max: equipMax } = getPriceRange(powerKw, products);
-    setResult({ powerKw, equipMin, equipMax, installMin: installFrom, installMax: installTo });
+    const powerKw = recommendedPowerKw({ area: areaNum, roomType, insulation, windows: parseInt(windows) || 0, floor });
+    const models = matchingModels(powerKw, products);
+    const prices = models.map(finalPrice);
+    setResult({
+      powerKw,
+      equipMin: prices.length ? Math.min(...prices) : 0,
+      equipMax: prices.length ? Math.max(...prices) : 0,
+      installMin: installFrom,
+      installMax: installTo,
+      models,
+    });
   };
+
+  // After each calculation, bring the result into view (mostly matters on mobile,
+  // where the result card sits below the form).
+  useEffect(() => {
+    if (!result || !resultRef.current) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    resultRef.current.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  }, [result]);
 
   const handleGetOffer = () => {
     if (!result) return;
@@ -198,7 +204,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
         </div>
 
         {/* Result */}
-        <div>
+        <div ref={resultRef} className="scroll-mt-28">
           {result ? (
             <div className="glass-card rounded-2xl p-7">
               <div className="flex items-center gap-3 mb-7">
@@ -224,7 +230,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                     {result.equipMin > 0
                       ? result.equipMin === result.equipMax
                         ? `${result.equipMin.toLocaleString('lv-LV')} €`
-                        : `${t('from')} ${result.equipMin.toLocaleString('lv-LV')}–${result.equipMax.toLocaleString('lv-LV')} €`
+                        : `${result.equipMin.toLocaleString('lv-LV')}–${result.equipMax.toLocaleString('lv-LV')} €`
                       : t('priceOnRequest')}
                   </span>
                 </div>
@@ -270,6 +276,14 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
           )}
         </div>
       </div>
+
+      {/* Suitable catalogue models (3–6), cheapest first */}
+      {result && result.models.length > 0 && (
+        <section className="mt-12">
+          <h2 className="font-syne font-semibold text-xl mb-6">{SUITABLE[L]} — {result.powerKw} {t('kw')}</h2>
+          <ProductGrid products={result.models.slice(0, 6)} locale={locale} installFrom={installFrom} />
+        </section>
+      )}
     </div>
   );
 }
