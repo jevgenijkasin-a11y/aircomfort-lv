@@ -216,7 +216,13 @@ function CatalogCard({ product, locale, t, tCat, installFrom }: { product: Supab
         <h3 className="font-syne font-semibold text-sm text-gray-900 mb-2 leading-snug">{name}</h3>
         <div className="flex gap-3 mb-3">
           <span className="text-xs text-gray-400">{product.power_kw} kW</span>
-          {product.area_coverage && <span className="text-xs text-gray-400">{product.area_coverage} m²</span>}
+          {product.area_coverage && (
+            <span className="text-xs text-gray-400">
+              {/telp/i.test(product.area_coverage)
+                ? `${product.area_coverage.match(/\d+/)?.[0]} ${locale === 'ru' ? 'комн.' : locale === 'en' ? 'rooms' : 'telpas'}`
+                : `${product.area_coverage.replace(/līdz/i, locale === 'ru' ? 'до' : locale === 'en' ? 'up to' : 'līdz')} m²`}
+            </span>
+          )}
         </div>
         <div className="border-t border-[#CDD5E0] pt-3 mt-auto">
           <div className="flex items-center justify-between mb-2.5">
