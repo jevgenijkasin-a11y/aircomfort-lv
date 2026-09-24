@@ -96,9 +96,20 @@ export function db(): DatabaseSync {
     const instance = new DatabaseSync(path.join(DATA_DIR, 'aircomfort.db'));
     instance.exec('PRAGMA journal_mode = WAL;');
     instance.exec(SCHEMA);
+    migrate(instance);
     g.__aircomfortDb = instance;
   }
   return g.__aircomfortDb;
+}
+
+// Additive, idempotent schema migrations for databases created by older code
+// (the live DB on the server). Never drops or rewrites existing data.
+function migrate(instance: DatabaseSync) {
+  const cols = instance.prepare('PRAGMA table_info(products)').all().map((c) => c.name as string);
+  if (!cols.includes('updated_at')) {
+    instance.exec('ALTER TABLE products ADD COLUMN updated_at TEXT');
+    instance.exec('UPDATE products SET updated_at = created_at WHERE updated_at IS NULL');
+  }
 }
 
 const bool = (v: unknown): boolean => v === 1 || v === true;
@@ -158,6 +169,7 @@ export async function getProduct(id: string): Promise<SupabaseProduct | null> {
 export async function createProduct(payload: Record<string, unknown>): Promise<SupabaseProduct> {
   const data = serializeProduct(payload);
   const id = randomUUID();
+  data.updated_at = new Date().toISOString();
   const cols = Object.keys(data);
   db().prepare(
     `INSERT INTO products (id${cols.map(c => `, ${c}`).join('')}) VALUES (?${', ?'.repeat(cols.length)})`
@@ -167,6 +179,7 @@ export async function createProduct(payload: Record<string, unknown>): Promise<S
 
 export async function updateProduct(id: string, payload: Record<string, unknown>): Promise<SupabaseProduct | null> {
   const data = serializeProduct(payload);
+  if (Object.keys(data).length) data.updated_at = new Date().toISOString();
   const cols = Object.keys(data);
   if (cols.length) {
     db().prepare(`UPDATE products SET ${cols.map(c => `${c} = ?`).join(', ')} WHERE id = ?`)

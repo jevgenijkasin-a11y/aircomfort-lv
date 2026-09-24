@@ -21,6 +21,7 @@ export interface SupabaseProduct {
   is_promo: boolean;
   discount_percent: number | null;
   created_at: string;
+  updated_at?: string | null;
   description_lv?: string;
   description_ru?: string;
   description_en?: string;
