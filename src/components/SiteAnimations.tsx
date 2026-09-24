@@ -46,14 +46,21 @@ export default function SiteAnimations() {
       el.classList.add('reveal-init');
       obs.observe(el);
     });
-    // Safety net: never leave anything hidden (e.g. after fast anchor jumps)
-    const safety = setTimeout(() => {
+    // Safety net: anything that is already above the bottom edge — including
+    // blocks jumped over by an anchor link or the End key — is shown.
+    const revealPassed = () => {
       els.forEach((el) => {
-        if (el.classList.contains('reveal-init') && el.getBoundingClientRect().top < window.innerHeight) {
+        if (el.classList.contains('reveal-init') && !el.classList.contains('is-visible') &&
+            el.getBoundingClientRect().top < window.innerHeight) {
           el.classList.add('is-visible');
+          obs.unobserve(el);
         }
       });
-    }, 1500);
+    };
+    let raf = 0;
+    const onScrollReveal = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(revealPassed); };
+    window.addEventListener('scroll', onScrollReveal, { passive: true });
+    const safety = setTimeout(revealPassed, 1500);
 
     // ── MAGNETIC BUTTONS ────────────────────────────────────────────────
     const cleanups: (() => void)[] = [];
@@ -79,6 +86,8 @@ export default function SiteAnimations() {
     return () => {
       window.removeEventListener('scroll', onScroll);
       clearTimeout(safety);
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScrollReveal);
       obs.disconnect();
       // Leave everything visible so a remount starts clean
       els.forEach((el) => el.classList.add('is-visible'));
