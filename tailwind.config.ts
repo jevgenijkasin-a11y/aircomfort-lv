@@ -18,7 +18,8 @@ const config: Config = {
       },
       fontFamily: {
         syne: ['var(--font-syne)', 'sans-serif'],
-        sans: ['var(--font-dm-sans)', 'sans-serif'],
+        // --font-dm-sans never existed, which made <body> fall back to Times
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
     },
   },

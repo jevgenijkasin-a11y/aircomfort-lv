@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Syne } from 'next/font/google';
+import { Inter, Unbounded } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -14,15 +14,18 @@ import SiteAnimations from '@/components/SiteAnimations';
 import { localizedAlternates } from '@/lib/seo';
 import '../globals.css';
 
-const syne = Syne({
-  subsets: ['latin'],
+// Headings: Unbounded (has Cyrillic, unlike the previous Syne). The CSS
+// variable keeps the historical name --font-syne so the existing `font-syne`
+// utility classes keep working.
+const syne = Unbounded({
+  subsets: ['latin', 'latin-ext', 'cyrillic'],
   variable: '--font-syne',
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['500', '600', '700'],
   display: 'swap',
 });
 
 const inter = Inter({
-  subsets: ['latin', 'latin-ext'],
+  subsets: ['latin', 'latin-ext', 'cyrillic'],
   variable: '--font-inter',
   weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
@@ -107,7 +110,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${syne.variable} ${inter.variable}`}>
-      <body className="bg-[#0A1628] text-white font-sans antialiased">
+      <body className={`${inter.className} bg-[#0A1628] text-white font-sans antialiased`}>
         <div id="scroll-progress-bar" aria-hidden="true" />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
