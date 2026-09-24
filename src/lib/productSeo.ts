@@ -87,9 +87,8 @@ export function finalPrice(p: SupabaseProduct): number | null {
 }
 const kw = (p: SupabaseProduct) => String(p.power_kw);
 /** Features in this locale only — untagged legacy features are Latvian, so they are skipped for ru/en. */
+/** Features in this locale only (legacy Latvian features are translated or dropped by productFeatures). */
 function localFeatures(p: SupabaseProduct, l: Loc): string[] {
-  const tagged = p.features.some((f) => /^(lv|ru|en):/.test(f));
-  if (!tagged && l !== 'lv') return [];
   return productFeatures(p, l);
 }
 const specsOf = (p: SupabaseProduct) =>
@@ -313,7 +312,9 @@ function brandAndInstallParagraph(p: SupabaseProduct, l: Loc, installFrom: numbe
 /** 2–3 paragraphs. Manual descriptions take priority over the template. */
 export function productParagraphs(p: SupabaseProduct, locale: string, installFrom: number): string[] {
   const l = asLoc(locale);
-  const manual = productDescription(p, l).trim();
+  // Only a description written in THIS language; otherwise generate one
+  // (e.g. a Latvian-only text must not appear on /ru or /en).
+  const manual = String(p[`description_${l}` as const] ?? '').trim();
   if (manual) return manual.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
   return [
     [purposeSentence(p, l), areaSentence(p, l)].filter(Boolean).join(' '),

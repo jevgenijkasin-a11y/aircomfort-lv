@@ -1,4 +1,5 @@
 // Shared data types and pure helpers — safe to import from both server and client code.
+import { translateLegacyFeature } from './featureI18n';
 // (Type names keep the historical "Supabase" prefix from the old backend to avoid mass renames.)
 
 export interface SupabaseProduct {
@@ -88,9 +89,12 @@ export function productFeatures(p: SupabaseProduct, locale: string): string[] {
   const prefix = `${locale}:`;
   const localeFeatures = p.features.filter(f => f.startsWith(prefix)).map(f => f.slice(prefix.length));
   if (localeFeatures.length) return localeFeatures;
-  // Fallback: untagged features (old format without locale prefix)
+  // Fallback: untagged legacy features (entered in Latvian) — translated
+  // where known, Latvian-only phrases hidden on ru/en.
   const untagged = p.features.filter(f => !/^(lv|ru|en):/.test(f));
-  return untagged.length ? untagged : p.features;
+  return untagged
+    .map(f => translateLegacyFeature(f, locale))
+    .filter((f): f is string => !!f);
 }
 
 export function productName(p: SupabaseProduct, locale: string): string {

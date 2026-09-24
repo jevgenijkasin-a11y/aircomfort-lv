@@ -13,7 +13,16 @@ const energyColors: Record<string, string> = {
   'A+': 'text-[#86efac] border-[#86efac]/40 bg-[#86efac]/10',
 };
 
-const ROOMS = { lv: 'telpas', ru: 'комн.', en: 'rooms' };
+/** "2 комнаты" / "5 комнат", "2 telpas", "2 rooms" — multi-split room count, no m². */
+function roomsLabel(n: number, l: 'lv' | 'ru' | 'en'): string {
+  if (l === 'ru') {
+    const m10 = n % 10, m100 = n % 100;
+    const w = m10 === 1 && m100 !== 11 ? 'комната' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'комнаты' : 'комнат';
+    return `${n} ${w}`;
+  }
+  if (l === 'en') return `${n} ${n === 1 ? 'room' : 'rooms'}`;
+  return `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'telpa' : 'telpas'}`;
+}
 
 /** Category icon for the no-photo placeholder (same icons as the category tiles). */
 function CategoryIcon({ category }: { category: string }) {
@@ -80,7 +89,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
         <h3 className="font-syne font-semibold text-sm text-white mb-2 leading-snug">{name}</h3>
         <p className="text-xs text-white/75 mb-4">
           {product.power_kw} kW
-          {area ? ` · ${area} m²` : rooms ? ` · ${rooms} ${ROOMS[l]}` : ''}
+          {area ? ` · ${area} m²` : rooms ? ` · ${roomsLabel(rooms, l)}` : ''}
         </p>
 
         <div className="mt-auto border-t border-white/10 pt-3 flex items-end justify-between gap-2">
