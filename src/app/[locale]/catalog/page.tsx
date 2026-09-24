@@ -1,16 +1,42 @@
 import type { Metadata } from 'next';
-import { getTranslations, getLocale, setRequestLocale } from 'next-intl/server';
-import { type SupabaseProduct } from '@/lib/types';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
 import { listProducts, getSettings } from '@/lib/db';
 import CatalogClient from '@/components/CatalogClient';
 import { localizedAlternates } from '@/lib/seo';
+import { asLoc, brandSlug, CATEGORY_SLUGS, CATEGORY_MSG_KEY } from '@/lib/productSeo';
+import { visibleProducts, CATALOG_PAGE_SIZE } from '@/lib/catalogData';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const { locale } = await params;
+type SP = { page?: string; category?: string; brand?: string; power?: string; sort?: string };
+
+const parsePage = (v?: string) => {
+  const n = parseInt(v || '1', 10);
+  return Number.isFinite(n) && n > 1 ? n : 1;
+};
+
+const DESC = {
+  lv: 'Kondicionieru un siltumsūkņu katalogs: Daikin, Mitsubishi Electric, Hisense, Midea un citi. Cenas, jauda, energoefektivitāte un montāža visā Latvijā.',
+  ru: 'Каталог кондиционеров и тепловых насосов: Daikin, Mitsubishi Electric, Hisense, Midea и другие. Цены, мощность, энергоэффективность и монтаж по всей Латвии.',
+  en: 'Catalogue of air conditioners and heat pumps: Daikin, Mitsubishi Electric, Hisense, Midea and more. Prices, capacity, efficiency and installation across Latvia.',
+};
+const PAGE_WORD = { lv: 'lapa', ru: 'страница', en: 'page' };
+
+export async function generateMetadata({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<SP> }): Promise<Metadata> {
+  const [{ locale }, sp] = await Promise.all([params, searchParams]);
+  const l = asLoc(locale);
   const t = await getTranslations('catalog');
-  return { title: t('title'), alternates: localizedAlternates(locale, '/catalog') };
+  const page = parsePage(sp.page);
+  // Pagination pages are self-canonical; any other params (filters, sort)
+  // canonicalize to the clean /catalog URL.
+  const path = page > 1 ? `/catalog?page=${page}` : '/catalog';
+  return {
+    title: page > 1 ? `${t('title')} — ${PAGE_WORD[l]} ${page}` : t('title'),
+    description: page > 1 ? `${DESC[l]} (${PAGE_WORD[l]} ${page})` : DESC[l],
+    alternates: localizedAlternates(locale, path),
+  };
 }
 
 export default async function CatalogPage({
@@ -18,19 +44,31 @@ export default async function CatalogPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<SP>;
 }) {
-  const { locale: routeLocale } = await params;
-  setRequestLocale(routeLocale);
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const l = asLoc(locale);
 
-  const [t, locale, products, sp, settings] = await Promise.all([
+  const [t, tc, all, sp, settings] = await Promise.all([
     getTranslations('catalog'),
-    getLocale(),
+    getTranslations('categories'),
     listProducts({ inStockOnly: true, orderBy: 'price' }),
     searchParams,
     getSettings(),
   ]);
+  const products = visibleProducts(all);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
+  const totalPages = Math.max(1, Math.ceil(products.length / CATALOG_PAGE_SIZE));
+  const page = parsePage(sp.page);
+  if (page > totalPages) notFound(); // no duplicate "last page" under other numbers
+
+  const brands = Array.from(new Set(products.map((p) => p.brand))).sort();
+  const cats = Object.keys(CATEGORY_SLUGS).filter((c) => products.some((p) => p.category === c));
+  const LBL = {
+    brands: { lv: 'Zīmoli', ru: 'Бренды', en: 'Brands' },
+    types: { lv: 'Kategorijas', ru: 'Категории', en: 'Categories' },
+  };
 
   return (
     <>
@@ -40,11 +78,47 @@ export default async function CatalogPage({
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-[#1A6B9A]/10 blur-[80px]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <p className="text-[#27C4A0] text-sm font-semibold uppercase tracking-widest mb-3">{t('title')}</p>
-          <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-3">{t('title')}</h1>
+          <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-3">
+            {t('title')}{page > 1 ? ` — ${PAGE_WORD[l]} ${page}` : ''}
+          </h1>
           <p className="text-white/45 text-lg">{t('subtitle')}</p>
         </div>
       </div>
-      <CatalogClient initialProducts={products as SupabaseProduct[]} locale={locale} initialCategory={sp.category} installFrom={installFrom} />
+      <CatalogClient
+        initialProducts={products}
+        locale={locale}
+        initialFilters={{ brand: sp.brand, power: sp.power, category: sp.category, sort: sp.sort }}
+        page={page}
+        installFrom={installFrom}
+      />
+
+      {/* Crawlable hub links to brand and category landing pages */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 grid gap-8 sm:grid-cols-2">
+        <nav aria-label={LBL.types[l]}>
+          <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">{LBL.types[l]}</h2>
+          <ul className="flex flex-wrap gap-2">
+            {cats.map((c) => (
+              <li key={c}>
+                <Link href={`/catalog/type/${CATEGORY_SLUGS[c]}` as any} className="inline-block text-sm text-white/70 bg-[#0A3658]/60 border border-[#1A6B9A]/30 hover:border-[#27C4A0]/50 hover:text-white px-3 py-1.5 rounded-xl transition-colors">
+                  {tc(CATEGORY_MSG_KEY[c])}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <nav aria-label={LBL.brands[l]}>
+          <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">{LBL.brands[l]}</h2>
+          <ul className="flex flex-wrap gap-2">
+            {brands.map((b) => (
+              <li key={b}>
+                <Link href={`/catalog/brand/${brandSlug(b)}` as any} className="inline-block text-sm text-white/70 bg-[#0A3658]/60 border border-[#1A6B9A]/30 hover:border-[#27C4A0]/50 hover:text-white px-3 py-1.5 rounded-xl transition-colors">
+                  {b}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
     </>
   );
 }
