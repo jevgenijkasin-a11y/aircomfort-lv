@@ -2,26 +2,47 @@ export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { DUPLICATE_REDIRECTS, visibleProducts } from '@/lib/catalogData';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productFeatures, productImages, productDescription } from '@/lib/types';
-import { getProduct, getSettings } from '@/lib/db';
-import { localizedAlternates } from '@/lib/seo';
+import { getProduct, getSettings, listProducts } from '@/lib/db';
+import { localizedAlternates, BASE_URL } from '@/lib/seo';
+import {
+  productTitle, productMetaDescription, productParagraphs, similarProducts,
+  productJsonLd, breadcrumbJsonLd, jsonLdString, absUrl, brandSlug, categoryNoun, asLoc, areaLabel, roomCount,
+} from '@/lib/productSeo';
 import ProductImageViewer from '@/components/ProductImageViewer';
 import BackLink from '@/components/BackLink';
+import { ProductGrid } from '@/components/CatalogClient';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
 }
 
+const installFromSettings = (s: Record<string, string>) => parseInt(s.install_price_from || '250') || 250;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id, locale } = await params;
-  const data = await getProduct(id);
+  const [data, settings] = await Promise.all([getProduct(id), getSettings()]);
   if (!data) return { title: 'Product' };
-  const name = locale === 'lv' ? data.name_lv : locale === 'ru' ? data.name_ru : data.name_en;
+  const title = productTitle(data, locale);
+  const description = productMetaDescription(data, locale, installFromSettings(settings));
+  const image = productImages(data)[0];
   return {
-    title: name || 'Product',
+    title,
+    description,
     alternates: localizedAlternates(locale, `/catalog/${id}`),
+    openGraph: {
+      type: 'website',
+      url: `${BASE_URL}/${locale}/catalog/${id}`,
+      title: `${title} | AirComfort`,
+      description,
+      siteName: 'AirComfort.lv',
+      // Product photo, or the branded site card when a product has no photo
+      images: [{ url: image ? absUrl(image) : `${BASE_URL}/${locale}/opengraph-image`, alt: productName(data, locale) }],
+    },
+    twitter: { card: 'summary_large_image', title: `${title} | AirComfort`, description },
   };
 }
 
@@ -104,22 +125,34 @@ const SPEC_LABELS: Record<string, Record<string, string>> = {
   electrical:     { ru: 'Электрическое соединение', lv: 'Elektriskais savienojums', en: 'Electrical Connection' },
   indoor_dims:    { ru: 'Габариты внутреннего блока', lv: 'Iekšējā bloka izmēri', en: 'Indoor Unit Dimensions' },
   outdoor_dims:   { ru: 'Габариты наружного блока', lv: 'Ārējā bloka izmēri', en: 'Outdoor Unit Dimensions' },
+  brand:          { ru: 'Бренд', lv: 'Zīmols', en: 'Brand' },
+  type:           { ru: 'Тип', lv: 'Tips', en: 'Type' },
+  power:          { ru: 'Мощность', lv: 'Jauda', en: 'Capacity' },
+  area:           { ru: 'Площадь помещения', lv: 'Telpas platība', en: 'Room area' },
+  rooms:          { ru: 'Количество комнат', lv: 'Telpu skaits', en: 'Number of rooms' },
+  energy_class:   { ru: 'Класс энергоэффективности', lv: 'Energoefektivitātes klase', en: 'Energy class' },
+  install:        { ru: 'Монтаж', lv: 'Montāža', en: 'Installation' },
 };
 
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
   setRequestLocale(locale);
-  const [t, tp, product, settings] = await Promise.all([
+  const [t, tp, tn, tTrust, product, settings, all] = await Promise.all([
     getTranslations('catalog'),
     getTranslations('products'),
+    getTranslations('nav'),
+    getTranslations('trustbar'),
     getProduct(id),
     getSettings(),
+    listProducts({ inStockOnly: true }),
   ]);
-  const installFrom = parseInt(settings.install_price_from || '250') || 250;
+  const installFrom = installFromSettings(settings);
 
+  if (DUPLICATE_REDIRECTS[id]) permanentRedirect(`/${locale}/catalog/${DUPLICATE_REDIRECTS[id]}`);
   if (!product) notFound();
 
   const p = product as SupabaseProduct;
+  const l = asLoc(locale);
   const name = productName(p, locale);
   const features = productFeatures(p, locale);
   const images = productImages(p);
@@ -127,24 +160,75 @@ export default async function ProductPage({ params }: Props) {
 
   const contactMessage = buildContactMessage(p, name, locale, installFrom);
   const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
-  const description = productDescription(p, locale);
+  const paragraphs = productParagraphs(p, locale, installFrom);
+  const metaDescription = productMetaDescription(p, locale, installFrom);
+  const similar = similarProducts(visibleProducts(all), p, 6);
+
+  // Specs table: core fields every product has, then detailed specs if present
+  const areaTxt = areaLabel(p, l);
+  const rooms = roomCount(p);
+  const baseRows: [string, string][] = [
+    ['brand', p.brand],
+    ['type', categoryNoun(p.category, l).replace(/^./, (c) => c.toUpperCase())],
+    ['power', `${p.power_kw} kW`],
+    ...(areaTxt ? [['area', `${areaTxt} m²`] as [string, string]] : []),
+    ...(rooms ? [['rooms', String(rooms)] as [string, string]] : []),
+    ['energy_class', p.energy_class],
+    ['install', `${l === 'en' ? 'from €' : l === 'ru' ? 'от ' : 'no '}${installFrom}${l === 'en' ? '' : ' €'}`],
+  ];
   const SPEC_ORDER = [
     'manufacturer', 'cooling_kw', 'heating_kw', 'scop', 'seer',
     'noise_db', 'airflow', 'operating_temp', 'mounting', 'refrigerant',
     'wifi', 'electrical', 'indoor_dims', 'outdoor_dims',
   ];
   const rawSpecs = p.specs && typeof p.specs === 'object' ? (p.specs as Record<string, string>) : {};
-  const specs = SPEC_ORDER
-    .map((k) => [k, translateSpecValue(k, rawSpecs[k] ?? '', locale)] as [string, string])
-    .filter(([, v]) => v);
+  const specs = [
+    ...baseRows,
+    ...SPEC_ORDER
+      .map((k) => [k, translateSpecValue(k, rawSpecs[k] ?? '', locale)] as [string, string])
+      .filter(([, v]) => v),
+  ];
+
+  // Breadcrumbs: Home → Catalog → Brand → Product
+  const pageUrl = `${BASE_URL}/${locale}/catalog/${p.id}`;
+  const brandHref = `/catalog/brand/${brandSlug(p.brand)}`;
+  const crumbs = [
+    { name: tn('home'), href: '/', url: `${BASE_URL}/${locale}` },
+    { name: tn('catalog'), href: '/catalog', url: `${BASE_URL}/${locale}/catalog` },
+    { name: p.brand, href: brandHref, url: `${BASE_URL}/${locale}${brandHref}` },
+    { name, href: null, url: pageUrl },
+  ];
+  const installDesc = settings[`svc_install_desc_${locale}`];
+  const TX = {
+    about: { lv: 'Apraksts', ru: 'Описание', en: 'Description' },
+    install: { lv: 'Montāža un konsultācija', ru: 'Монтаж и консультация', en: 'Installation and advice' },
+    similar: { lv: 'Līdzīgi modeļi', ru: 'Похожие модели', en: 'Similar models' },
+    installFrom: { lv: `Montāža no ${installFrom} €`, ru: `Монтаж от ${installFrom} €`, en: `Installation from €${installFrom}` },
+  };
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(productJsonLd(p, locale, pageUrl, metaDescription)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumbJsonLd(crumbs.map(({ name: n, url }) => ({ name: n, url })))) }} />
       {/* Header */}
       <div className="pt-36 pb-6 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <BackLink label={t('backToCatalog')} />
+          <nav aria-label="Breadcrumb" className="mb-3">
+            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-white/45">
+              {crumbs.map((c, i) => (
+                <li key={i} className="flex items-center gap-1.5">
+                  {c.href ? (
+                    <Link href={c.href as any} className="hover:text-[#27C4A0] transition-colors">{c.name}</Link>
+                  ) : (
+                    <span className="text-white/70" aria-current="page">{c.name}</span>
+                  )}
+                  {i < crumbs.length - 1 && <span aria-hidden="true">/</span>}
+                </li>
+              ))}
+            </ol>
+          </nav>
           <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-widest mb-1">{p.brand}</p>
           <h1 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{name}</h1>
           {(p.is_hit || p.is_promo || !!p.discount_percent) && (
@@ -199,12 +283,17 @@ export default async function ProductPage({ params }: Props) {
                   <p className="text-white/40 text-xs mb-1">{tp('power')}</p>
                   <p className="font-syne font-bold text-2xl text-[#27C4A0]">{p.power_kw} <span className="text-sm font-normal">kW</span></p>
                 </div>
-                {p.area_coverage && (
+                {areaTxt ? (
                   <div className="bg-[#0A3658]/50 rounded-xl p-4">
                     <p className="text-white/40 text-xs mb-1">{tp('area')}</p>
-                    <p className="font-syne font-bold text-2xl text-[#27C4A0]">{p.area_coverage} <span className="text-sm font-normal">m²</span></p>
+                    <p className="font-syne font-bold text-2xl text-[#27C4A0]">{areaTxt} <span className="text-sm font-normal">m²</span></p>
                   </div>
-                )}
+                ) : rooms ? (
+                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
+                    <p className="text-white/40 text-xs mb-1">{SPEC_LABELS.rooms[l]}</p>
+                    <p className="font-syne font-bold text-2xl text-[#27C4A0]">{rooms}</p>
+                  </div>
+                ) : null}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#0A3658]/50 rounded-xl p-4">
@@ -256,15 +345,27 @@ export default async function ProductPage({ params }: Props) {
               </svg>
             </Link>
 
-            {/* Description */}
-            {description && (
-              <div className="glass-card rounded-2xl p-6">
-                <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">
-                  {locale === 'lv' ? 'Apraksts' : locale === 'ru' ? 'Описание' : 'Description'}
-                </p>
-                <p className="text-white/70 text-sm leading-relaxed whitespace-pre-line">{description}</p>
+            {/* Description (manual text, or generated from product data) */}
+            <div className="glass-card rounded-2xl p-6">
+              <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">{TX.about[l]}</h2>
+              <div className="space-y-3">
+                {paragraphs.map((para, i) => (
+                  <p key={i} className="text-white/70 text-sm leading-relaxed">{para}</p>
+                ))}
               </div>
-            )}
+            </div>
+
+            {/* Installation — site-wide facts only (settings + trust bar) */}
+            <div className="glass-card rounded-2xl p-6">
+              <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">{TX.install[l]}</h2>
+              <ul className="space-y-1.5 text-sm text-white/70 list-disc pl-5">
+                <li>{TX.installFrom[l]}</li>
+                <li>{tTrust('installation')}</li>
+                <li>{tTrust('warranty')}</li>
+                <li>{tTrust('consultation')}</li>
+              </ul>
+              {installDesc && <p className="text-white/50 text-sm mt-3">{installDesc}</p>}
+            </div>
           </div>
         </div>
 
@@ -272,9 +373,9 @@ export default async function ProductPage({ params }: Props) {
         {specs.length > 0 && (
           <div className="mt-10">
             <div className="glass-card rounded-2xl p-6">
-              <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-5">
+              <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-5">
                 {t('specsLabel')}
-              </p>
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
                 {specs.map(([key, value], i) => (
                   <div key={key} className={`flex items-start justify-between py-3 px-4 ${i % 2 === 0 ? '' : ''} border-b border-[#1A6B9A]/12 last:border-b-0`}>
@@ -287,6 +388,14 @@ export default async function ProductPage({ params }: Props) {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Similar models — crawlable links to related product pages */}
+        {similar.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-syne font-bold text-2xl mb-6">{TX.similar[l]}</h2>
+            <ProductGrid products={similar} locale={locale} installFrom={installFrom} />
+          </section>
         )}
       </div>
     </>
