@@ -6,12 +6,34 @@ import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
-
-
-
 import { CATALOG_PAGE_SIZE } from '@/lib/catalogData';
+import { areaMax } from '@/lib/productSeo';
 
-type Filters = { brand?: string; power?: string; category?: string; sort?: string };
+type Filters = { brand?: string; area?: string; category?: string; sort?: string; q?: string };
+
+/** Room-area buckets (m², by the product's max served area). */
+const AREA_BUCKETS: { id: string; min: number; max: number; label: string }[] = [
+  { id: 'lt25', min: 0, max: 25, label: '≤ 25 m²' },
+  { id: '25-35', min: 25, max: 35, label: '25–35 m²' },
+  { id: '35-50', min: 35, max: 50, label: '35–50 m²' },
+  { id: '50-70', min: 50, max: 70, label: '50–70 m²' },
+  { id: '70plus', min: 70, max: Infinity, label: '70+ m²' },
+];
+const inBucket = (p: SupabaseProduct, id: string) => {
+  const b = AREA_BUCKETS.find((x) => x.id === id);
+  const a = areaMax(p);
+  if (!b || a === null) return false;
+  return b.id === 'lt25' ? a <= 25 : a > b.min && a <= b.max;
+};
+// Case- and diacritic-insensitive ("kondicionetajs" finds "kondicionētājs")
+const norm = (s: string) => s.toLocaleLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+const finalPrice = (p: SupabaseProduct) => (p.price ? (p.discount_percent ? p.price * (1 - p.discount_percent / 100) : p.price) : 0);
+
+const TXT = {
+  search: { lv: 'Meklēt pēc nosaukuma vai modeļa', ru: 'Поиск по названию или модели', en: 'Search by name or model' },
+  area: { lv: 'Telpas platība', ru: 'Площадь помещения', en: 'Room area' },
+  anyArea: { lv: 'Jebkura', ru: 'Любая', en: 'Any' },
+};
 
 /** Grid of product cards (crawlable <a> links). Used by catalog, landing pages and "similar models". */
 export function ProductGrid({ products, locale, installFrom = 250 }: { products: SupabaseProduct[]; locale: string; installFrom?: number }) {
@@ -34,7 +56,11 @@ export default function CatalogClient({
   // Initial state comes from the server (search params), so SSR HTML and the
   // hydrated client agree — the default view is ALL products, paginated.
   const [brand, setBrand] = useState(initialFilters.brand ?? '');
-  const [power, setPower] = useState(initialFilters.power ?? '');
+  const [area, setArea] = useState(initialFilters.area ?? '');
+  const [query, setQuery] = useState(initialFilters.q ?? '');
+  const [q, setQ] = useState(initialFilters.q ?? '');
+  // Debounce typing → filter + URL update 250 ms after the last keystroke
+  useEffect(() => { const id = setTimeout(() => setQ(query.trim()), 250); return () => clearTimeout(id); }, [query]);
   const [category, setCategory] = useState(initialFilters.category ?? '');
   const [sort, setSort] = useState(initialFilters.sort ?? 'asc');
   const [touched, setTouched] = useState(false);
@@ -45,31 +71,40 @@ export default function CatalogClient({
     if (!touched) return;
     const p = new URLSearchParams();
     if (brand) p.set('brand', brand);
-    if (power) p.set('power', power);
+    if (q) p.set('q', q);
+    if (area) p.set('area', area);
     if (category) p.set('category', category);
     if (sort !== 'asc') p.set('sort', sort);
     const q = p.toString();
     window.history.replaceState(null, '', q ? `${pathname}?${q}` : pathname);
     sessionStorage.setItem('catalogParams', q);
-  }, [brand, power, category, sort, touched, pathname]);
+  }, [brand, area, category, sort, q, touched, pathname]);
 
   const brands = useMemo(() => Array.from(new Set(initialProducts.map((p) => p.brand))), [initialProducts]);
-  const powerLevels = useMemo(() => Array.from(new Set(initialProducts.map((p) => p.power_kw))).sort((a, b) => a - b), [initialProducts]);
 
   const filtered = useMemo(() => {
     let list = [...initialProducts];
     if (brand) list = list.filter((p) => p.brand === brand);
-    if (power) list = list.filter((p) => p.power_kw === parseFloat(power));
+    if (area) list = list.filter((p) => inBucket(p, area));
+    if (q) {
+      const needle = norm(q);
+      list = list.filter((p) => norm([p.brand, p.name_lv, p.name_ru, p.name_en].join(' ')).includes(needle));
+    }
     if (category) list = list.filter((p) => p.category === category);
-    list.sort((a, b) => sort === 'asc' ? a.price - b.price : b.price - a.price);
+    // 'Price on request' (no price) always last, whatever the direction
+    list.sort((a, b) => {
+      const pa = finalPrice(a), pb = finalPrice(b);
+      if (!pa || !pb) return (pa ? 0 : 1) - (pb ? 0 : 1);
+      return sort === 'asc' ? pa - pb : pb - pa;
+    });
     return list;
-  }, [initialProducts, brand, power, category, sort]);
+  }, [initialProducts, brand, area, category, sort, q]);
 
-  const reset = () => { setTouched(true); setBrand(''); setPower(''); setCategory(''); setSort('asc'); };
+  const reset = () => { setTouched(true); setBrand(''); setArea(''); setCategory(''); setSort('asc'); setQuery(''); setQ(''); };
   const change = (fn: (v: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => { setTouched(true); fn(e.target.value); };
 
   // Unfiltered view → server pagination with real links. Filtered view → full filtered list.
-  const unfiltered = !brand && !power && !category && sort === 'asc';
+  const unfiltered = !brand && !area && !category && !q && sort === 'asc';
   const totalPages = Math.max(1, Math.ceil(filtered.length / CATALOG_PAGE_SIZE));
   const curPage = unfiltered ? Math.min(Math.max(1, page), totalPages) : 1;
   const shown = unfiltered ? filtered.slice((curPage - 1) * CATALOG_PAGE_SIZE, curPage * CATALOG_PAGE_SIZE) : filtered;
@@ -86,6 +121,19 @@ export default function CatalogClient({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="glass-card rounded-2xl p-5 mb-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="col-span-2 sm:col-span-4 relative">
+          <label htmlFor="cat-search" className="sr-only">{TXT.search[L]}</label>
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <input
+            id="cat-search"
+            type="search"
+            value={query}
+            onChange={(e) => { setTouched(true); setQuery(e.target.value); }}
+            placeholder={TXT.search[L]}
+            autoComplete="off"
+            className="w-full bg-[#0A3658]/80 border border-[#1A6B9A]/30 text-white text-sm pl-10 pr-3.5 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors placeholder-white/50"
+          />
+        </div>
         <div>
           <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('brand')}</label>
           <div className="relative">
@@ -98,11 +146,11 @@ export default function CatalogClient({
         </div>
 
         <div>
-          <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('power')}</label>
+          <label htmlFor="cat-area" className="block text-xs text-white/70 mb-1.5 font-medium">{TXT.area[L]}</label>
           <div className="relative">
-            <select value={power} onChange={change(setPower)} className={selectCls}>
-              <option value="">{t('allPowers')}</option>
-              {powerLevels.map((p) => <option key={p} value={p} style={{ background: '#0A3658' }}>{p} kW</option>)}
+            <select id="cat-area" value={area} onChange={change(setArea)} className={selectCls}>
+              <option value="">{TXT.anyArea[L]}</option>
+              {AREA_BUCKETS.map((b) => <option key={b.id} value={b.id} style={{ background: '#0A3658' }}>{b.label}</option>)}
             </select>
             <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
           </div>
@@ -136,7 +184,7 @@ export default function CatalogClient({
 
       <div className="flex items-center justify-between mb-6">
         <p className="text-white/70 text-sm"><span className="text-white font-semibold">{filtered.length}</span> {t('results')}</p>
-        {(brand || power || category) && (
+        {(brand || area || category || q) && (
           <button onClick={reset} className="text-[#27C4A0] text-sm hover:text-white transition-colors flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
             {t('resetFilters')}

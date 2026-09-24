@@ -10,7 +10,7 @@ import { visibleProducts, CATALOG_PAGE_SIZE } from '@/lib/catalogData';
 
 export const dynamic = 'force-dynamic';
 
-type SP = { page?: string; category?: string; brand?: string; power?: string; sort?: string };
+type SP = { page?: string; category?: string; brand?: string; area?: string; sort?: string; q?: string };
 
 const parsePage = (v?: string) => {
   const n = parseInt(v || '1', 10);
@@ -87,7 +87,7 @@ export default async function CatalogPage({
       <CatalogClient
         initialProducts={products}
         locale={locale}
-        initialFilters={{ brand: sp.brand, power: sp.power, category: sp.category, sort: sp.sort }}
+        initialFilters={{ brand: sp.brand, area: sp.area, category: sp.category, sort: sp.sort, q: sp.q }}
         page={page}
         installFrom={installFrom}
       />
