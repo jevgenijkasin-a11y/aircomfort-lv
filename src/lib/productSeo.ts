@@ -250,8 +250,19 @@ function efficiencySentence(p: SupabaseProduct, l: Loc): string {
   return { ru: `Класс энергоэффективности — ${c}.`, lv: `Energoefektivitātes klase — ${c}.`, en: `Energy efficiency class: ${c}.` }[l];
 }
 
+// Proper names that must keep their capital letter inside a list
+const KEEP_CASE = /^(Coanda|Daikin|Mitsubishi|Hisense|Midea|Toshiba|Panasonic|Samsung|Bosch|Alexa|Google|Hi-?NANO|Flash|Ururu|Sarara|Emura|Perfera|Stylish)/i;
+
+/** Lower-case a feature's first letter for use mid-sentence ("— unikāls dizains, …"),
+ *  but keep acronyms/model tokens (Wi-Fi, R32, DC, SEER, 3D) and proper names. */
+function midSentence(f: string): string {
+  const first = f.split(/\s/)[0];
+  if (/[A-ZĀ-ŽА-ЯЁ0-9]/.test(first.slice(1)) || KEEP_CASE.test(first)) return f;
+  return f.charAt(0).toLocaleLowerCase() + f.slice(1);
+}
+
 function featuresSentence(p: SupabaseProduct, l: Loc): string {
-  const f = localFeatures(p, l).slice(0, 5);
+  const f = localFeatures(p, l).slice(0, 5).map(midSentence);
   if (!f.length) return '';
   const list = f.join(', ');
   return pick(p, 2, {

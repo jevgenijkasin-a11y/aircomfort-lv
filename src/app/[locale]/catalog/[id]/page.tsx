@@ -10,7 +10,7 @@ import { getProduct, getSettings, listProducts } from '@/lib/db';
 import { localizedAlternates, BASE_URL } from '@/lib/seo';
 import {
   productTitle, productMetaDescription, productParagraphs, similarProducts,
-  productJsonLd, breadcrumbJsonLd, jsonLdString, absUrl, brandSlug, categoryNoun, asLoc, areaLabel, roomCount,
+  productJsonLd, breadcrumbJsonLd, jsonLdString, absUrl, brandSlug, categoryNoun, asLoc, areaLabel, roomCount, fullName,
 } from '@/lib/productSeo';
 import ProductImageViewer from '@/components/ProductImageViewer';
 import BackLink from '@/components/BackLink';
@@ -52,33 +52,24 @@ const energyColors: Record<string, string> = {
   'A+': 'text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10',
 };
 
-function buildContactMessage(p: SupabaseProduct, name: string, locale: string, installFrom: number): string {
-  const finalPrice = p.price && p.discount_percent
-    ? Math.round(p.price * (1 - p.discount_percent / 100))
-    : p.price;
-
-  if (locale === 'lv') {
-    const lines = [`Interesē: ${p.brand} ${name}`];
-    if (p.power_kw) lines.push(`Jauda: ${p.power_kw} kW`);
-    if (p.area_coverage) lines.push(`Platība: ${p.area_coverage} m²`);
-    if (finalPrice) lines.push(`Cena: ${finalPrice} €`);
-    lines.push(`Uzstādīšana no: ${installFrom} €`);
-    return lines.join('\n');
-  }
-  if (locale === 'en') {
-    const lines = [`Interested in: ${p.brand} ${name}`];
-    if (p.power_kw) lines.push(`Power: ${p.power_kw} kW`);
-    if (p.area_coverage) lines.push(`Area: ${p.area_coverage} m²`);
-    if (finalPrice) lines.push(`Price: ${finalPrice} €`);
-    lines.push(`Installation from: ${installFrom} €`);
-    return lines.join('\n');
-  }
-  // ru (default)
-  const lines = [`Интересует: ${p.brand} ${name}`];
-  if (p.power_kw) lines.push(`Мощность: ${p.power_kw} kW`);
-  if (p.area_coverage) lines.push(`Площадь: ${p.area_coverage} m²`);
-  if (finalPrice) lines.push(`Цена: ${finalPrice} €`);
-  lines.push(`Монтаж от: ${installFrom} €`);
+/** Prefilled contact-form message. Uses fullName() so the brand is not duplicated
+ *  ("Daikin Daikin Stylish…") and localized area / multi-split room count. */
+function buildContactMessage(p: SupabaseProduct, _name: string, locale: string, installFrom: number): string {
+  const l = asLoc(locale);
+  const price = p.price && p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price;
+  const area = areaLabel(p, l);
+  const rooms = roomCount(p);
+  const L = {
+    lv: { want: 'Interesē', power: 'Jauda', area: 'Platība', rooms: 'Telpu skaits', price: 'Cena', install: 'Montāža no' },
+    ru: { want: 'Интересует', power: 'Мощность', area: 'Площадь', rooms: 'Количество комнат', price: 'Цена', install: 'Монтаж от' },
+    en: { want: 'Interested in', power: 'Capacity', area: 'Area', rooms: 'Rooms', price: 'Price', install: 'Installation from' },
+  }[l];
+  const lines = [`${L.want}: ${fullName(p, l)}`];
+  if (p.power_kw) lines.push(`${L.power}: ${p.power_kw} kW`);
+  if (area) lines.push(`${L.area}: ${area} m²`);
+  else if (rooms) lines.push(`${L.rooms}: ${rooms}`);
+  if (price) lines.push(`${L.price}: ${price} €`);
+  lines.push(`${L.install}: ${installFrom} €`);
   return lines.join('\n');
 }
 
@@ -204,6 +195,11 @@ export default async function ProductPage({ params }: Props) {
     install: { lv: 'Montāža un konsultācija', ru: 'Монтаж и консультация', en: 'Installation and advice' },
     similar: { lv: 'Līdzīgi modeļi', ru: 'Похожие модели', en: 'Similar models' },
     installFrom: { lv: `Montāža no ${installFrom} €`, ru: `Монтаж от ${installFrom} €`, en: `Installation from €${installFrom}` },
+    total: {
+      lv: (v: string) => `Kopā ar montāžu no ${v} €`,
+      ru: (v: string) => `Итого с монтажом от ${v} €`,
+      en: (v: string) => `Total with installation from €${v}`,
+    },
   };
 
   return (
@@ -330,12 +326,20 @@ export default async function ProductPage({ params }: Props) {
                   </div>
                 </div>
               )}
-              <div className="flex items-center py-3 border-t border-[#1A6B9A]/15">
-                <span className="text-white/70 text-sm">{tp('installFrom', { price: installFrom })}</span>
+              <div className="py-3 border-t border-[#1A6B9A]/15 space-y-1" data-fab-avoid>
+                <p className="text-white/70 text-sm">{tp('installFrom', { price: installFrom })}</p>
+                {!!p.price && (
+                  <p className="font-syne font-semibold text-base text-[#27C4A0]">
+                    {TX.total[l](
+                      ((p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price) + installFrom).toLocaleString('lv-LV')
+                    )}
+                  </p>
+                )}
               </div>
             </div>
 
             <Link
+              data-fab-avoid
               href={contactHref as any}
               className="w-full flex items-center justify-center gap-2 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold py-4 rounded-2xl transition-all duration-200 shadow-xl shadow-[#27C4A0]/25 hover:-translate-y-0.5 text-base"
             >
