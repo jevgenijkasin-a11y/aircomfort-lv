@@ -121,23 +121,10 @@ export default async function Hero() {
           <div className="mt-16 sm:flex sm:flex-wrap sm:items-end sm:justify-start sm:gap-x-10 sm:gap-y-6">
             <div className="grid grid-cols-3 gap-x-4 gap-y-5 sm:contents">
               {stats.map((stat) => {
-                const match = stat.value.match(/^([\d.]+)(.*)$/);
-                const numPart = match ? match[1] : null;
-                const suffix = match ? match[2] : '';
+                // First screen: no count-up animation, final values straight from the server
                 return (
                   <div key={stat.label} className="flex flex-col items-center sm:items-start">
-                    {numPart ? (
-                      <span
-                        className="font-syne font-bold text-3xl text-[#27C4A0]"
-                        data-count={numPart}
-                        data-suffix={suffix}
-                        suppressHydrationWarning
-                      >
-                        0{suffix}
-                      </span>
-                    ) : (
-                      <span className="font-syne font-bold text-3xl text-[#27C4A0]">{stat.value}</span>
-                    )}
+                    <span className="font-syne font-bold text-3xl text-[#27C4A0]">{stat.value}</span>
                     <span className="text-sm text-white/75 mt-0.5 text-center sm:text-left">{stat.label}</span>
                   </div>
                 );
