@@ -114,7 +114,7 @@ function migrate(instance: DatabaseSync) {
 
 const bool = (v: unknown): boolean => v === 1 || v === true;
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// (row mappers below take untyped SQLite rows)
 
 function mapProduct(r: any): SupabaseProduct {
   let specs: Record<string, string> | undefined;
