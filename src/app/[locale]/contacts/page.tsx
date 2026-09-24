@@ -29,7 +29,7 @@ function InfoCard({
         {icon}
       </div>
       <div>
-        <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-0.5">{label}</p>
+        <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-0.5">{label}</p>
         <p className="text-white font-medium text-sm">{value}</p>
       </div>
     </div>
@@ -72,7 +72,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <p className="text-[#27C4A0] text-sm font-semibold uppercase tracking-widest mb-3">{pageTitle}</p>
           <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-3">{pageTitle}</h1>
-          <p className="text-white/45 text-lg max-w-xl">{pageSubtitle}</p>
+          <p className="text-white/70 text-lg max-w-xl">{pageSubtitle}</p>
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

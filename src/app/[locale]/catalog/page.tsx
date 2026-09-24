@@ -81,7 +81,7 @@ export default async function CatalogPage({
           <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-3">
             {t('title')}{page > 1 ? ` — ${PAGE_WORD[l]} ${page}` : ''}
           </h1>
-          <p className="text-white/45 text-lg">{t('subtitle')}</p>
+          <p className="text-white/70 text-lg">{t('subtitle')}</p>
         </div>
       </div>
       <CatalogClient
@@ -95,7 +95,7 @@ export default async function CatalogPage({
       {/* Crawlable hub links to brand and category landing pages */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 grid gap-8 sm:grid-cols-2">
         <nav aria-label={LBL.types[l]}>
-          <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">{LBL.types[l]}</h2>
+          <h2 className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-3">{LBL.types[l]}</h2>
           <ul className="flex flex-wrap gap-2">
             {cats.map((c) => (
               <li key={c}>
@@ -107,7 +107,7 @@ export default async function CatalogPage({
           </ul>
         </nav>
         <nav aria-label={LBL.brands[l]}>
-          <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">{LBL.brands[l]}</h2>
+          <h2 className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-3">{LBL.brands[l]}</h2>
           <ul className="flex flex-wrap gap-2">
             {brands.map((b) => (
               <li key={b}>

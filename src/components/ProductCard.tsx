@@ -90,7 +90,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
             ) : (
               <>
                 {!!product.discount_percent && (
-                  <span className="block text-xs text-white/60 line-through">{product.price.toLocaleString('lv-LV')} €</span>
+                  <span className="block text-xs text-white/70 line-through">{product.price.toLocaleString('lv-LV')} €</span>
                 )}
                 <span className={`font-syne font-bold text-xl ${product.discount_percent ? 'text-[#27C4A0]' : 'text-white'}`}>
                   {price.toLocaleString('lv-LV')} €

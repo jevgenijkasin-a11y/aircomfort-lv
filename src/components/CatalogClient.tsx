@@ -87,7 +87,7 @@ export default function CatalogClient({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="glass-card rounded-2xl p-5 mb-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
-          <label className="block text-xs text-white/40 mb-1.5 font-medium">{t('brand')}</label>
+          <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('brand')}</label>
           <div className="relative">
             <select value={brand} onChange={change(setBrand)} className={selectCls}>
               <option value="">{t('allBrands')}</option>
@@ -98,7 +98,7 @@ export default function CatalogClient({
         </div>
 
         <div>
-          <label className="block text-xs text-white/40 mb-1.5 font-medium">{t('power')}</label>
+          <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('power')}</label>
           <div className="relative">
             <select value={power} onChange={change(setPower)} className={selectCls}>
               <option value="">{t('allPowers')}</option>
@@ -109,7 +109,7 @@ export default function CatalogClient({
         </div>
 
         <div>
-          <label className="block text-xs text-white/40 mb-1.5 font-medium">{t('category')}</label>
+          <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('category')}</label>
           <div className="relative">
             <select value={category} onChange={change(setCategory)} className={selectCls}>
               <option value="">{t('allCategories')}</option>
@@ -123,7 +123,7 @@ export default function CatalogClient({
         </div>
 
         <div>
-          <label className="block text-xs text-white/40 mb-1.5 font-medium">{t('sort')}</label>
+          <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('sort')}</label>
           <div className="relative">
             <select value={sort} onChange={change(setSort)} className={selectCls}>
               <option value="asc" style={{ background: '#0A3658' }}>{t('sortAsc')}</option>
@@ -135,7 +135,7 @@ export default function CatalogClient({
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <p className="text-white/40 text-sm"><span className="text-white font-semibold">{filtered.length}</span> {t('results')}</p>
+        <p className="text-white/70 text-sm"><span className="text-white font-semibold">{filtered.length}</span> {t('results')}</p>
         {(brand || power || category) && (
           <button onClick={reset} className="text-[#27C4A0] text-sm hover:text-white transition-colors flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -149,8 +149,8 @@ export default function CatalogClient({
           <div className="w-16 h-16 rounded-2xl bg-[#0A3658] border border-[#1A6B9A]/20 flex items-center justify-center mx-auto mb-4">
             <svg className="w-7 h-7 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </div>
-          <p className="text-white/40 text-lg font-syne">{t('noResults')}</p>
-          <p className="text-white/25 text-sm mt-1">{t('noResultsHint')}</p>
+          <p className="text-white/70 text-lg font-syne">{t('noResults')}</p>
+          <p className="text-white/70 text-sm mt-1">{t('noResultsHint')}</p>
           <button onClick={reset} className="mt-5 text-[#27C4A0] text-sm font-semibold hover:text-white transition-colors">{t('resetFilters')}</button>
         </div>
       ) : (

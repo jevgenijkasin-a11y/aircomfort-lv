@@ -12,7 +12,7 @@ export default function BrandMarquee() {
       <div className="motion-reduce-show max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
           {brands.map((b) => (
-            <span key={b} className="font-syne font-bold text-xl text-white/20 tracking-wide">
+            <span key={b} className="font-syne font-bold text-xl text-white/70 tracking-wide">
               {b}
             </span>
           ))}
@@ -25,7 +25,7 @@ export default function BrandMarquee() {
           {quad.map((b, i) => (
             <span
               key={i}
-              className="font-syne font-bold text-xl text-white/25 hover:text-white/70 transition-colors duration-200 tracking-wide cursor-default select-none px-10"
+              className="font-syne font-bold text-xl text-white/70 hover:text-white transition-colors duration-200 tracking-wide cursor-default select-none px-10"
             >
               {b}
             </span>

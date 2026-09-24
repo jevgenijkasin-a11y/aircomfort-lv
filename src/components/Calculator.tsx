@@ -86,7 +86,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
     router.push(`/contacts?service=consultation&message=${encodeURIComponent(message)}`);
   };
 
-  const labelCls = 'block text-sm font-medium text-white/60 mb-1.5';
+  const labelCls = 'block text-sm font-medium text-white/70 mb-1.5';
   const inputCls =
     'w-full bg-[#0A3658]/80 border border-[#1A6B9A]/30 text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors placeholder-white/20';
   const selectCls =
@@ -150,7 +150,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                     className={`py-2.5 px-2 text-xs font-medium rounded-xl border transition-all ${
                       insulation === val
                         ? 'bg-[#27C4A0]/15 border-[#27C4A0]/50 text-[#27C4A0]'
-                        : 'bg-[#0A3658]/50 border-[#1A6B9A]/25 text-white/50 hover:text-white hover:border-[#1A6B9A]/50'
+                        : 'bg-[#0A3658]/50 border-[#1A6B9A]/25 text-white/70 hover:text-white hover:border-[#1A6B9A]/50'
                     }`}
                   >
                     {label}
@@ -184,7 +184,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                     className={`py-2.5 px-3 text-xs font-medium rounded-xl border transition-all ${
                       floor === val
                         ? 'bg-[#27C4A0]/15 border-[#27C4A0]/50 text-[#27C4A0]'
-                        : 'bg-[#0A3658]/50 border-[#1A6B9A]/25 text-white/50 hover:text-white hover:border-[#1A6B9A]/50'
+                        : 'bg-[#0A3658]/50 border-[#1A6B9A]/25 text-white/70 hover:text-white hover:border-[#1A6B9A]/50'
                     }`}
                   >
                     {label}
@@ -218,14 +218,14 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
 
               {/* Recommended power */}
               <div className="bg-gradient-to-r from-[#27C4A0]/10 to-transparent border border-[#27C4A0]/20 rounded-xl p-5 mb-5">
-                <p className="text-white/50 text-sm mb-1">{t('recommendedPower')}</p>
+                <p className="text-white/70 text-sm mb-1">{t('recommendedPower')}</p>
                 <p className="font-syne font-bold text-4xl text-[#27C4A0]">{result.powerKw} {t('kw')}</p>
               </div>
 
               {/* Cost breakdown */}
               <div className="space-y-3 mb-5">
                 <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
-                  <span className="text-white/55 text-sm">{t('equipmentCost')}</span>
+                  <span className="text-white/70 text-sm">{t('equipmentCost')}</span>
                   <span className="font-semibold text-white">
                     {result.equipMin > 0
                       ? result.equipMin === result.equipMax
@@ -235,7 +235,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
-                  <span className="text-white/55 text-sm">{t('installationCost')}</span>
+                  <span className="text-white/70 text-sm">{t('installationCost')}</span>
                   <span className="font-semibold text-white">
                     {result.installMin}–{result.installMax} €
                   </span>
@@ -260,7 +260,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                 </svg>
               </button>
 
-              <p className="text-white/50 text-xs mt-4 leading-relaxed">{t('disclaimer')}</p>
+              <p className="text-white/70 text-xs mt-4 leading-relaxed">{t('disclaimer')}</p>
             </div>
           ) : (
             <div className="glass-card rounded-2xl p-10 text-center flex flex-col items-center justify-center min-h-[360px]">
@@ -270,8 +270,8 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                   <circle cx="12" cy="12" r="2.5" />
                 </svg>
               </div>
-              <p className="font-syne font-semibold text-white/50 mb-1">{t('resultTitle')}</p>
-              <p className="text-sm text-white/25">{t('areaPlaceholder')}</p>
+              <p className="font-syne font-semibold text-white/70 mb-1">{t('resultTitle')}</p>
+              <p className="text-sm text-white/70">{t('areaPlaceholder')}</p>
             </div>
           )}
         </div>

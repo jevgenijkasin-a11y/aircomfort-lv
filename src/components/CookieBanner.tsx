@@ -35,7 +35,7 @@ export default function CookieBanner() {
         <div className="flex items-center gap-3 flex-shrink-0">
           <button
             onClick={() => accept('necessary')}
-            className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-xl border border-white/10 hover:border-white/25 transition-all"
+            className="text-white/70 hover:text-white text-sm font-medium px-4 py-2 rounded-xl border border-white/10 hover:border-white/25 transition-all"
           >
             {t('necessary')}
           </button>

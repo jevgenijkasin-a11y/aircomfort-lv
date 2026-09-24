@@ -46,7 +46,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
             {tn('calculator')}
           </p>
           <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-3">{t('title')}</h1>
-          <p className="text-white/45 text-lg max-w-xl mx-auto">{t('subtitle')}</p>
+          <p className="text-white/70 text-lg max-w-xl mx-auto">{t('subtitle')}</p>
         </div>
       </div>
       <Calculator installFrom={installFrom} installTo={installTo} products={residential} locale={locale} />

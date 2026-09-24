@@ -67,7 +67,7 @@ export default async function Services() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="reveal text-center mb-14">
           <h2 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{title}</h2>
-          <p className="text-white/45 text-lg">{subtitle}</p>
+          <p className="text-white/70 text-lg">{subtitle}</p>
         </div>
 
         <div className="reveal-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -78,7 +78,7 @@ export default async function Services() {
                   <Icon />
                 </div>
                 <h3 className="font-syne font-semibold text-lg mb-2">{name}</h3>
-                <p className="text-white/50 text-sm leading-relaxed flex-1">{desc}</p>
+                <p className="text-white/70 text-sm leading-relaxed flex-1">{desc}</p>
               </div>
             </div>
           ))}
