@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface Props {
   slides: string[];
@@ -24,11 +25,16 @@ export default function HeroSlider({ slides }: Props) {
           className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
           style={{ opacity: i === current ? 1 : 0 }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* TODO: hero photos are placeholders and will be replaced with real
+              AirComfort installation photos (managed in Admin → Slider). */}
+          <Image
             src={url}
             alt=""
-            className="w-full h-full object-cover"
+            fill
+            sizes="100vw"
+            quality={70}
+            priority={i === 0}
+            className="object-cover"
             aria-hidden
             style={{ filter: 'brightness(1.05) saturate(0.88) contrast(0.96)' }}
           />

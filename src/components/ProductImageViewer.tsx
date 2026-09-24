@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { createPortal } from 'react-dom';
+import Image from 'next/image';
 
 interface Props {
   images: string[];
@@ -40,13 +41,13 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
     <>
       {/* Main image */}
       <div
-        className="h-80 flex items-center justify-center relative cursor-zoom-in select-none bg-white"
+        className="h-80 flex items-center justify-center relative cursor-zoom-in select-none bg-[#F3F6F9]"
         onClick={() => hasImages && openLightbox(active)}
       >
 
         {hasImages ? (
           <>
-            <img src={images[active]} alt={alt} className="relative h-full w-full object-contain p-8" />
+            <Image src={images[active]} alt={alt} fill priority sizes="(max-width: 1024px) 100vw, 50vw" quality={80} className="object-contain p-8" />
 
             {hasMultiple && (
               <>
@@ -97,7 +98,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
                   : 'border-gray-200 opacity-60 hover:opacity-90 hover:border-gray-400'
               }`}
             >
-              <img src={src} alt={`${alt} ${i + 1}`} className="w-full h-full object-contain p-1" />
+              <span className="relative block w-full h-full"><Image src={src} alt={`${alt} ${i + 1}`} fill sizes="96px" className="object-contain p-1" /></span>
             </button>
           ))}
         </div>
@@ -133,11 +134,14 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
               </button>
             )}
-            <div className="w-full h-full flex items-center justify-center bg-white/5 rounded-2xl mx-4 overflow-hidden">
-              <img
+            <div className="relative w-full h-full flex items-center justify-center bg-white/5 rounded-2xl mx-4 overflow-hidden">
+              <Image
                 src={images[lbIndex]}
                 alt={`${alt} ${lbIndex + 1}`}
-                className="max-w-full max-h-full object-contain p-6"
+                fill
+                sizes="100vw"
+                quality={85}
+                className="object-contain p-6"
               />
             </div>
             {hasMultiple && (
@@ -161,7 +165,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
                     lbIndex === i ? 'border-[#27C4A0]' : 'border-white/15 opacity-50 hover:opacity-80'
                   }`}
                 >
-                  <img src={src} alt="" className="w-full h-full object-contain" />
+                  <span className="relative block w-full h-full"><Image src={src} alt="" fill sizes="96px" className="object-contain" /></span>
                 </button>
               ))}
             </div>

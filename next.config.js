@@ -11,6 +11,19 @@ const nextConfig = {
     cpus: 1,
   },
 
+  images: {
+    // Originals (uploads up to ~3500 px, several MB) never reach the client:
+    // next/image serves resized AVIF/WebP variants, cached in .next/cache/images.
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 828, 1080, 1280, 1920],
+    imageSizes: [64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    remotePatterns: [
+      // Hero slides stored in the DB may still point to Unsplash
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+    ],
+  },
+
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
 

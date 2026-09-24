@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import { getCardByToken } from '@/lib/db';
 import type { Metadata } from 'next';
 
@@ -80,7 +81,7 @@ export default async function CardPage({ params }: Props) {
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
         }}>
           {data.photo_url ? (
-            <img className="card-photo" src={data.photo_url} alt={data.name} style={{
+            <Image className="card-photo" src={data.photo_url} alt={data.name} width={130} height={130} priority sizes="130px" style={{
               width: 130, height: 130, borderRadius: '50%', objectFit: 'cover',
               objectPosition: `center ${data.photo_position ?? 50}%`,
               border: '3px solid rgba(255,255,255,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
