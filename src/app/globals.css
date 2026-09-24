@@ -176,3 +176,10 @@ body {
   .airflow-layer { display: none !important; }
 }
 
+
+/* ── Room for the floating "Contact" button ──────────────────────────────
+   On mobile the FAB (56px + 16px gap) sits bottom-right; pad the page so
+   the last content (footer, CTAs) can always scroll clear of it. */
+@media (max-width: 1023px) {
+  body { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+}
