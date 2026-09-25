@@ -90,7 +90,7 @@
     "catCommercialHeatPump": "Siltumsūkņi gaiss-ūdens",
     "sortAsc": "Cena: augošā",
     "sortDesc": "Cena: dilstošā",
-    "noResults": "Produkti nav atrasti",
+    "noResults": "Nekas netika atrasts",
     "noResultsHint": "Mainiet filtrus vai skatiet visu katalogu",
     "resetFilters": "Atiestatīt filtrus",
     "brand": "Zīmols",
@@ -113,7 +113,29 @@
     "orderTitle": "Pasūtīt šo modeli",
     "orderSubtitle": "Mēs sazināsimies ar jums 2 stundu laikā",
     "orderCta": "Nosūtīt pieprasījumu",
-    "features": "Funkcijas"
+    "features": "Funkcijas",
+    "pipes": "Cauruļu sistēma",
+    "pipes2": "2 cauruļu",
+    "pipes4": "4 cauruļu",
+    "motor": "Ventilatora motors",
+    "cooling": "Dzesēšana",
+    "heating": "Sildīšana",
+    "any": "Jebkurš",
+    "errorTitle": "Neizdevās parādīt preces",
+    "errorHint": "Mēģiniet atiestatīt filtrus — pārējais katalogs darbojas.",
+    "subcategories": "Apakškategorijas",
+    "categoryEmpty": "Šajā sadaļā pagaidām nav preču. Sazinieties ar mums — piemeklēsim iekārtas jūsu projektam.",
+    "specType": "Tips",
+    "specPipes": "Cauruļu sistēma",
+    "specMotor": "Ventilatora motors",
+    "specCooling": "Dzesēšanas jauda",
+    "specHeating": "Sildīšanas jauda",
+    "specAirflow": "Gaisa plūsma",
+    "specNoise": "Trokšņa līmenis",
+    "specEsp": "Ārējais statiskais spiediens",
+    "worksWithHeatPump": "Darbojas ar siltumsūkni",
+    "worksWithHint": "Fankoils saņem siltu vai aukstu ūdeni no siltumsūkņa gaiss-ūdens.",
+    "matchingFanCoils": "Piemēroti fankoili"
   },
   "calculator": {
     "title": "Izmaksu kalkulators",
@@ -229,5 +251,10 @@
     "s6title": "6. Kontaktinformācija",
     "s6body": "Ja jums ir jautājumi par šo privātuma politiku, lūdzu, sazinieties ar mums:",
     "back": "← Atpakaļ uz sākumlapu"
+  },
+  "notFound": {
+    "title": "Lapa nav atrasta",
+    "text": "Iespējams, prece vairs netiek pārdota vai saite ir novecojusi.",
+    "toCatalog": "Uz katalogu"
   }
 }

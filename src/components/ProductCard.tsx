@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productImages } from '@/lib/types';
 import { areaLabel, roomCount, asLoc } from '@/lib/productSeo';
 import { starred } from '@/components/FootnoteStar';
+import { fanSpec } from '@/lib/fanCoil';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-[#27C4A0] border-[#27C4A0]/40 bg-[#27C4A0]/10',
@@ -32,17 +33,23 @@ function CategoryIcon({ category }: { category: string }) {
     heat_pump: 'M13 10V3L4 14h7v7l9-11h-7z',
     commercial: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
     commercial_heat_pump: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18',
+    fan_coils: 'M12 12m-2 0a2 2 0 104 0 2 2 0 10-4 0M12 10c0-4 3-6 5-4s-1 5-5 4m2 2c4 0 6 3 4 5s-5-1-4-5m-2 2c0 4-3 6-5 4s1-5 5-4m-2-2c-4 0-6-3-4-5s5 1 4 5',
   };
+  const key = category.startsWith('fan_coils') ? 'fan_coils' : category;
   return (
     <svg viewBox="0 0 24 24" className="w-10 h-10 text-[#5B7A99]" fill="none" stroke="currentColor" strokeWidth={1.4} aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d={d[category] ?? d.home} />
+      <path strokeLinecap="round" strokeLinejoin="round" d={d[key] ?? d.home} />
     </svg>
   );
 }
 
 export default function ProductCard({ product, locale, installFrom }: { product: SupabaseProduct; locale: string; installFrom: number }) {
   const t = useTranslations('products');
+  const tc = useTranslations('catalog');
   const l = asLoc(locale);
+  // Fan coil parameters (only fan coils have them)
+  const pipes = fanSpec(product, 'pipe_system');
+  const motor = fanSpec(product, 'fan_motor');
   const name = productName(product, locale);
   const image = productImages(product)[0];
   const area = areaLabel(product, l);
@@ -73,9 +80,11 @@ export default function ProductCard({ product, locale, installFrom }: { product:
             <span className="text-sm font-semibold text-[#3D5270]">{product.brand}</span>
           </div>
         )}
-        <div className={`absolute top-2.5 right-2.5 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyColors[product.energy_class] ?? 'text-[#3D5270] border-[#3D5270]/30 bg-white/70'}`}>
-          {product.energy_class}
-        </div>
+        {product.energy_class && (
+          <div className={`absolute top-2.5 right-2.5 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyColors[product.energy_class] ?? 'text-[#3D5270] border-[#3D5270]/30 bg-white/70'}`}>
+            {product.energy_class}
+          </div>
+        )}
         {(product.is_hit || product.is_promo || !!product.discount_percent) && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white">{t('badgeHit')}</span>}
@@ -91,6 +100,8 @@ export default function ProductCard({ product, locale, installFrom }: { product:
         <p className="text-xs text-white/60 mb-4">
           {product.power_kw} kW
           {area ? ` · ${area} m²` : rooms ? ` · ${roomsLabel(rooms, l)}` : ''}
+          {pipes ? ` · ${tc(`pipes${pipes}`)}` : ''}
+          {motor ? ` · ${motor}` : ''}
         </p>
 
         <div className="mt-auto border-t border-white/10 pt-3 flex items-end justify-between gap-2">

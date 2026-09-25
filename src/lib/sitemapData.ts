@@ -1,4 +1,5 @@
-import { listProducts } from './db';
+import { listProducts, hiddenCategoryKeys, listCategories } from './db';
+import { descendantKeys, hiddenKeys } from './categories';
 import { visibleProducts } from './catalogData';
 import { BASE_URL } from './seo';
 import { brandSlug, CATEGORY_SLUGS } from './productSeo';
@@ -23,7 +24,7 @@ const maxDate = (dates: (string | undefined)[]) => dates.filter(Boolean).sort().
 
 /** All canonical, indexable URLs for one locale. */
 export async function sitemapEntries(locale: string): Promise<Entry[]> {
-  const products = visibleProducts(await listProducts({ inStockOnly: true }));
+  const products = visibleProducts(await listProducts({ inStockOnly: true }), hiddenCategoryKeys());
   const pDate = (p: (typeof products)[number]) => day(p.updated_at) ?? day(p.created_at)!;
   const base = `${BASE_URL}/${locale}`;
   const out: Entry[] = STATIC_PAGES.map((s) => ({ loc: `${base}${s.path}`, lastmod: s.lastmod, priority: s.priority, changefreq: s.changefreq }));
@@ -41,6 +42,16 @@ export async function sitemapEntries(locale: string): Promise<Entry[]> {
   for (const [cat, slug] of Object.entries(CATEGORY_SLUGS)) {
     const list = products.filter((p) => p.category === cat);
     if (list.length) out.push({ loc: `${base}/catalog/type/${slug}`, lastmod: maxDate(list.map(pDate)), priority: 0.8, changefreq: 'weekly' });
+  }
+  // Category landings managed in the admin (fan coils…): visible and not empty
+  // (empty ones are noindex, so they stay out of the sitemap)
+  const cats = listCategories();
+  const hidden = hiddenKeys(cats);
+  for (const c of cats) {
+    if (c.is_system || hidden.has(c.key)) continue;
+    const keys = descendantKeys(cats, c.key);
+    const list = products.filter((p) => keys.has(p.category));
+    if (list.length) out.push({ loc: `${base}/catalog/category/${c.slug}`, lastmod: maxDate(list.map(pDate)), priority: 0.8, changefreq: 'weekly' });
   }
   // Products
   for (const p of products) {

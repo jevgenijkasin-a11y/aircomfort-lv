@@ -1,6 +1,19 @@
 ﻿import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { getSettings } from '@/lib/db';
+import Image from 'next/image';
+import { getSettings, listCategories } from '@/lib/db';
+import { catName, hiddenKeys } from '@/lib/categories';
+import { asLoc } from '@/lib/productSeo';
+
+function FanCoilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="12" cy="12" r="1.5" />
+      <path strokeLinecap="round" d="M12 10.5c0-2.5 2-3.5 3-2.5s-.5 3-3 2.5M13.5 12c2.5 0 3.5 2 2.5 3s-3-.5-2.5-3M12 13.5c0 2.5-2 3.5-3 2.5s.5-3 3-2.5M10.5 12c-2.5 0-3.5-2-2.5-3s3 .5 2.5 3" />
+    </svg>
+  );
+}
 
 function HomeIcon() {
   return (
@@ -51,14 +64,33 @@ export default async function Categories() {
   const title = settings[`cats_title_${locale}`] || t('title');
   const subtitle = settings[`cats_subtitle_${locale}`] || t('subtitle');
 
-  const cards = CAT_META.map(({ tKey, sk, slug, Icon, accent }) => ({
+  const cards: { slug: string; href: string; Icon: () => JSX.Element; image?: string; accent: string; name: string; desc: string; explore: string }[] = CAT_META.map(({ tKey, sk, slug, Icon, accent }) => ({
     slug,
+    href: `/catalog?category=${slug}`,
     Icon,
     accent,
     name: settings[`${sk}_${locale}`] || t(tKey),
     desc: settings[`${sk}_desc_${locale}`] || t(`${tKey}Desc` as `${typeof tKey}Desc`),
     explore: t('explore'),
   }));
+
+  // Top-level categories added in Admin → Categories with "show on site" on (e.g. fan coils)
+  const l = asLoc(locale);
+  const cats = listCategories();
+  const hidden = hiddenKeys(cats);
+  for (const c of cats) {
+    if (c.is_system || c.parent_key || hidden.has(c.key)) continue;
+    cards.push({
+      slug: c.key,
+      href: `/catalog/category/${c.slug}`,
+      Icon: FanCoilIcon,
+      image: c.image_url || undefined,
+      accent: '#06B6D4',
+      name: catName(c, l),
+      desc: c[`seo_description_${l}`] || c[`seo_intro_${l}`].split(/\n/)[0] || '',
+      explore: t('explore'),
+    });
+  }
 
   return (
     <section className="section-padding relative overflow-hidden">
@@ -70,22 +102,22 @@ export default async function Categories() {
           <p className="text-white/60 text-lg">{subtitle}</p>
         </div>
 
-        <div className="reveal-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {cards.map(({ slug, Icon, accent, name, desc, explore }, i) => (
+        <div className={`reveal-grid grid grid-cols-1 sm:grid-cols-2 gap-6 ${cards.length > 4 ? 'lg:grid-cols-3 xl:grid-cols-5' : 'lg:grid-cols-4'}`}>
+          {cards.map(({ slug, href, Icon, image, accent, name, desc, explore }, i) => (
             <div key={slug} className="reveal-3d flex flex-col" data-stagger={i}>
             <Link
-              href={`/catalog?category=${slug}`}
+              href={href as any}
               className="glass-card glass-card-hover rounded-2xl p-7 group flex flex-col h-full"
             >
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 border"
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 border overflow-hidden relative"
                 style={{
                   background: `linear-gradient(135deg, ${accent}20, ${accent}08)`,
                   borderColor: `${accent}30`,
                   color: accent,
                 }}
               >
-                <Icon />
+                {image ? <Image src={image} alt="" fill sizes="48px" className="object-cover" /> : <Icon />}
               </div>
               <h3 className="font-syne font-semibold text-lg mb-2">{name}</h3>
               <p className="text-white/60 text-sm leading-relaxed flex-1">{desc}</p>

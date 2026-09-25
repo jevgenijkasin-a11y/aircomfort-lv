@@ -7,7 +7,7 @@ type Crumb = { name: string; href: string | null; url: string };
 
 /** Server-rendered landing page (brand / category): H1, intro, product links, hub links. */
 export default function LandingView({
-  locale, crumbs, h1, intro, products, installFrom, related,
+  locale, crumbs, h1, intro, products, installFrom, related, emptyText,
 }: {
   locale: string;
   crumbs: Crumb[];
@@ -16,6 +16,8 @@ export default function LandingView({
   products: SupabaseProduct[];
   installFrom: number;
   related: { title: string; items: { href: string; label: string }[] };
+  /** Shown instead of the grid when the section has no products yet. */
+  emptyText?: string;
 }) {
   return (
     <>
@@ -47,7 +49,11 @@ export default function LandingView({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <ProductGrid products={products} locale={locale} installFrom={installFrom} />
+        {products.length || !emptyText ? (
+          <ProductGrid products={products} locale={locale} installFrom={installFrom} />
+        ) : (
+          <p className="glass-card rounded-2xl p-6 text-white/70">{emptyText}</p>
+        )}
 
         {related.items.length > 0 && (
           <nav aria-label={related.title} className="mt-14">

@@ -1,5 +1,5 @@
 export type Lang = 'ru' | 'en';
-export type Section = 'requests' | 'products' | 'slider' | 'reviews' | 'texts' | 'settings' | 'password' | 'cards';
+export type Section = 'requests' | 'products' | 'categories' | 'slider' | 'reviews' | 'texts' | 'settings' | 'password' | 'cards';
 
 export interface AdminRequest {
   id: number;
@@ -27,6 +27,10 @@ export interface ProductSpecs {
   electrical?: string;
   indoor_dims?: string;
   outdoor_dims?: string;
+  // Fan coils
+  pipe_system?: string;
+  fan_motor?: string;
+  esp_pa?: string;
 }
 
 export interface AdminProduct {
@@ -35,7 +39,7 @@ export interface AdminProduct {
   name_lv: string;
   name_ru: string;
   name_en: string;
-  category: 'home' | 'heat_pump' | 'commercial' | 'commercial_heat_pump';
+  category: string;
   power_kw: number;
   area_coverage: string;
   price: number;
@@ -56,6 +60,7 @@ export interface AdminProduct {
   is_hit: boolean;
   is_promo: boolean;
   discount_percent: number | null;
+  compatible_ids?: string[];
   created_at?: string;
 }
 
@@ -294,6 +299,52 @@ export const T = {
     confirm: 'Да, удалить',
     cancel: 'Отмена',
     noData: 'Нет данных',
+    navCategories: 'Категории',
+    catTitle: 'Категории',
+    catDesc: 'Дерево категорий каталога. Системные категории (исходные четыре) нельзя удалить, их ключ и адрес зафиксированы.',
+    catAdd: 'Добавить категорию',
+    catAddSub: 'Подкатегория',
+    catAddTitle: 'Новая категория',
+    catEditTitle: 'Редактировать категорию',
+    catProducts: 'товаров',
+    catSystem: 'системная',
+    catHidden: 'скрыта',
+    catNameLv: 'Название LV *',
+    catNameRu: 'Название RU *',
+    catNameEn: 'Название EN *',
+    catSlug: 'Slug (адрес страницы)',
+    catSlugAuto: 'Сгенерировать из названия EN',
+    catParent: 'Родительская категория',
+    catNoParent: '— верхний уровень —',
+    catSort: 'Порядок сортировки',
+    catVisible: 'Показывать на сайте',
+    catImage: 'Иконка / изображение для блока «Наш ассортимент»',
+    catImageUpload: 'Загрузить',
+    catImageRemove: 'Убрать',
+    catSeo: 'SEO',
+    catSeoTitle: 'Title',
+    catSeoDesc: 'Description',
+    catSeoH1: 'H1',
+    catSeoIntro: 'Вводный текст',
+    catSystemNote: 'Системная категория: название на сайте берётся из раздела «Тексты сайта», адрес /catalog/type/… не меняется.',
+    catDeleteConfirm: 'Удалить категорию?',
+    catSaved: 'Сохранено',
+    prodFanSection: 'Параметры фанкойла',
+    prodFanPipes: 'Система труб *',
+    prodFanPipes2: '2-трубный',
+    prodFanPipes4: '4-трубный',
+    prodFanMotor: 'Двигатель вентилятора *',
+    prodFanCooling: 'Мощность охлаждения, кВт *',
+    prodFanHeating: 'Мощность нагрева, кВт *',
+    prodFanAirflow: 'Расход воздуха, м³/ч',
+    prodFanNoise: 'Уровень шума, дБ(А)',
+    prodFanEsp: 'Внешний статический напор, Па',
+    prodCompatible: 'Совместимые товары',
+    prodCompatibleHint: 'Показываются в карточке товара. Для фанкойла — тепловые насосы воздух-вода.',
+    prodCompatibleSearch: 'Поиск по названию…',
+    prodCompatibleOnlyAw: 'Только тепловые насосы воздух-вода',
+    prodSaveError: 'Не сохранено',
+    selectPlaceholder: '— выберите —',
   },
   en: {
     adminTitle: 'Admin Panel',
@@ -491,5 +542,51 @@ export const T = {
     confirm: 'Yes, delete',
     cancel: 'Cancel',
     noData: 'No data',
+    navCategories: 'Categories',
+    catTitle: 'Categories',
+    catDesc: 'Catalogue category tree. System categories (the original four) cannot be deleted; their key and URL are fixed.',
+    catAdd: 'Add category',
+    catAddSub: 'Subcategory',
+    catAddTitle: 'New category',
+    catEditTitle: 'Edit category',
+    catProducts: 'products',
+    catSystem: 'system',
+    catHidden: 'hidden',
+    catNameLv: 'Name LV *',
+    catNameRu: 'Name RU *',
+    catNameEn: 'Name EN *',
+    catSlug: 'Slug (page URL)',
+    catSlugAuto: 'Generate from EN name',
+    catParent: 'Parent category',
+    catNoParent: '— top level —',
+    catSort: 'Sort order',
+    catVisible: 'Show on website',
+    catImage: 'Icon / image for the "Our range" block',
+    catImageUpload: 'Upload',
+    catImageRemove: 'Remove',
+    catSeo: 'SEO',
+    catSeoTitle: 'Title',
+    catSeoDesc: 'Description',
+    catSeoH1: 'H1',
+    catSeoIntro: 'Intro text',
+    catSystemNote: 'System category: its public name comes from "Site Texts"; the /catalog/type/… URL is fixed.',
+    catDeleteConfirm: 'Delete this category?',
+    catSaved: 'Saved',
+    prodFanSection: 'Fan coil parameters',
+    prodFanPipes: 'Pipe system *',
+    prodFanPipes2: '2-pipe',
+    prodFanPipes4: '4-pipe',
+    prodFanMotor: 'Fan motor *',
+    prodFanCooling: 'Cooling capacity, kW *',
+    prodFanHeating: 'Heating capacity, kW *',
+    prodFanAirflow: 'Airflow, m³/h',
+    prodFanNoise: 'Noise level, dB(A)',
+    prodFanEsp: 'External static pressure, Pa',
+    prodCompatible: 'Compatible products',
+    prodCompatibleHint: 'Shown on the product page. For fan coils: air-to-water heat pumps.',
+    prodCompatibleSearch: 'Search by name…',
+    prodCompatibleOnlyAw: 'Air-to-water heat pumps only',
+    prodSaveError: 'Not saved',
+    selectPlaceholder: '— select —',
   },
 } as const;

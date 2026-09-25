@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Calculator from '@/components/Calculator';
-import { getSettings, listProducts } from '@/lib/db';
+import { getSettings, listProducts, hiddenCategoryKeys } from '@/lib/db';
 import { visibleProducts } from '@/lib/catalogData';
 import { localizedAlternates } from '@/lib/seo';
 
@@ -24,7 +24,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
     listProducts({ inStockOnly: true }),
   ]);
   // Room calculator → residential air-to-air units only (home ACs + air-to-air heat pumps)
-  const residential = visibleProducts(allProducts).filter(
+  const residential = visibleProducts(allProducts, hiddenCategoryKeys()).filter(
     (p) => p.price > 0 && (p.category === 'home' || p.category === 'heat_pump')
   );
   const installFrom = parseInt(settings.install_price_from || '250') || 250;

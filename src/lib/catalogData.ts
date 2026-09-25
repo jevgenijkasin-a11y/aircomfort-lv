@@ -13,6 +13,9 @@ export const DUPLICATE_REDIRECTS: Record<string, string> = {
   '1719d7c0-0070-473d-907f-7e7d542eafba': '76662679-b614-4719-a279-49bb3f67acc8',
 };
 
-/** Products that should appear in listings, landing pages and the sitemap. */
-export const visibleProducts = (all: SupabaseProduct[]) =>
-  all.filter((p) => !DUPLICATE_REDIRECTS[p.id]);
+/**
+ * Products that should appear in listings, landing pages and the sitemap.
+ * `hidden` = category keys switched off in Admin → Categories.
+ */
+export const visibleProducts = (all: SupabaseProduct[], hidden: Set<string> = new Set()) =>
+  all.filter((p) => !DUPLICATE_REDIRECTS[p.id] && !hidden.has(p.category));

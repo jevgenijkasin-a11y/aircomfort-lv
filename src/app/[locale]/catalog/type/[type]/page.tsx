@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { listProducts, getSettings } from '@/lib/db';
+import { listProducts, getSettings, hiddenCategoryKeys } from '@/lib/db';
 import { visibleProducts } from '@/lib/catalogData';
 import { localizedAlternates, BASE_URL } from '@/lib/seo';
 import { asLoc, brandSlug, categoryFromSlug, CATEGORY_SLUGS, CATEGORY_MSG_KEY } from '@/lib/productSeo';
@@ -15,7 +15,7 @@ type Props = { params: Promise<{ locale: string; type: string }> };
 async function load(slug: string) {
   const cat = categoryFromSlug(slug);
   const [all, settings] = await Promise.all([listProducts({ inStockOnly: true, orderBy: 'price' }), getSettings()]);
-  const visible = visibleProducts(all);
+  const visible = visibleProducts(all, hiddenCategoryKeys());
   const products = cat ? visible.filter((p) => p.category === cat) : [];
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
   return { cat, products, installFrom, all: visible };
