@@ -6,6 +6,7 @@ import { useRouter } from '@/i18n/navigation';
 import type { SupabaseProduct } from '@/lib/types';
 import { recommendedPowerKw, matchingPowerRange } from '@/lib/calc';
 import { ProductGrid } from '@/components/CatalogClient';
+import { starred } from '@/components/FootnoteStar';
 
 interface CalcResult {
   powerKw: number;
@@ -236,7 +237,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                 <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
                   <span className="text-white/60 text-sm">{t('installationCost')}</span>
                   <span className="font-semibold text-white">
-                    {t('from')} {result.installMin} €*
+                    {starred(`${t('from')} ${result.installMin} €*`)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-3">
@@ -259,7 +260,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                 </svg>
               </button>
 
-              <p className="text-white/60 text-xs mt-4 leading-relaxed">{tp('installNote')}</p>
+              <p className="text-white/60 text-xs mt-4 leading-relaxed">{starred(tp('installNote'))}</p>
               {/* The '*' belongs to the installation note above; the general disclaimer gets none */}
               <p className="text-white/60 text-xs mt-1 leading-relaxed">{t('disclaimer').replace(/^\*\s*/, '')}</p>
             </div>

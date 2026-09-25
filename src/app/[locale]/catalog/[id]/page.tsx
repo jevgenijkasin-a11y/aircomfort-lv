@@ -15,6 +15,7 @@ import {
 import ProductImageViewer from '@/components/ProductImageViewer';
 import BackLink from '@/components/BackLink';
 import { ProductGrid } from '@/components/CatalogClient';
+import { starred } from '@/components/FootnoteStar';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -327,15 +328,15 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               )}
               <div className="py-3 border-t border-[#1A6B9A]/15 space-y-1" data-fab-avoid>
-                <p className="text-white/60 text-sm">{tp('installFrom', { price: installFrom })}</p>
+                <p className="text-white/60 text-sm">{starred(tp('installFrom', { price: installFrom }))}</p>
                 {!!p.price && (
                   <p className="font-syne font-semibold text-base text-[#27C4A0]">
-                    {TX.total[l](
+                    {starred(TX.total[l](
                       ((p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price) + installFrom).toLocaleString('lv-LV')
-                    )}
+                    ))}
                   </p>
                 )}
-                <p className="text-xs text-white/60 leading-snug">{tp('installNote')}</p>
+                <p className="text-xs text-white/60 leading-snug">{starred(tp('installNote'))}</p>
               </div>
             </div>
 
@@ -364,7 +365,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="glass-card rounded-2xl p-6">
               <h2 className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3">{TX.install[l]}</h2>
               <ul className="space-y-1.5 text-sm text-white/70 list-disc pl-5">
-                <li>{TX.installFrom[l]}</li>
+                <li>{starred(TX.installFrom[l])}</li>
                 <li>{tTrust('installation')}</li>
                 <li>{tTrust('warranty')}</li>
                 <li>{tTrust('consultation')}</li>
@@ -387,7 +388,7 @@ export default async function ProductPage({ params }: Props) {
                     <span className="text-white/60 text-sm pr-4">
                       {SPEC_LABELS[key]?.[locale] ?? SPEC_LABELS[key]?.en ?? key}
                     </span>
-                    <span className="text-white font-medium text-sm text-right">{value}</span>
+                    <span className="text-white font-medium text-sm text-right">{key === 'install' ? starred(value) : value}</span>
                   </div>
                 ))}
               </div>

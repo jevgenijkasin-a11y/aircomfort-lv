@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productImages } from '@/lib/types';
 import { areaLabel, roomCount, asLoc } from '@/lib/productSeo';
+import { starred } from '@/components/FootnoteStar';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-[#27C4A0] border-[#27C4A0]/40 bg-[#27C4A0]/10',
@@ -107,7 +108,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
               </>
             )}
           </div>
-          <span className="text-xs text-white/60 text-right">{t('installFrom', { price: installFrom })}</span>
+          <span className="text-xs text-white/60 text-right">{starred(t('installFrom', { price: installFrom }))}</span>
         </div>
       </div>
     </Link>

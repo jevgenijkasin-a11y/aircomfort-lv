@@ -2,6 +2,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
+import { starred } from '@/components/FootnoteStar';
 import { listProducts, getSettings } from '@/lib/db';
 
 // Seeded LCG shuffle — same result all day, different result tomorrow (UTC midnight)
@@ -48,7 +49,7 @@ export default async function FeaturedProducts() {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-xs text-white/60">{t('installNote')}</p>
+        <p className="mt-4 text-xs text-white/60">{starred(t('installNote'))}</p>
       </div>
     </section>
   );

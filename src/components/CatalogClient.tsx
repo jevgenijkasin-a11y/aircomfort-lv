@@ -8,6 +8,7 @@ import { type SupabaseProduct } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import { CATALOG_PAGE_SIZE } from '@/lib/catalogData';
 import { areaMax } from '@/lib/productSeo';
+import { starred } from '@/components/FootnoteStar';
 
 type Filters = { brand?: string; area?: string; category?: string; sort?: string; q?: string };
 
@@ -44,7 +45,7 @@ export function ProductGrid({ products, locale, installFrom = 250 }: { products:
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {products.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
       </div>
-      <p className="mt-4 text-xs text-white/60">{tp('installNote')}</p>
+      <p className="mt-4 text-xs text-white/60">{starred(tp('installNote'))}</p>
     </>
   );
 }
@@ -209,7 +210,7 @@ export default function CatalogClient({
           {shown.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
         </div>
       )}
-      {filtered.length > 0 && <p className="mt-4 text-xs text-white/60">{tp('installNote')}</p>}
+      {filtered.length > 0 && <p className="mt-4 text-xs text-white/60">{starred(tp('installNote'))}</p>}
 
       {/* Pagination — real <a href> links, rendered on the server */}
       {unfiltered && totalPages > 1 && (
