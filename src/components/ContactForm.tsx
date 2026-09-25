@@ -45,7 +45,7 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
   };
 
   const inputCls = 'w-full bg-[#0A3658]/60 border border-[#1A6B9A]/30 hover:border-[#1A6B9A]/50 text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-[#27C4A0]/60 transition-all placeholder-white/20';
-  const labelCls = 'block text-sm font-medium text-white/70 mb-1.5';
+  const labelCls = 'block text-sm font-medium text-white/60 mb-1.5';
 
   if (status === 'success') {
     return (

@@ -32,7 +32,7 @@ export default async function FeaturedProducts() {
         <div className="reveal flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
             <h2 className="font-syne font-bold text-3xl sm:text-4xl mb-2">{t('featured')}</h2>
-            <p className="text-white/70">{t('featuredSubtitle')}</p>
+            <p className="text-white/60">{t('featuredSubtitle')}</p>
           </div>
           <Link href="/catalog" className="inline-flex items-center gap-2 text-[#27C4A0] hover:text-white text-sm font-semibold transition-colors group flex-shrink-0">
             {t('viewAll')}
@@ -48,7 +48,7 @@ export default async function FeaturedProducts() {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-xs text-white/70">{t('installNote')}</p>
+        <p className="mt-4 text-xs text-white/60">{t('installNote')}</p>
       </div>
     </section>
   );

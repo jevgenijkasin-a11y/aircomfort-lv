@@ -119,7 +119,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
           </button>
 
           {hasMultiple && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-white/70 text-sm">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-white/60 text-sm">
               {lbIndex + 1} / {images.length}
             </div>
           )}

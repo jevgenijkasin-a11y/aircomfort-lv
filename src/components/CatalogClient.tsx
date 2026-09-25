@@ -44,7 +44,7 @@ export function ProductGrid({ products, locale, installFrom = 250 }: { products:
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {products.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
       </div>
-      <p className="mt-4 text-xs text-white/70">{tp('installNote')}</p>
+      <p className="mt-4 text-xs text-white/60">{tp('installNote')}</p>
     </>
   );
 }
@@ -138,7 +138,7 @@ export default function CatalogClient({
           />
         </div>
         <div>
-          <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('brand')}</label>
+          <label className="block text-xs text-white/60 mb-1.5 font-medium">{t('brand')}</label>
           <div className="relative">
             <select value={brand} onChange={change(setBrand)} className={selectCls}>
               <option value="">{t('allBrands')}</option>
@@ -160,7 +160,7 @@ export default function CatalogClient({
         </div>
 
         <div>
-          <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('category')}</label>
+          <label className="block text-xs text-white/60 mb-1.5 font-medium">{t('category')}</label>
           <div className="relative">
             <select value={category} onChange={change(setCategory)} className={selectCls}>
               <option value="">{t('allCategories')}</option>
@@ -174,7 +174,7 @@ export default function CatalogClient({
         </div>
 
         <div>
-          <label className="block text-xs text-white/70 mb-1.5 font-medium">{t('sort')}</label>
+          <label className="block text-xs text-white/60 mb-1.5 font-medium">{t('sort')}</label>
           <div className="relative">
             <select value={sort} onChange={change(setSort)} className={selectCls}>
               <option value="asc" style={{ background: '#0A3658' }}>{t('sortAsc')}</option>
@@ -186,7 +186,7 @@ export default function CatalogClient({
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <p className="text-white/70 text-sm"><span className="text-white font-semibold">{filtered.length}</span> {t('results')}</p>
+        <p className="text-white/60 text-sm"><span className="text-white font-semibold">{filtered.length}</span> {t('results')}</p>
         {(brand || area || category || q) && (
           <button onClick={reset} className="text-[#27C4A0] text-sm hover:text-white transition-colors flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -200,8 +200,8 @@ export default function CatalogClient({
           <div className="w-16 h-16 rounded-2xl bg-[#0A3658] border border-[#1A6B9A]/20 flex items-center justify-center mx-auto mb-4">
             <svg className="w-7 h-7 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </div>
-          <p className="text-white/70 text-lg font-syne">{t('noResults')}</p>
-          <p className="text-white/70 text-sm mt-1">{t('noResultsHint')}</p>
+          <p className="text-white/60 text-lg font-syne">{t('noResults')}</p>
+          <p className="text-white/60 text-sm mt-1">{t('noResultsHint')}</p>
           <button onClick={reset} className="mt-5 text-[#27C4A0] text-sm font-semibold hover:text-white transition-colors">{t('resetFilters')}</button>
         </div>
       ) : (
@@ -209,7 +209,7 @@ export default function CatalogClient({
           {shown.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
         </div>
       )}
-      {filtered.length > 0 && <p className="mt-4 text-xs text-white/70">{tp('installNote')}</p>}
+      {filtered.length > 0 && <p className="mt-4 text-xs text-white/60">{tp('installNote')}</p>}
 
       {/* Pagination — real <a href> links, rendered on the server */}
       {unfiltered && totalPages > 1 && (

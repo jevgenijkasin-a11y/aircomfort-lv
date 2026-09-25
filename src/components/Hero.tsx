@@ -96,7 +96,7 @@ export default async function Hero() {
             {showAccent && <span className="gradient-text">{t('titleAccent')}</span>}
           </h1>
 
-          <p className="text-lg sm:text-xl text-white/70 mb-10 leading-relaxed max-w-xl mx-auto sm:mx-0">
+          <p className="text-lg sm:text-xl text-white/60 mb-10 leading-relaxed max-w-xl mx-auto sm:mx-0">
             {subtitle}
           </p>
 

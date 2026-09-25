@@ -33,7 +33,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         </Link>
 
         <h1 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{t('title')}</h1>
-        <p className="text-white/70 text-sm mb-12">{t('updated')}</p>
+        <p className="text-white/60 text-sm mb-12">{t('updated')}</p>
 
         <p className="text-white/65 leading-relaxed mb-10">{t('intro')}</p>
 
@@ -41,28 +41,28 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
           {sections.map(({ title, body }) => (
             <section key={title}>
               <h2 className="font-syne font-semibold text-lg mb-3 text-white">{title}</h2>
-              <p className="text-white/70 leading-relaxed">{body}</p>
+              <p className="text-white/60 leading-relaxed">{body}</p>
             </section>
           ))}
 
           <section>
             <h2 className="font-syne font-semibold text-lg mb-3 text-white">{t('s6title')}</h2>
-            <p className="text-white/70 leading-relaxed mb-4">{t('s6body')}</p>
-            <ul className="space-y-1 text-white/70 text-sm">
+            <p className="text-white/60 leading-relaxed mb-4">{t('s6body')}</p>
+            <ul className="space-y-1 text-white/60 text-sm">
               <li>
-                <span className="text-white/70">Email: </span>
+                <span className="text-white/60">Email: </span>
                 <a href={`mailto:${tc('emailValue')}`} className="text-[#27C4A0] hover:text-white transition-colors">
                   {tc('emailValue')}
                 </a>
               </li>
               <li>
-                <span className="text-white/70">{tc('phone')}: </span>
+                <span className="text-white/60">{tc('phone')}: </span>
                 <a href={`tel:${tc('phoneValue')}`} className="text-[#27C4A0] hover:text-white transition-colors">
                   {tc('phoneValue')}
                 </a>
               </li>
               <li>
-                <span className="text-white/70">{tc('address')}: </span>
+                <span className="text-white/60">{tc('address')}: </span>
                 <span>{tc('addressValue')}</span>
               </li>
             </ul>

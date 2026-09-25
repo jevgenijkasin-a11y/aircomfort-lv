@@ -87,7 +87,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
       <div className="px-2 pt-4 pb-1 flex flex-col flex-1">
         <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
         <h3 className="font-syne font-semibold text-sm text-white mb-2 leading-snug">{name}</h3>
-        <p className="text-xs text-white/75 mb-4">
+        <p className="text-xs text-white/60 mb-4">
           {product.power_kw} kW
           {area ? ` · ${area} m²` : rooms ? ` · ${roomsLabel(rooms, l)}` : ''}
         </p>
@@ -99,7 +99,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
             ) : (
               <>
                 {!!product.discount_percent && (
-                  <span className="block text-xs text-white/70 line-through">{product.price.toLocaleString('lv-LV')} €</span>
+                  <span className="block text-xs text-white/60 line-through">{product.price.toLocaleString('lv-LV')} €</span>
                 )}
                 <span className={`font-syne font-bold text-xl ${product.discount_percent ? 'text-[#27C4A0]' : 'text-white'}`}>
                   {price.toLocaleString('lv-LV')} €
@@ -107,7 +107,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
               </>
             )}
           </div>
-          <span className="text-xs text-white/70 text-right">{t('installFrom', { price: installFrom })}</span>
+          <span className="text-xs text-white/60 text-right">{t('installFrom', { price: installFrom })}</span>
         </div>
       </div>
     </Link>

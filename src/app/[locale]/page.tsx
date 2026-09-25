@@ -38,7 +38,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <h2 className="font-syne font-bold text-3xl sm:text-5xl mb-4 max-w-2xl mx-auto leading-tight">
             {t('title')} <span className="gradient-text">{t('titleAccent')}</span>
           </h2>
-          <p className="text-white/70 text-lg mb-8 max-w-lg mx-auto">{t('subtitle')}</p>
+          <p className="text-white/60 text-lg mb-8 max-w-lg mx-auto">{t('subtitle')}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/contacts"

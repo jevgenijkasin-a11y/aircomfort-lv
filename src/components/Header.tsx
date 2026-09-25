@@ -76,7 +76,7 @@ export default function Header() {
                   className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all duration-200 ${
                     locale === lang
                       ? 'bg-[#27C4A0] text-[#072D47]'
-                      : 'text-white/70 hover:text-white'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   {lang.toUpperCase()}
@@ -135,7 +135,7 @@ export default function Header() {
                     className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
                       locale === lang
                         ? 'bg-[#27C4A0] text-[#072D47]'
-                        : 'text-white/70 hover:text-white'
+                        : 'text-white/60 hover:text-white'
                     }`}
                   >
                     {lang.toUpperCase()}

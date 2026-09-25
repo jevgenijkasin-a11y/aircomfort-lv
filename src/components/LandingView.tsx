@@ -24,7 +24,7 @@ export default function LandingView({
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <nav aria-label="Breadcrumb" className="mb-4">
-            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-white/70">
+            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-white/60">
               {crumbs.map((c, i) => (
                 <li key={i} className="flex items-center gap-1.5">
                   {c.href ? (
@@ -40,7 +40,7 @@ export default function LandingView({
           <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-5">{h1}</h1>
           <div className="max-w-3xl space-y-3">
             {intro.filter(Boolean).map((p, i) => (
-              <p key={i} className="text-white/70 text-base leading-relaxed">{p}</p>
+              <p key={i} className="text-white/60 text-base leading-relaxed">{p}</p>
             ))}
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function LandingView({
 
         {related.items.length > 0 && (
           <nav aria-label={related.title} className="mt-14">
-            <h2 className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-3">{related.title}</h2>
+            <h2 className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3">{related.title}</h2>
             <ul className="flex flex-wrap gap-2">
               {related.items.map((it) => (
                 <li key={it.href}>
