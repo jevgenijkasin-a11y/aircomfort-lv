@@ -40,9 +40,14 @@ export function recommendedPowerKw(input: CalcInput): number {
   return roundToStandardSize(requiredWatts(input) / 1000);
 }
 
-/** Catalogue models suitable for a recommended size: from that size up to the next one. */
+/**
+ * Max oversizing for a suggested unit. Anything at least as powerful as needed
+ * fits the room, and a bigger unit is often cheaper — but a heavily oversized
+ * one short-cycles (switches on/off constantly), so we cap at +60%.
+ */
+export const MAX_OVERSIZE = 1.6;
+
+/** Catalogue models suitable for a recommended size: not weaker than needed, up to +60%. */
 export function matchingPowerRange(kw: number): { min: number; max: number } {
-  const i = STANDARD_SIZES_KW.indexOf(kw);
-  const next = i >= 0 && i < STANDARD_SIZES_KW.length - 1 ? STANDARD_SIZES_KW[i + 1] : kw + 1;
-  return { min: kw, max: next - 0.01 };
+  return { min: kw, max: Math.round(kw * MAX_OVERSIZE * 10) / 10 };
 }

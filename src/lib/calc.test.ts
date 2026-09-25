@@ -1,7 +1,7 @@
 // Run: npm test   (Node's built-in test runner; Node >= 23 strips TS types)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { recommendedPowerKw, roundToStandardSize } from './calc.ts';
+import { recommendedPowerKw, roundToStandardSize, matchingPowerRange } from './calc.ts';
 
 const base = { roomType: 'living', insulation: 'avg', windows: 2, floor: 'middle' };
 
@@ -20,6 +20,11 @@ for (const [label, input, min, max] of table) {
     assert.ok(kw >= min && kw <= max, `${label}: got ${kw} kW, expected ${min}–${max}`);
   });
 }
+
+test('suitable range: never weaker than needed, up to +60%', () => {
+  assert.deepEqual(matchingPowerRange(2.5), { min: 2.5, max: 4.0 });
+  assert.deepEqual(matchingPowerRange(3.5), { min: 3.5, max: 5.6 });
+});
 
 test('rounds up to standard sizes', () => {
   assert.equal(roundToStandardSize(1.2), 2.0);
