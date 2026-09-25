@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Unbounded } from 'next/font/google';
+import { Inter, Manrope } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -14,13 +14,13 @@ import SiteAnimations from '@/components/SiteAnimations';
 import { localizedAlternates } from '@/lib/seo';
 import '../globals.css';
 
-// Headings: Unbounded (has Cyrillic, unlike the previous Syne). The CSS
-// variable keeps the historical name --font-syne so the existing `font-syne`
-// utility classes keep working.
-const syne = Unbounded({
+// Headings: Manrope (has Cyrillic, unlike the previous Syne). Bold headings
+// render at 800 (see globals.css). The CSS variable keeps the historical name
+// --font-syne so the existing `font-syne` utility classes keep working.
+const syne = Manrope({
   subsets: ['latin', 'latin-ext', 'cyrillic'],
   variable: '--font-syne',
-  weight: ['500', '600', '700'],
+  weight: ['600', '700', '800'],
   display: 'swap',
 });
 
