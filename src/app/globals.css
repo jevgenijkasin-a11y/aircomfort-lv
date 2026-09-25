@@ -183,3 +183,6 @@ body {
 @media (max-width: 1023px) {
   body { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
 }
+
+/* Headings font (Manrope): bold headings use the 800 weight */
+.font-syne.font-bold { font-weight: 800; }
