@@ -78,7 +78,8 @@ export default function FloatingButtonsClient({ whatsapp, telegram, phone }: Pro
     <div
       ref={rootRef}
       className={`fixed right-4 z-50 flex flex-col items-end gap-3 transition-opacity duration-200 ${hidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-      style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      // Raised above the footer's bottom row so "Privacy policy" stays visible at the page end
+      style={{ bottom: 'calc(3rem + env(safe-area-inset-bottom))' }}
     >
       {open && (
         <ul id={menuId} role="menu" aria-label={LBL.contact[l]} className="flex flex-col items-end gap-2.5">

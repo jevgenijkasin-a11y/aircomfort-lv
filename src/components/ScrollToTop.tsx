@@ -34,7 +34,7 @@ export default function ScrollToTop() {
       onClick={scrollToTop}
       aria-label="Scroll to top"
       // Desktop only — on mobile the single contact FAB is the only floating control
-      className="hidden lg:flex fixed bottom-6 left-6 z-50 w-12 h-12 rounded-full bg-[#1A6B9A]/80 hover:bg-[#27C4A0] border border-[#1A6B9A] hover:border-[#27C4A0] text-white shadow-lg backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
+      className="hidden lg:flex fixed bottom-12 left-6 z-50 w-12 h-12 rounded-full bg-[#1A6B9A]/80 hover:bg-[#27C4A0] border border-[#1A6B9A] hover:border-[#27C4A0] text-white shadow-lg backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
     >
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
