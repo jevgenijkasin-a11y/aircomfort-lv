@@ -210,7 +210,8 @@ function CatalogInner({
             {tree.map(({ cat, children }) => (
               <Fragment key={cat.key}>
                 <option value={cat.key} style={opt}>{catLabel(cat)}</option>
-                {children.map((ch) => <option key={ch.key} value={ch.key} style={opt}>{'  — '}{catLabel(ch)}</option>)}
+                {/* "Фанкоилы – Кассетные": the closed select shows the full path */}
+                {children.map((ch) => <option key={ch.key} value={ch.key} style={opt}>{`${catLabel(cat)} – ${catLabel(ch)}`}</option>)}
               </Fragment>
             ))}
           </select>
