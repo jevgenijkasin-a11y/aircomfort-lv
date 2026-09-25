@@ -6,7 +6,9 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { DUPLICATE_REDIRECTS, visibleProducts } from '@/lib/catalogData';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productFeatures, productImages, productDescription } from '@/lib/types';
-import { getProduct, getSettings, listProducts } from '@/lib/db';
+import { getProduct, getSettings, listProducts, listCategories, hiddenCategoryKeys } from '@/lib/db';
+import { AIR_WATER_KEY, catName, hiddenKeys, isFanCoil, isWithin } from '@/lib/categories';
+import { fanSpec } from '@/lib/fanCoil';
 import { localizedAlternates, BASE_URL } from '@/lib/seo';
 import {
   productTitle, productMetaDescription, productParagraphs, similarProducts,
@@ -44,6 +46,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [{ url: image ? absUrl(image) : `${BASE_URL}/${locale}/opengraph-image`, alt: productName(data, locale) }],
     },
     twitter: { card: 'summary_large_image', title: `${title} | AirComfort`, description },
+    // Products in a category hidden in the admin stay reachable but unindexed
+    ...(hiddenCategoryKeys().has(data.category) ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -154,25 +158,74 @@ export default async function ProductPage({ params }: Props) {
   const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
   const paragraphs = productParagraphs(p, locale, installFrom);
   const metaDescription = productMetaDescription(p, locale, installFrom);
-  const similar = similarProducts(visibleProducts(all), p, 6);
+  const cats = listCategories();
+  const publicAll = visibleProducts(all, hiddenKeys(cats));
+  const fanCoil = isFanCoil(cats, p.category);
+  const cat = cats.find((c) => c.key === p.category);
+  const fan = (k: string) => fanSpec(p, k);
+  const byPrice = (target: number) => (a: SupabaseProduct, b: SupabaseProduct) => Math.abs(a.price - target) - Math.abs(b.price - target);
+  // Fan coils are compared with other fan coils only
+  const similar = similarProducts(fanCoil ? publicAll.filter((x) => isFanCoil(cats, x.category)) : publicAll, p, 6);
+
+  // Fan coil → "Works with a heat pump": products picked in the admin, else
+  // 3–4 air-to-water heat pumps (Midea Huggy / Mitsubishi Ecodan first) by price.
+  const byId = new Map(publicAll.map((x) => [x.id, x]));
+  let worksWith: SupabaseProduct[] = [];
+  if (fanCoil) {
+    worksWith = (p.compatible_ids ?? []).map((x) => byId.get(x)).filter((x): x is SupabaseProduct => !!x);
+    if (!worksWith.length) {
+      const pumps = publicAll.filter((x) => x.category === AIR_WATER_KEY && x.price > 0);
+      const preferred = pumps.filter((x) => /huggy|ecodan/i.test(`${x.name_en} ${x.name_ru}`));
+      worksWith = [...(preferred.length >= 3 ? preferred : pumps)].sort(byPrice(p.price)).slice(0, 4);
+    }
+  }
+  // Air-to-water heat pump → "Matching fan coils" (hidden while there are none)
+  let matchingFanCoils: SupabaseProduct[] = [];
+  if (isWithin(cats, p.category, AIR_WATER_KEY)) {
+    const fcs = publicAll.filter((x) => isFanCoil(cats, x.category));
+    const linked = fcs.filter((x) => x.compatible_ids?.includes(p.id) || p.compatible_ids?.includes(x.id));
+    matchingFanCoils = (linked.length ? linked : [...fcs].sort((a, b) => a.price - b.price)).slice(0, 4);
+  }
 
   // Specs table: core fields every product has, then detailed specs if present
   const areaTxt = areaLabel(p, l);
   const rooms = roomCount(p);
-  const baseRows: [string, string][] = [
+  const installRow: [string, string] = ['install', `${l === 'en' ? 'from €' : l === 'ru' ? 'от ' : 'no '}${installFrom}${l === 'en' ? '' : ' €'}*`];
+  const typeLabel = categoryNoun(p.category, l).replace(/^./, (c) => c.toUpperCase());
+  const baseRows: [string, string][] = fanCoil ? [
     ['brand', p.brand],
-    ['type', categoryNoun(p.category, l).replace(/^./, (c) => c.toUpperCase())],
+    ['type', cat && cat.key !== 'fan_coils' ? `${typeLabel} — ${catName(cat, l).toLocaleLowerCase()}` : typeLabel],
+    ...([
+      ['fc_pipes', fan('pipe_system') ? t(`pipes${fan('pipe_system')}`) : ''],
+      ['fc_motor', fan('fan_motor')],
+      ['fc_cooling', fan('cooling_kw') && `${fan('cooling_kw')} kW`],
+      ['fc_heating', fan('heating_kw') && `${fan('heating_kw')} kW`],
+      ['fc_airflow', fan('airflow') && `${fan('airflow')} m³/h`],
+      ['fc_noise', fan('noise_db') && `${fan('noise_db')} dB(A)`],
+      ['fc_esp', fan('esp_pa') && `${fan('esp_pa')} Pa`],
+    ] as [string, string][]).filter(([, v]) => v),
+    ...(p.energy_class ? [['energy_class', p.energy_class] as [string, string]] : []),
+    installRow,
+  ] : [
+    ['brand', p.brand],
+    ['type', typeLabel],
     ['power', `${p.power_kw} kW`],
     ...(areaTxt ? [['area', `${areaTxt} m²`] as [string, string]] : []),
     ...(rooms ? [['rooms', String(rooms)] as [string, string]] : []),
-    ['energy_class', p.energy_class],
-    ['install', `${l === 'en' ? 'from €' : l === 'ru' ? 'от ' : 'no '}${installFrom}${l === 'en' ? '' : ' €'}*`],
+    ...(p.energy_class ? [['energy_class', p.energy_class] as [string, string]] : []),
+    installRow,
   ];
+  const FAN_LABEL: Record<string, string> = {
+    fc_pipes: t('specPipes'), fc_motor: t('specMotor'), fc_cooling: t('specCooling'), fc_heating: t('specHeating'),
+    fc_airflow: t('specAirflow'), fc_noise: t('specNoise'), fc_esp: t('specEsp'),
+  };
+  // Fields already shown in the fan coil rows are not repeated
+  const FAN_SHOWN = ['cooling_kw', 'heating_kw', 'noise_db', 'airflow'];
   const SPEC_ORDER = [
     'manufacturer', 'cooling_kw', 'heating_kw', 'scop', 'seer',
     'noise_db', 'airflow', 'operating_temp', 'mounting', 'refrigerant',
     'wifi', 'electrical', 'indoor_dims', 'outdoor_dims',
-  ];
+  ].filter((k) => !fanCoil || !FAN_SHOWN.includes(k));
   const rawSpecs = p.specs && typeof p.specs === 'object' ? (p.specs as Record<string, string>) : {};
   const specs = [
     ...baseRows,
@@ -250,7 +303,7 @@ export default async function ProductPage({ params }: Props) {
               brandColor={p.brand_color}
               brand={p.brand}
             />
-            <div className={`absolute top-4 right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>
+            {p.energy_class && <div className={`absolute top-4 right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>}
             {(p.is_hit || p.is_promo || !!p.discount_percent) && (
               <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                 {p.is_hit && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#f97316] text-white shadow-sm">{tp('badgeHit')}</span>}
@@ -277,10 +330,15 @@ export default async function ProductPage({ params }: Props) {
             <div className="glass-card rounded-2xl p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                  <p className="text-white/60 text-xs mb-1">{tp('power')}</p>
-                  <p className="font-syne font-bold text-2xl text-[#27C4A0]">{p.power_kw} <span className="text-sm font-normal">kW</span></p>
+                  <p className="text-white/60 text-xs mb-1">{fanCoil ? t('specCooling') : tp('power')}</p>
+                  <p className="font-syne font-bold text-2xl text-[#27C4A0]">{(fanCoil && fan('cooling_kw')) || p.power_kw} <span className="text-sm font-normal">kW</span></p>
                 </div>
-                {areaTxt ? (
+                {fanCoil && fan('heating_kw') ? (
+                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
+                    <p className="text-white/60 text-xs mb-1">{t('specHeating')}</p>
+                    <p className="font-syne font-bold text-2xl text-[#27C4A0]">{fan('heating_kw')} <span className="text-sm font-normal">kW</span></p>
+                  </div>
+                ) : areaTxt ? (
                   <div className="bg-[#0A3658]/50 rounded-xl p-4">
                     <p className="text-white/60 text-xs mb-1">{tp('area')}</p>
                     <p className="font-syne font-bold text-2xl text-[#27C4A0]">{areaTxt} <span className="text-sm font-normal">m²</span></p>
@@ -293,10 +351,17 @@ export default async function ProductPage({ params }: Props) {
                 ) : null}
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                  <p className="text-white/60 text-xs mb-1">{tp('energyClass')}</p>
-                  <p className={`font-syne font-bold text-xl ${energyColors[p.energy_class]?.split(' ')[0] ?? 'text-white'}`}>{p.energy_class}</p>
-                </div>
+                {p.energy_class ? (
+                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
+                    <p className="text-white/60 text-xs mb-1">{tp('energyClass')}</p>
+                    <p className={`font-syne font-bold text-xl ${energyColors[p.energy_class]?.split(' ')[0] ?? 'text-white'}`}>{p.energy_class}</p>
+                  </div>
+                ) : fanCoil && fan('pipe_system') ? (
+                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
+                    <p className="text-white/60 text-xs mb-1">{t('specPipes')}</p>
+                    <p className="font-syne font-bold text-xl text-white">{t(`pipes${fan('pipe_system')}`)}{fan('fan_motor') ? ` · ${fan('fan_motor')}` : ''}</p>
+                  </div>
+                ) : <div />}
                 <div className="bg-[#0A3658]/50 rounded-xl p-4">
                   {!p.price ? (
                     <p className="font-syne font-semibold text-base text-white/60">{tp('priceOnRequest')}</p>
@@ -386,7 +451,7 @@ export default async function ProductPage({ params }: Props) {
                 {specs.map(([key, value], i) => (
                   <div key={key} className={`flex items-start justify-between py-3 px-4 ${i % 2 === 0 ? '' : ''} border-b border-[#1A6B9A]/12 last:border-b-0`}>
                     <span className="text-white/60 text-sm pr-4">
-                      {SPEC_LABELS[key]?.[locale] ?? SPEC_LABELS[key]?.en ?? key}
+                      {FAN_LABEL[key] ?? SPEC_LABELS[key]?.[locale] ?? SPEC_LABELS[key]?.en ?? key}
                     </span>
                     <span className="text-white font-medium text-sm text-right">{key === 'install' ? starred(value) : value}</span>
                   </div>
@@ -394,6 +459,23 @@ export default async function ProductPage({ params }: Props) {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Fan coil → compatible air-to-water heat pumps */}
+        {worksWith.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-syne font-bold text-2xl mb-2">{t('worksWithHeatPump')}</h2>
+            <p className="text-white/60 text-sm mb-6">{t('worksWithHint')}</p>
+            <ProductGrid products={worksWith} locale={locale} installFrom={installFrom} />
+          </section>
+        )}
+
+        {/* Air-to-water heat pump → fan coils that work with it */}
+        {matchingFanCoils.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-syne font-bold text-2xl mb-6">{t('matchingFanCoils')}</h2>
+            <ProductGrid products={matchingFanCoils} locale={locale} installFrom={installFrom} />
+          </section>
         )}
 
         {/* Similar models — crawlable links to related product pages */}

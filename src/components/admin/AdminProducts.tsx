@@ -1,7 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { Fragment, useState, useEffect, useRef, useMemo } from 'react';
 import { T, Lang, AdminProduct, ProductSpecs } from './adminStrings';
+import { type Category, categoryTree, descendantKeys, isFanCoil, isWithin, FAN_COILS_DUCTED_KEY, AIR_WATER_KEY } from '@/lib/categories';
+import { validateFanCoilSpecs, PIPE_SYSTEMS, FAN_MOTORS } from '@/lib/fanCoil';
+
+// Spec keys used only by fan coils (removed when a product is not a fan coil)
+const FAN_ONLY_SPECS = ['pipe_system', 'fan_motor', 'esp_pa'] as const;
+// General spec fields that the fan coil block already edits
+const FAN_SHARED_SPECS = ['cooling_kw', 'heating_kw', 'airflow', 'noise_db'];
 
 type ProductForm = Omit<AdminProduct, 'id' | 'created_at'> & { id?: string };
 
@@ -20,7 +27,7 @@ const EMPTY: ProductForm = {
   description_lv: '', description_ru: '', description_en: '',
   specs: { ...EMPTY_SPECS },
   brand_color: '#1A6B9A', image_url: '', image_urls: [], in_stock: true,
-  is_hit: false, is_promo: false, discount_percent: null,
+  is_hit: false, is_promo: false, discount_percent: null, compatible_ids: [],
 };
 
 const energyClasses = ['A+++', 'A++', 'A+', 'A', 'B'];
@@ -37,14 +44,27 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   const [filterCategory, setFilterCategory] = useState('');
   const [uploadingImg, setUploadingImg] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [saveErrors, setSaveErrors] = useState<string[]>([]);
+  const [cats, setCats] = useState<Category[]>([]);
+  const [compatQuery, setCompatQuery] = useState('');
+  const [compatOnlyAw, setCompatOnlyAw] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
-    const r = await fetch('/api/admin/products');
+    const [r, rc] = await Promise.all([fetch('/api/admin/products'), fetch('/api/admin/categories')]);
     const data = r.ok ? await r.json() : [];
     setProducts((data ?? []) as AdminProduct[]);
+    if (rc.ok) setCats((await rc.json()).categories ?? []);
     setLoading(false);
+  };
+  const tree = useMemo(() => categoryTree(cats), [cats]);
+  const catLabel = (key: string) => {
+    const c = cats.find((x) => x.key === key);
+    if (!c) return key;
+    const parent = c.parent_key ? cats.find((x) => x.key === c.parent_key) : null;
+    const n = (x: Category) => (lang === 'ru' ? x.name_ru : x.name_en);
+    return parent ? `${n(parent)} → ${n(c)}` : n(c);
   };
 
   useEffect(() => { load(); }, []);
@@ -56,14 +76,18 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     let list = products;
     if (filterBrand) list = list.filter(p => p.brand === filterBrand);
     if (filterPower) list = list.filter(p => p.power_kw === parseFloat(filterPower));
-    if (filterCategory) list = list.filter(p => p.category === filterCategory);
+    if (filterCategory) {
+      // A parent category includes its subcategories
+      const keys = descendantKeys(cats, filterCategory);
+      list = list.filter(p => keys.has(p.category));
+    }
     return list;
-  }, [products, filterBrand, filterPower, filterCategory]);
+  }, [products, filterBrand, filterPower, filterCategory, cats]);
 
   const resetFilters = () => { setFilterBrand(''); setFilterPower(''); setFilterCategory(''); };
   const hasFilters = filterBrand || filterPower || filterCategory;
 
-  const openAdd = () => setModal({ open: true, product: { ...EMPTY, specs: { ...EMPTY_SPECS } } });
+  const openAdd = () => { setSaveErrors([]); setModal({ open: true, product: { ...EMPTY, specs: { ...EMPTY_SPECS } } }); };
 
   const parseProductForModal = (p: AdminProduct) => {
     const hasLocale = p.features.some(f => /^(lv|ru|en):/.test(f));
@@ -88,10 +112,13 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
 
   const openCopy = (p: AdminProduct) => {
     const { id: _id, created_at: _ca, ...rest } = parseProductForModal(p) as AdminProduct & { image_urls: string[]; features_lv: string[]; features_ru: string[]; features_en: string[] };
+    setSaveErrors([]);
+    // The copy keeps category, fan coil parameters (specs) and compatible products
     setModal({
       open: true,
       product: {
         ...rest,
+        compatible_ids: [...(rest.compatible_ids ?? [])],
         name_lv: rest.name_lv ? rest.name_lv + ' (kopija)' : rest.name_lv,
         name_ru: rest.name_ru ? rest.name_ru + ' (копия)' : rest.name_ru,
         name_en: rest.name_en ? rest.name_en + ' (copy)' : rest.name_en,
@@ -100,6 +127,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   };
 
   const openEdit = (p: AdminProduct) => {
+    setSaveErrors([]);
     const hasLocale = p.features.some(f => /^(lv|ru|en):/.test(f));
     let imgs: string[] = [];
     if (p.image_url?.startsWith('[')) {
@@ -158,8 +186,15 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
   };
 
   const save = async () => {
-    setSaving(true);
     const { id, ...fields } = modal.product as AdminProduct;
+    const fanCoil = isFanCoil(cats, fields.category);
+    // Client-side check (the API validates the same rules again)
+    if (fanCoil) {
+      const { errors } = validateFanCoilSpecs(fields.specs as Record<string, unknown>, isWithin(cats, fields.category, FAN_COILS_DUCTED_KEY));
+      if (errors.length) { setSaveErrors(errors); return; }
+    }
+    setSaveErrors([]);
+    setSaving(true);
 
     const parseStr = (v: unknown) =>
       typeof v === 'string' ? v.split(',').map(f => f.trim()).filter(Boolean)
@@ -181,6 +216,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     for (const [k, v] of Object.entries(rawSpecs)) {
       if (v && v.trim()) specs[k] = v.trim();
     }
+    if (!fanCoil) for (const k of FAN_ONLY_SPECS) delete specs[k];
 
     const { features_lv: _flv, features_ru: _fru, features_en: _fen, features: _f, image_urls: _iu, specs: _sp, ...restFields } = fields;
     const imageUrls: string[] = (fields.image_urls as string[]) || [];
@@ -199,25 +235,22 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
       description_ru: fields.description_ru ?? '',
       description_en: fields.description_en ?? '',
       specs: Object.keys(specs).length ? specs : null,
+      compatible_ids: fields.compatible_ids ?? [],
     };
 
-    if (id) {
-      const r = await fetch(`/api/admin/products/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = r.ok ? await r.json() : null;
-      if (data) setProducts((prev) => prev.map((p) => (p.id === id ? (data as AdminProduct) : p)));
-    } else {
-      const r = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = r.ok ? await r.json() : null;
-      if (data) setProducts((prev) => [data as AdminProduct, ...prev]);
+    const r = await fetch(id ? `/api/admin/products/${id}` : '/api/admin/products', {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json().catch(() => null);
+    if (!r.ok) {
+      setSaveErrors(data?.errors ?? [data?.error ?? `HTTP ${r.status}`]);
+      setSaving(false);
+      return; // keep the form open with the entered data
     }
+    if (id) setProducts((prev) => prev.map((p) => (p.id === id ? (data as AdminProduct) : p)));
+    else setProducts((prev) => [data as AdminProduct, ...prev]);
     await fetch('/api/admin/revalidate', { method: 'POST' });
     setSaving(false);
     closeModal();
@@ -277,6 +310,24 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     { value: '3ph_380_50hz', ru: '3Ф, 380~415 В, 50 Гц',   en: '3Ph, 380~415 V, 50 Hz' },
   ];
 
+  // Fan coil block + compatible products (form state)
+  const formIsFan = isFanCoil(cats, modal.product.category);
+  const formIsDucted = isWithin(cats, modal.product.category, FAN_COILS_DUCTED_KEY);
+  const specVal = (k: string) => ((modal.product.specs ?? {}) as Record<string, string>)[k] ?? '';
+  const compatIds = useMemo(() => modal.product.compatible_ids ?? [], [modal.product.compatible_ids]);
+  const productTitle = (p: AdminProduct) => (lang === 'ru' ? p.name_ru || p.name_en : p.name_en || p.name_ru);
+  const compatCandidates = useMemo(() => {
+    const awKeys = descendantKeys(cats, AIR_WATER_KEY);
+    const needle = compatQuery.trim().toLowerCase();
+    return products
+      .filter((p) => p.id !== modal.product.id && !compatIds.includes(p.id))
+      .filter((p) => !(formIsFan && compatOnlyAw) || awKeys.has(p.category))
+      .filter((p) => !needle || `${p.brand} ${p.name_ru} ${p.name_en}`.toLowerCase().includes(needle))
+      .slice(0, 40);
+  }, [products, cats, compatQuery, compatOnlyAw, formIsFan, compatIds, modal.product.id]);
+  const toggleCompat = (id: string) =>
+    setField('compatible_ids', compatIds.includes(id) ? compatIds.filter((x) => x !== id) : [...compatIds, id]);
+
   return (
     <div className="p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
@@ -316,10 +367,12 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
           <div className="relative">
             <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="w-full bg-[#0A2035]/80 border border-white/10 text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors appearance-none cursor-pointer" style={{ background: '#0A2035' }}>
               <option value="">{lang === 'ru' ? 'Все' : 'All'}</option>
-              <option value="home" style={{ background: '#0A2035' }}>{lang === 'ru' ? 'Бытовые' : 'Home'}</option>
-              <option value="heat_pump" style={{ background: '#0A2035' }}>{lang === 'ru' ? 'Насос воздух-воздух' : 'Heat Pump A-A'}</option>
-              <option value="commercial" style={{ background: '#0A2035' }}>{lang === 'ru' ? 'Коммерческие' : 'Commercial'}</option>
-              <option value="commercial_heat_pump" style={{ background: '#0A2035' }}>{lang === 'ru' ? 'Насос воздух-вода' : 'Heat Pump A-W'}</option>
+              {tree.map(({ cat, children }) => (
+                <Fragment key={cat.key}>
+                  <option value={cat.key} style={{ background: '#0A2035' }}>{catLabel(cat.key)}</option>
+                  {children.map((ch) => <option key={ch.key} value={ch.key} style={{ background: '#0A2035' }}>{catLabel(ch.key)}</option>)}
+                </Fragment>
+              ))}
             </select>
             <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
           </div>
@@ -442,10 +495,14 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                   <div>
                     <label className={lbl}>{s.prodCategory}</label>
                     <select className={inp} value={modal.product.category} onChange={(e) => setField('category', e.target.value)} style={{ background: '#0D2137' }}>
-                      <option value="home">{s.prodCatHome}</option>
-                      <option value="heat_pump">{s.prodCatHeatPump}</option>
-                      <option value="commercial">{s.prodCatCommercial}</option>
-                      <option value="commercial_heat_pump">{s.prodCatCommercialHeatPump}</option>
+                      {tree.map(({ cat, children }) => children.length ? (
+                        <optgroup key={cat.key} label={catLabel(cat.key)}>
+                          <option value={cat.key}>{catLabel(cat.key)}</option>
+                          {children.map((ch) => <option key={ch.key} value={ch.key}>{catLabel(ch.key)}</option>)}
+                        </optgroup>
+                      ) : (
+                        <option key={cat.key} value={cat.key}>{catLabel(cat.key)}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -471,6 +528,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                   <div>
                     <label className={lbl}>{s.prodEnergyClass}</label>
                     <select className={inp} value={modal.product.energy_class} onChange={(e) => setField('energy_class', e.target.value)} style={{ background: '#0D2137' }}>
+                      <option value="">—</option>
                       {energyClasses.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
@@ -504,9 +562,54 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
 
                 {/* Column 2: Specs */}
                 <div className="p-5 space-y-4">
+                  {/* Only for the fan coil category and its subcategories */}
+                  {formIsFan && (
+                    <div className="bg-[#06B6D4]/5 border border-[#06B6D4]/25 rounded-xl p-4 space-y-3">
+                      <p className={sectionHdr}>{s.prodFanSection}</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className={lbl}>{s.prodFanPipes}</label>
+                          <select className={inp} style={{ background: '#0D2137' }} value={specVal('pipe_system')} onChange={(e) => setSpec('pipe_system', e.target.value)}>
+                            <option value="">{s.selectPlaceholder}</option>
+                            {PIPE_SYSTEMS.map((v) => <option key={v} value={v}>{v === '2' ? s.prodFanPipes2 : s.prodFanPipes4}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={lbl}>{s.prodFanMotor}</label>
+                          <select className={inp} style={{ background: '#0D2137' }} value={specVal('fan_motor')} onChange={(e) => setSpec('fan_motor', e.target.value)}>
+                            <option value="">{s.selectPlaceholder}</option>
+                            {FAN_MOTORS.map((v) => <option key={v} value={v}>{v}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={lbl}>{s.prodFanCooling}</label>
+                          <input className={inp} inputMode="decimal" value={specVal('cooling_kw')} onChange={(e) => setSpec('cooling_kw', e.target.value)} placeholder="3.5" />
+                        </div>
+                        <div>
+                          <label className={lbl}>{s.prodFanHeating}</label>
+                          <input className={inp} inputMode="decimal" value={specVal('heating_kw')} onChange={(e) => setSpec('heating_kw', e.target.value)} placeholder="4.2" />
+                        </div>
+                        <div>
+                          <label className={lbl}>{s.prodFanAirflow}</label>
+                          <input className={inp} inputMode="decimal" value={specVal('airflow')} onChange={(e) => setSpec('airflow', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className={lbl}>{s.prodFanNoise}</label>
+                          <input className={inp} inputMode="decimal" value={specVal('noise_db')} onChange={(e) => setSpec('noise_db', e.target.value)} />
+                        </div>
+                        {formIsDucted && (
+                          <div className="col-span-2">
+                            <label className={lbl}>{s.prodFanEsp}</label>
+                            <input className={inp} inputMode="decimal" value={specVal('esp_pa')} onChange={(e) => setSpec('esp_pa', e.target.value)} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <p className={sectionHdr}>{s.prodSpecsSection}</p>
                   <div className="space-y-3">
-                    {specFields.map(({ key, label }) => (
+                    {specFields.filter(({ key }) => !formIsFan || !FAN_SHARED_SPECS.includes(key)).map(({ key, label }) => (
                       <div key={key}>
                         <label className={lbl}>{label}</label>
                         {key === 'wifi' ? (
@@ -605,6 +708,41 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
                     )}
                   </div>
 
+                  {/* Compatible products (all products; fan coils → air-to-water heat pumps) */}
+                  <div>
+                    <p className={sectionHdr}>{s.prodCompatible} ({compatIds.length})</p>
+                    <p className="text-white/40 text-xs mb-2">{s.prodCompatibleHint}</p>
+                    {compatIds.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {compatIds.map((cid) => {
+                          const cp = products.find((x) => x.id === cid);
+                          return (
+                            <button key={cid} type="button" onClick={() => toggleCompat(cid)} title={lang === 'ru' ? 'Убрать' : 'Remove'}
+                              className="text-xs bg-[#27C4A0]/15 text-[#27C4A0] border border-[#27C4A0]/30 rounded-lg px-2 py-1 hover:bg-red-500/15 hover:text-red-300 hover:border-red-500/30 transition-colors">
+                              {cp ? productTitle(cp) : cid} ×
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <input className={inp} value={compatQuery} onChange={(e) => setCompatQuery(e.target.value)} placeholder={s.prodCompatibleSearch} />
+                    {formIsFan && (
+                      <label className="flex items-center gap-2 mt-2 text-xs text-white/50 cursor-pointer">
+                        <input type="checkbox" checked={compatOnlyAw} onChange={(e) => setCompatOnlyAw(e.target.checked)} className="accent-[#27C4A0]" />
+                        {s.prodCompatibleOnlyAw}
+                      </label>
+                    )}
+                    <div className="mt-2 max-h-44 overflow-y-auto border border-white/8 rounded-xl divide-y divide-white/5">
+                      {compatCandidates.map((cp) => (
+                        <button key={cp.id} type="button" onClick={() => toggleCompat(cp.id)} className="w-full text-left px-3 py-2 text-xs text-white/70 hover:bg-white/5 flex justify-between gap-2">
+                          <span className="truncate">{productTitle(cp)}</span>
+                          <span className="text-white/30 flex-shrink-0">{cp.price ? `${cp.price} €` : ''}</span>
+                        </button>
+                      ))}
+                      {compatCandidates.length === 0 && <p className="px-3 py-2 text-xs text-white/30">{s.noData}</p>}
+                    </div>
+                  </div>
+
                   {/* Features */}
                   <div>
                     <p className={sectionHdr}>{s.prodFeatures}</p>
@@ -664,6 +802,12 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
               </div>
             </div>
 
+            {saveErrors.length > 0 && (
+              <div className="mx-6 mt-3 text-red-300 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 space-y-0.5 flex-shrink-0" role="alert">
+                <p className="font-semibold">{s.prodSaveError}:</p>
+                {saveErrors.map((e) => <p key={e}>• {e}</p>)}
+              </div>
+            )}
             {/* Footer */}
             <div className="px-6 py-4 border-t border-white/10 flex gap-3 flex-shrink-0 bg-[#0D2137]">
               <button onClick={save} disabled={saving} className="flex-1 bg-[#27C4A0] hover:bg-[#1fa389] disabled:opacity-50 text-[#0B1929] font-semibold py-3 rounded-xl transition-colors text-base">

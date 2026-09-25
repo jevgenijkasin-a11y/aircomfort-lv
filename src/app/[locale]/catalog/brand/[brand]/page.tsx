@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { listProducts, getSettings } from '@/lib/db';
+import { listProducts, getSettings, hiddenCategoryKeys } from '@/lib/db';
 import { visibleProducts } from '@/lib/catalogData';
 import { localizedAlternates, BASE_URL } from '@/lib/seo';
 import { asLoc, brandSlug, CATEGORY_SLUGS, CATEGORY_MSG_KEY } from '@/lib/productSeo';
@@ -14,9 +14,9 @@ type Props = { params: Promise<{ locale: string; brand: string }> };
 
 async function load(slug: string) {
   const [all, settings] = await Promise.all([listProducts({ inStockOnly: true, orderBy: 'price' }), getSettings()]);
-  const products = visibleProducts(all).filter((p) => brandSlug(p.brand) === slug);
+  const products = visibleProducts(all, hiddenCategoryKeys()).filter((p) => brandSlug(p.brand) === slug);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
-  return { products, brand: products[0]?.brand ?? null, installFrom, all: visibleProducts(all) };
+  return { products, brand: products[0]?.brand ?? null, installFrom, all: visibleProducts(all, hiddenCategoryKeys()) };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

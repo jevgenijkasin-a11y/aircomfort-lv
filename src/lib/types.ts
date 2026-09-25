@@ -27,6 +27,8 @@ export interface SupabaseProduct {
   description_ru?: string;
   description_en?: string;
   specs?: Record<string, string>;
+  /** Product ids shown in "Works with a heat pump" / "Matching fan coils". */
+  compatible_ids?: string[];
 }
 
 export interface SupabaseContact {

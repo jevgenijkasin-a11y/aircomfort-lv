@@ -3,7 +3,8 @@ import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import { starred } from '@/components/FootnoteStar';
-import { listProducts, getSettings } from '@/lib/db';
+import { listProducts, getSettings, hiddenCategoryKeys } from '@/lib/db';
+import { visibleProducts } from '@/lib/catalogData';
 
 // Seeded LCG shuffle — same result all day, different result tomorrow (UTC midnight)
 function dailyShuffle<T>(arr: T[]): T[] {
@@ -22,7 +23,7 @@ export default async function FeaturedProducts() {
   const [t, locale, settings] = await Promise.all([getTranslations('products'), getLocale(), getSettings()]);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
 
-  const all = await listProducts({ inStockOnly: true });
+  const all = visibleProducts(await listProducts({ inStockOnly: true }), hiddenCategoryKeys());
   if (!all.length) return null;
   const products = dailyShuffle(all).slice(0, 3);
 

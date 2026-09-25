@@ -6,6 +6,7 @@ import path from 'path';
 import { verifySession } from '@/lib/adminAuth';
 import { UPLOADS_DIR } from '@/lib/db';
 import { optimizeUpload } from '@/lib/optimizeUpload';
+import { sniffImageType, uploadTypeError } from '@/lib/imageType';
 
 export async function POST(req: NextRequest) {
   if (!(await verifySession(req))) {
@@ -16,11 +17,11 @@ export async function POST(req: NextRequest) {
   const file = formData.get('file') as File | null;
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
 
-  const bytes = await file.arrayBuffer();
-  const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
-  const rawSafeExt = /^[a-z0-9]{1,5}$/.test(rawExt) ? rawExt : 'jpg';
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const typeError = uploadTypeError(bytes, file.name);
+  if (typeError) return NextResponse.json({ error: typeError }, { status: 400 });
   // Portrait shown at 130 px — 800 px is plenty for retina and vCard use
-  const { data, ext } = await optimizeUpload(Buffer.from(bytes), rawSafeExt, 800);
+  const { data, ext } = await optimizeUpload(bytes, sniffImageType(bytes), 800);
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   const dir = path.join(UPLOADS_DIR, 'employee-photos');

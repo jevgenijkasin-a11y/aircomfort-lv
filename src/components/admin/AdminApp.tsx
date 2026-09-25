@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { T, Lang, Section } from './adminStrings';
 import AdminRequests from './AdminRequests';
 import AdminProducts from './AdminProducts';
+import AdminCategories from './AdminCategories';
 import AdminSlider from './AdminSlider';
 import AdminReviews from './AdminReviews';
 import AdminTexts from './AdminTexts';
@@ -32,6 +33,10 @@ const navItems: { id: Section; icon: React.ReactNode }[] = [
   {
     id: 'products',
     icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" /></svg>,
+  },
+  {
+    id: 'categories',
+    icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M4 5h6v4H4zM4 15h6v4H4zM14 10h6v4h-6zM7 9v6M10 12h4" /></svg>,
   },
   {
     id: 'slider',
@@ -175,6 +180,7 @@ export default function AdminApp() {
           {section === 'cards' && <AdminCards lang={lang} />}
           {section === 'requests' && <AdminRequests lang={lang} />}
           {section === 'products' && <AdminProducts lang={lang} />}
+          {section === 'categories' && <AdminCategories lang={lang} />}
           {section === 'slider' && <AdminSlider lang={lang} />}
           {section === 'reviews' && <AdminReviews lang={lang} />}
           {section === 'texts' && <AdminTexts lang={lang} />}

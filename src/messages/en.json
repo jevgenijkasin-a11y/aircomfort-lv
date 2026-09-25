@@ -90,7 +90,7 @@
     "catCommercialHeatPump": "Heat Pumps Air-to-Water",
     "sortAsc": "Price: ascending",
     "sortDesc": "Price: descending",
-    "noResults": "No products found",
+    "noResults": "Nothing found",
     "noResultsHint": "Change filters or browse the full catalog",
     "resetFilters": "Reset filters",
     "brand": "Brand",
@@ -113,7 +113,29 @@
     "orderTitle": "Order this model",
     "orderSubtitle": "We will contact you within 2 hours",
     "orderCta": "Send request",
-    "features": "Features"
+    "features": "Features",
+    "pipes": "Pipe system",
+    "pipes2": "2-pipe",
+    "pipes4": "4-pipe",
+    "motor": "Fan motor",
+    "cooling": "Cooling",
+    "heating": "Heating",
+    "any": "Any",
+    "errorTitle": "Couldn't display the products",
+    "errorHint": "Try resetting the filters — the rest of the catalogue works.",
+    "subcategories": "Subcategories",
+    "categoryEmpty": "There are no products in this section yet. Contact us and we’ll pick the right equipment for your project.",
+    "specType": "Type",
+    "specPipes": "Pipe system",
+    "specMotor": "Fan motor",
+    "specCooling": "Cooling capacity",
+    "specHeating": "Heating capacity",
+    "specAirflow": "Airflow",
+    "specNoise": "Noise level",
+    "specEsp": "External static pressure",
+    "worksWithHeatPump": "Works with a heat pump",
+    "worksWithHint": "The fan coil receives warm or chilled water from an air-to-water heat pump.",
+    "matchingFanCoils": "Matching fan coils"
   },
   "calculator": {
     "title": "Cost Calculator",
@@ -229,5 +251,10 @@
     "s6title": "6. Contact information",
     "s6body": "If you have any questions about this privacy policy, please contact us:",
     "back": "← Back to home"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "The product may have been discontinued or the link is out of date.",
+    "toCatalog": "Go to the catalogue"
   }
 }

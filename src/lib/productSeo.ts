@@ -41,8 +41,11 @@ const CAT_NOUN: Record<string, Record<Loc, string>> = {
   heat_pump: { lv: 'gaiss-gaiss siltumsūknis', ru: 'тепловой насос воздух-воздух', en: 'air-to-air heat pump' },
   commercial: { lv: 'komerciālais kondicionieris', ru: 'коммерческий кондиционер', en: 'commercial air conditioner' },
   commercial_heat_pump: { lv: 'gaiss-ūdens siltumsūknis', ru: 'тепловой насос воздух-вода', en: 'air-to-water heat pump' },
+  fan_coils: { lv: 'fankoils', ru: 'фанкойл', en: 'fan coil unit' },
 };
-export const categoryNoun = (cat: string, l: Loc) => (CAT_NOUN[cat] ?? CAT_NOUN.home)[l];
+/** Fan coil subcategories (fan_coils_*) share the fan coil texts. */
+const textKey = (cat: string) => (cat.startsWith('fan_coils') ? 'fan_coils' : cat);
+export const categoryNoun = (cat: string, l: Loc) => (CAT_NOUN[textKey(cat)] ?? CAT_NOUN.home)[l];
 
 // Manufacturer origin — public, verifiable facts only. Unknown brands get none.
 const BRAND_ORIGIN: Record<string, Record<Loc, string>> = {
@@ -129,10 +132,11 @@ export function productMetaDescription(p: SupabaseProduct, locale: string, insta
   const roomsPart = rooms ? { lv: `, ${rooms} telpām`, ru: `, для ${rooms} комнат`, en: `, for ${rooms} rooms` }[l] : '';
   const feat = localFeatures(p, l)[0];
 
+  const cls = p.energy_class ? { lv: `, klase ${p.energy_class}`, ru: `, класс ${p.energy_class}`, en: `, class ${p.energy_class}` }[l] : '';
   const core: Record<Loc, string> = {
-    lv: `${name}: ${kw(p)} kW${a ? `, telpām līdz ${a} m²` : roomsPart}, klase ${p.energy_class}${noise ? `, ${noise} dB` : ''}.`,
-    ru: `${name}: ${kw(p)} кВт${a ? `, для помещений до ${a} м²` : roomsPart}, класс ${p.energy_class}${noise ? `, ${noise} дБ` : ''}.`,
-    en: `${name}: ${kw(p)} kW${a ? `, for rooms up to ${a} m²` : roomsPart}, class ${p.energy_class}${noise ? `, ${noise} dB` : ''}.`,
+    lv: `${name}: ${kw(p)} kW${a ? `, telpām līdz ${a} m²` : roomsPart}${cls}${noise ? `, ${noise} dB` : ''}.`,
+    ru: `${name}: ${kw(p)} кВт${a ? `, для помещений до ${a} м²` : roomsPart}${cls}${noise ? `, ${noise} дБ` : ''}.`,
+    en: `${name}: ${kw(p)} kW${a ? `, for rooms up to ${a} m²` : roomsPart}${cls}${noise ? `, ${noise} dB` : ''}.`,
   };
   const money: Record<Loc, string> = {
     lv: price ? ` Cena ${price} €, montāža no ${installFrom} €.` : ` Montāža no ${installFrom} €.`,
@@ -222,8 +226,13 @@ function purposeSentence(p: SupabaseProduct, l: Loc): string {
       lv: `${n} (${k} kW) ir paredzēts gaiss-ūdens sistēmām: siltumsūknis ņem siltumu no āra gaisa un nodod to ūdens lokam — grīdas apsildei, radiatoriem un karstajam ūdenim.`,
       en: `The ${n} (${k} kW) is designed for air-to-water systems: the heat pump extracts heat from outdoor air and transfers it to a water circuit for underfloor heating, radiators and hot water.`,
     },
+    fan_coils: {
+      ru: `${n} — фанкойл мощностью ${k} кВт: внутренний блок водяной системы, который обогревает или охлаждает помещение водой от теплового насоса воздух-вода.`,
+      lv: `${n} ir ${k} kW fankoils — ūdens sistēmas iekšējais bloks, kas silda vai dzesē telpu ar ūdeni no siltumsūkņa gaiss-ūdens.`,
+      en: `The ${n} is a ${k} kW fan coil unit — the indoor part of a hydronic system that heats or cools a room with water from an air-to-water heat pump.`,
+    },
   };
-  return (texts[p.category] ?? texts.home)[l];
+  return (texts[textKey(p.category)] ?? texts.home)[l];
 }
 
 function efficiencySentence(p: SupabaseProduct, l: Loc): string {
@@ -246,6 +255,7 @@ function efficiencySentence(p: SupabaseProduct, l: Loc): string {
     },
   };
   if (T[c]) return T[c][l];
+  if (!c) return ''; // fan coils etc. have no energy label
   return { ru: `Класс энергоэффективности — ${c}.`, lv: `Energoefektivitātes klase — ${c}.`, en: `Energy efficiency class: ${c}.` }[l];
 }
 
