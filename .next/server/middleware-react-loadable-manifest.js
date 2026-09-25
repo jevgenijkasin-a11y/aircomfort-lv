@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST='{"components\\\\admin\\\\AdminCards.tsx -> qrcode":{"id":9783,"files":["static/chunks/783.524d525fbe03e9f3.js"]}}';
+self.__REACT_LOADABLE_MANIFEST='{"components\\\\admin\\\\AdminCards.tsx -> qrcode":{"id":9783,"files":["static/chunks/783.bbc6c2fcd9627dd2.js"]}}';
