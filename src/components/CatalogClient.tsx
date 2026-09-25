@@ -40,9 +40,12 @@ export function ProductGrid({ products, locale, installFrom = 250 }: { products:
   const t = useTranslations('catalog');
   const tp = useTranslations('products');
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-      {products.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
-    </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {products.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
+      </div>
+      <p className="mt-4 text-xs text-white/70">{tp('installNote')}</p>
+    </>
   );
 }
 
@@ -206,6 +209,7 @@ export default function CatalogClient({
           {shown.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
         </div>
       )}
+      {filtered.length > 0 && <p className="mt-4 text-xs text-white/70">{tp('installNote')}</p>}
 
       {/* Pagination — real <a href> links, rendered on the server */}
       {unfiltered && totalPages > 1 && (

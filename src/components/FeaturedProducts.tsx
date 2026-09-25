@@ -48,6 +48,7 @@ export default async function FeaturedProducts() {
             </div>
           ))}
         </div>
+        <p className="mt-4 text-xs text-white/70">{t('installNote')}</p>
       </div>
     </section>
   );

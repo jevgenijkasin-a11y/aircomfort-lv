@@ -165,7 +165,7 @@ export default async function ProductPage({ params }: Props) {
     ...(areaTxt ? [['area', `${areaTxt} m²`] as [string, string]] : []),
     ...(rooms ? [['rooms', String(rooms)] as [string, string]] : []),
     ['energy_class', p.energy_class],
-    ['install', `${l === 'en' ? 'from €' : l === 'ru' ? 'от ' : 'no '}${installFrom}${l === 'en' ? '' : ' €'}`],
+    ['install', `${l === 'en' ? 'from €' : l === 'ru' ? 'от ' : 'no '}${installFrom}${l === 'en' ? '' : ' €'}*`],
   ];
   const SPEC_ORDER = [
     'manufacturer', 'cooling_kw', 'heating_kw', 'scop', 'seer',
@@ -194,11 +194,11 @@ export default async function ProductPage({ params }: Props) {
     about: { lv: 'Apraksts', ru: 'Описание', en: 'Description' },
     install: { lv: 'Montāža un konsultācija', ru: 'Монтаж и консультация', en: 'Installation and advice' },
     similar: { lv: 'Līdzīgi modeļi', ru: 'Похожие модели', en: 'Similar models' },
-    installFrom: { lv: `Montāža no ${installFrom} €`, ru: `Монтаж от ${installFrom} €`, en: `Installation from €${installFrom}` },
+    installFrom: { lv: `Montāža no ${installFrom} €*`, ru: `Монтаж от ${installFrom} €*`, en: `Installation from €${installFrom}*` },
     total: {
-      lv: (v: string) => `Kopā ar montāžu no ${v} €`,
-      ru: (v: string) => `Итого с монтажом от ${v} €`,
-      en: (v: string) => `Total with installation from €${v}`,
+      lv: (v: string) => `Kopā ar montāžu no ${v} €*`,
+      ru: (v: string) => `Итого с монтажом от ${v} €*`,
+      en: (v: string) => `Total with installation from €${v}*`,
     },
   };
 
@@ -335,6 +335,7 @@ export default async function ProductPage({ params }: Props) {
                     )}
                   </p>
                 )}
+                <p className="text-xs text-white/70 leading-snug">{tp('installNote')}</p>
               </div>
             </div>
 
