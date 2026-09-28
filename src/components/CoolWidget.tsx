@@ -36,35 +36,54 @@ function useDarkTheme() {
 export default function CoolWidget({ label }: Props) {
   const [temp, setTemp] = useState(FROM_TEMP);
   const [progress, setProgress] = useState(0);
-  const [fired, setFired] = useState(false);
   const dark = useDarkTheme();
   const ref = useRef<HTMLDivElement>(null);
 
+  // Plays each time the widget comes into view, like the stat counters next
+  // to it: fully leaving the viewport resets it to +32° for the next pass.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setTemp(TO_TEMP);
+      setProgress(1);
+      return;
+    }
+    let raf = 0;
+    let played = false;
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+    const play = () => {
+      if (played) return;
+      played = true;
+      const start = performance.now();
+      const tick = (now: number) => {
+        const p = Math.min((now - start) / DURATION, 1);
+        const e = easeOut(p);
+        setTemp(Math.round(FROM_TEMP - e * (FROM_TEMP - TO_TEMP)));
+        setProgress(e);
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    const reset = () => {
+      cancelAnimationFrame(raf);
+      played = false;
+      setTemp(FROM_TEMP);
+      setProgress(0);
+    };
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !fired) {
-          setFired(true);
-          obs.disconnect();
-          const start = performance.now();
-          const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-          const tick = (now: number) => {
-            const p = Math.min((now - start) / DURATION, 1);
-            const e = easeOut(p);
-            setTemp(Math.round(FROM_TEMP - e * (FROM_TEMP - TO_TEMP)));
-            setProgress(e);
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
+        if (entry.intersectionRatio >= 0.8) play();
+        else if (!entry.isIntersecting) reset();
       },
-      { threshold: 0.8 }
+      { threshold: [0, 0.8] }
     );
     obs.observe(el);
-    return () => obs.disconnect();
-  }, [fired]);
+    return () => {
+      obs.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
   const color = lerpColor(progress, dark);
   // teal glow a bit softer on the light theme (matches --glow-k)
