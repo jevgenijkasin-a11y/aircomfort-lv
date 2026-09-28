@@ -4,12 +4,24 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import ContactForm from '@/components/ContactForm';
 import { getSettings } from '@/lib/db';
-import { localizedAlternates } from '@/lib/seo';
+import { localizedAlternates, BASE_URL } from '@/lib/seo';
+import { getCompany, contactPageJsonLd } from '@/lib/company';
+import GoogleIcon from '@/components/GoogleIcon';
+import { jsonLdString } from '@/lib/productSeo';
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const { locale } = await params;
+type SP = Record<string, string | string[] | undefined>;
+
+export async function generateMetadata({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<SP> }): Promise<Metadata> {
+  const [{ locale }, sp] = await Promise.all([params, searchParams]);
   const t = await getTranslations('contacts');
-  return { title: t('title'), alternates: localizedAlternates(locale, '/contacts') };
+  // Old "Order" links carried ?service=…&message=… — those variants must not be
+  // indexed: canonical always points to the clean URL, and any query → noindex.
+  const hasQuery = Object.keys(sp).length > 0;
+  return {
+    title: t('title'),
+    alternates: localizedAlternates(locale, '/contacts'),
+    ...(hasQuery ? { robots: { index: false, follow: true } } : {}),
+  };
 }
 
 function InfoCard({
@@ -47,10 +59,9 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
 
   const [t, settings] = await Promise.all([getTranslations('contacts'), getSettings()]);
 
-  const phone = settings.phone || t('phoneValue');
-  const email = settings.email || t('emailValue');
-  const address = settings.address || t('addressValue');
-  const hours = t('hoursValue');
+  // Contact data from the site config (+ admin overrides) — same as footer and JSON-LD
+  const company = getCompany(settings, locale);
+  const { phoneDisplay: phone, email, address, hours } = company;
 
   const titleKey = `contacts_title_${locale}` as const;
   const subtitleKey = `contacts_subtitle_${locale}` as const;
@@ -61,6 +72,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(contactPageJsonLd(locale, `${BASE_URL}/${locale}/contacts`, pageTitle, settings)) }} />
       <div className="pt-36 pb-10 bg-gradient-to-b from-surface to-page relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -78,14 +90,14 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3">
-            <ContactForm formTitle={formTitle} />
+            <ContactForm formTitle={formTitle} reviewUrl={company.googleReviewUrl} reviewLabel={t('leaveReview')} />
           </div>
           <div className="lg:col-span-2">
             <div className="space-y-4">
               <InfoCard
                 label={t('phone')}
                 value={phone}
-                href={`tel:${phone}`}
+                href={company.phoneHref}
                 icon={
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -105,7 +117,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
               <InfoCard
                 label={t('address')}
                 value={address}
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.mapQuery)}`}
                 icon={
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -124,10 +136,30 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
               />
             </div>
 
-            {/* Google Maps embed — address from admin settings */}
+            {/* Google profile / review links — each shown only when set in the site config */}
+            {(company.googleShare || company.googleReviewUrl) && (
+              <div className="mt-4 flex flex-wrap gap-3">
+                {company.googleShare && (
+                  <a href={company.googleShare} target="_blank" rel="noopener"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-fg bg-card border border-line hover:border-primary px-4 py-2.5 rounded-xl transition-colors">
+                    <GoogleIcon />
+                    {t('onGoogle')}
+                  </a>
+                )}
+                {company.googleReviewUrl && (
+                  <a href={company.googleReviewUrl} target="_blank" rel="noopener"
+                    className="inline-flex items-center gap-2 text-sm font-semibold bg-primary hover:bg-primary-hover text-on-primary px-4 py-2.5 rounded-xl transition-colors">
+                    <GoogleIcon />
+                    {t('leaveReview')}
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Google Maps embed — address from the site config */}
             <div className="mt-4 rounded-2xl overflow-hidden border border-line h-48">
               <iframe
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(company.mapQuery)}&output=embed`}
                 width="100%"
                 height="100%"
                 // dark-styled map only in the dark theme

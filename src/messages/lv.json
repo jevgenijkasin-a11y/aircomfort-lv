@@ -202,7 +202,9 @@
       "sending": "Sūta...",
       "success": "Paldies! Mēs sazināsimies ar jums drīzumā.",
       "error": "Kļūda. Lūdzu, mēģiniet vēlreiz vai zvaniet."
-    }
+    },
+    "onGoogle": "Mēs Google",
+    "leaveReview": "Atstājiet atsauksmi Google"
   },
   "reviews": {
     "title": "Klientu atsauksmes",

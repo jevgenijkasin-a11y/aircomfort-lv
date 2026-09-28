@@ -1,6 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import type { Metadata } from 'next';
+import { getSettings } from '@/lib/db';
+import { getCompany } from '@/lib/company';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -12,10 +14,12 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [t, tc] = await Promise.all([
+  const [t, tc, settings] = await Promise.all([
     getTranslations('privacy'),
     getTranslations('contacts'),
+    getSettings(),
   ]);
+  const company = getCompany(settings, locale);
 
   const sections = [
     { title: t('s1title'), body: t('s1body') },
@@ -51,19 +55,19 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             <ul className="space-y-1 text-muted text-sm">
               <li>
                 <span className="text-muted">Email: </span>
-                <a href={`mailto:${tc('emailValue')}`} className="text-primary hover:text-fg transition-colors">
-                  {tc('emailValue')}
+                <a href={`mailto:${company.email}`} className="text-primary hover:text-fg transition-colors">
+                  {company.email}
                 </a>
               </li>
               <li>
                 <span className="text-muted">{tc('phone')}: </span>
-                <a href={`tel:${tc('phoneValue')}`} className="text-primary hover:text-fg transition-colors">
-                  {tc('phoneValue')}
+                <a href={company.phoneHref} className="text-primary hover:text-fg transition-colors">
+                  {company.phoneDisplay}
                 </a>
               </li>
               <li>
                 <span className="text-muted">{tc('address')}: </span>
-                <span>{tc('addressValue')}</span>
+                <span>{company.address}</span>
               </li>
             </ul>
           </section>

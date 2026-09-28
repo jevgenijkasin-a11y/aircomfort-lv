@@ -5,23 +5,63 @@ import FeaturedProducts from '@/components/FeaturedProducts';
 import Reviews from '@/components/Reviews';
 import BrandMarquee from '@/components/BrandMarquee';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
+import { getSettings } from '@/lib/db';
+import { homeJsonLd } from '@/lib/company';
+import { jsonLdString } from '@/lib/productSeo';
+import { BASE_URL } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
+// Brand + city in the home title so "aircomfort lv" searches resolve to this shop
+const HOME_META = {
+  lv: {
+    title: 'AirComfort — kondicionieri un siltumsūkņi Rīgā ar montāžu',
+    description: 'AirComfort — Daikin, Mitsubishi Electric, Midea kondicionieru un siltumsūkņu pārdošana un montāža Rīgā un visā Latvijā. Montāža no 1 dienas, garantija.',
+  },
+  ru: {
+    title: 'AirComfort — кондиционеры и тепловые насосы в Риге с монтажом',
+    description: 'AirComfort — продажа и монтаж кондиционеров и тепловых насосов Daikin, Mitsubishi Electric, Midea в Риге и по всей Латвии. Монтаж от 1 дня, гарантия.',
+  },
+  en: {
+    title: 'AirComfort — air conditioners and heat pumps in Riga with installation',
+    description: 'AirComfort sells and installs Daikin, Mitsubishi Electric and Midea air conditioners and heat pumps in Riga and across Latvia. Fitting from 1 day, warranty.',
+  },
+} as const;
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const m = HOME_META[(locale === 'ru' || locale === 'en' ? locale : 'lv') as keyof typeof HOME_META];
+  return {
+    title: { absolute: m.title }, // no "| AirComfort" suffix — the brand already leads
+    description: m.description,
+    openGraph: {
+      type: 'website',
+      url: `${BASE_URL}/${locale}`,
+      title: m.title,
+      description: m.description,
+      siteName: 'AirComfort',
+    },
+    twitter: { card: 'summary_large_image', title: m.title, description: m.description },
+  };
+}
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [t, tn, th] = await Promise.all([
+  const [t, tn, th, settings] = await Promise.all([
     getTranslations('cta'),
     getTranslations('nav'),
     getTranslations('hero'),
+    getSettings(),
   ]);
 
   return (
     <>
+      {/* Organization + WebSite structured data (brand shop in Riga) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(homeJsonLd(locale, settings)) }} />
       <Hero />
       <BrandMarquee />
       <Services />

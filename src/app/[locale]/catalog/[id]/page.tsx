@@ -18,6 +18,7 @@ import ProductImageViewer from '@/components/ProductImageViewer';
 import BackLink from '@/components/BackLink';
 import { ProductGrid } from '@/components/CatalogClient';
 import { starred } from '@/components/FootnoteStar';
+import OrderLink from '@/components/OrderLink';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${BASE_URL}/${locale}/catalog/${id}`,
       title: `${title} | AirComfort`,
       description,
-      siteName: 'AirComfort.lv',
+      siteName: 'AirComfort',
       // Product photo, or the branded site card when a product has no photo
       images: [{ url: image ? absUrl(image) : `${BASE_URL}/${locale}/opengraph-image`, alt: productName(data, locale) }],
     },
@@ -155,7 +156,6 @@ export default async function ProductPage({ params }: Props) {
   const energyCls = energyColors[p.energy_class] ?? 'text-muted border-line bg-fg/5';
 
   const contactMessage = buildContactMessage(p, name, locale, installFrom);
-  const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
   const paragraphs = productParagraphs(p, locale, installFrom);
   const metaDescription = productMetaDescription(p, locale, installFrom);
   const cats = listCategories();
@@ -405,16 +405,18 @@ export default async function ProductPage({ params }: Props) {
               </div>
             </div>
 
-            <Link
+            {/* Clean /contacts link; the request text travels via sessionStorage */}
+            <OrderLink
               data-fab-avoid
-              href={contactHref as any}
+              service="install"
+              message={contactMessage}
               className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-on-primary font-bold py-4 rounded-2xl transition-all duration-200 shadow-xl shadow-glow/25 hover:-translate-y-0.5 text-base"
             >
               {tp('order')}
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
               </svg>
-            </Link>
+            </OrderLink>
 
             {/* Description (manual text, or generated from product data) */}
             <div className="glass-card rounded-2xl p-6">

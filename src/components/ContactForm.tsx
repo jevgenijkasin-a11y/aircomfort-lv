@@ -2,19 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { takeContactPrefill } from '@/lib/contactPrefill';
+import GoogleIcon from '@/components/GoogleIcon';
 
 type Status = 'idle' | 'sending' | 'success' | 'error';
 
-export default function ContactForm({ formTitle }: { formTitle?: string }) {
+export default function ContactForm({ formTitle, reviewUrl, reviewLabel }: {
+  formTitle?: string;
+  /** Google review link from the site config; the button is hidden while empty */
+  reviewUrl?: string;
+  reviewLabel?: string;
+}) {
   const t = useTranslations('contacts.form');
   const [form, setForm] = useState({ name: '', phone: '', email: '', service: '', message: '' });
   const [status, setStatus] = useState<Status>('idle');
 
-  // Pre-fill service and message from URL params (e.g., from product page or calculator)
+  // Pre-fill service and message handed over by the product "Order" button or
+  // the calculator (sessionStorage; legacy ?service=&message= links still work)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const service = params.get('service') ?? '';
-    const message = params.get('message') ?? '';
+    const { service = '', message = '' } = takeContactPrefill();
     if (service || message) {
       setForm((f) => ({
         ...f,
@@ -56,6 +62,13 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
           </svg>
         </div>
         <p className="font-heading font-semibold text-xl">{t('success')}</p>
+        {reviewUrl && reviewLabel && (
+          <a href={reviewUrl} target="_blank" rel="noopener"
+            className="inline-flex items-center gap-2 text-sm font-semibold bg-primary hover:bg-primary-hover text-on-primary px-5 py-2.5 rounded-xl transition-colors">
+            <GoogleIcon />
+            {reviewLabel}
+          </a>
+        )}
         <button onClick={() => { setStatus('idle'); setForm({ name: '', phone: '', email: '', service: '', message: '' }); }}
           className="text-primary text-sm hover:text-fg transition-colors mt-2">
           ←
