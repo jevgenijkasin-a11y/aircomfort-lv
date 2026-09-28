@@ -10,9 +10,9 @@ import { starred } from '@/components/FootnoteStar';
 import { fanSpec } from '@/lib/fanCoil';
 
 const energyColors: Record<string, string> = {
-  'A+++': 'text-[#27C4A0] border-[#27C4A0]/40 bg-[#27C4A0]/10',
-  'A++': 'text-[#4ade80] border-[#4ade80]/40 bg-[#4ade80]/10',
-  'A+': 'text-[#86efac] border-[#86efac]/40 bg-[#86efac]/10',
+  'A+++': 'text-primary border-accent/40 bg-accent/10',
+  'A++': 'text-energy-fg border-energy-fg/30 bg-energy-bg',
+  'A+': 'text-energy-fg border-energy-fg/30 bg-energy-bg',
 };
 
 /** "2 комнаты" / "5 комнат", "2 telpas", "2 rooms" — multi-split room count, no m². */
@@ -37,7 +37,7 @@ function CategoryIcon({ category }: { category: string }) {
   };
   const key = category.startsWith('fan_coils') ? 'fan_coils' : category;
   return (
-    <svg viewBox="0 0 24 24" className="w-10 h-10 text-[#5B7A99]" fill="none" stroke="currentColor" strokeWidth={1.4} aria-hidden>
+    <svg viewBox="0 0 24 24" className="w-10 h-10 text-muted" fill="none" stroke="currentColor" strokeWidth={1.4} aria-hidden>
       <path strokeLinecap="round" strokeLinejoin="round" d={d[key] ?? d.home} />
     </svg>
   );
@@ -61,10 +61,11 @@ export default function ProductCard({ product, locale, installFrom }: { product:
   return (
     <Link
       href={`/catalog/${product.id}` as any}
-      className="glass-card product-card-hover rounded-2xl overflow-hidden flex flex-col group h-full p-3"
+      className="bg-card border border-line shadow-soft product-card-hover rounded-2xl overflow-hidden flex flex-col group h-full p-3"
     >
-      {/* Photo on a light plate — same height on every card */}
-      <div className="relative h-48 rounded-xl overflow-hidden bg-[#F3F6F9]">
+      {/* Photo on a light plate in both themes (data-theme="light" keeps the
+          badges on it in the light palette) — same height on every card */}
+      <div data-theme="light" className="relative h-48 rounded-xl overflow-hidden bg-photo">
         {image ? (
           <Image
             src={image}
@@ -77,50 +78,61 @@ export default function ProductCard({ product, locale, installFrom }: { product:
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
             <CategoryIcon category={product.category} />
-            <span className="text-sm font-semibold text-[#3D5270]">{product.brand}</span>
+            <span className="text-sm font-semibold text-muted">{product.brand}</span>
           </div>
         )}
         {product.energy_class && (
-          <div className={`absolute top-2.5 right-2.5 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyColors[product.energy_class] ?? 'text-[#3D5270] border-[#3D5270]/30 bg-white/70'}`}>
+          <div className={`absolute top-2.5 right-2.5 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyColors[product.energy_class] ?? 'text-muted border-line-strong bg-card/70'}`}>
             {product.energy_class}
           </div>
         )}
         {(product.is_hit || product.is_promo || !!product.discount_percent) && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#f97316] text-white">{t('badgeHit')}</span>}
-            {product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e91e8c] text-white">{t('badgePromo')}</span>}
-            {!!product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#eab308] text-black">-{product.discount_percent}%</span>}
+            {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-hit text-white">{t('badgeHit')}</span>}
+            {product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-promo text-white">{t('badgePromo')}</span>}
+            {!!product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-sale text-black">-{product.discount_percent}%</span>}
           </div>
         )}
       </div>
 
       <div className="px-2 pt-4 pb-1 flex flex-col flex-1">
-        <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
-        <h3 className="font-syne font-semibold text-sm text-white mb-2 leading-snug">{name}</h3>
-        <p className="text-xs text-white/60 mb-4">
-          {product.power_kw} kW
-          {area ? ` · ${area} m²` : rooms ? ` · ${roomsLabel(rooms, l)}` : ''}
-          {pipes ? ` · ${tc(`pipes${pipes}`)}` : ''}
-          {motor ? ` · ${motor}` : ''}
-        </p>
+        <p className="text-primary text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
+        <h3 className="font-heading font-semibold text-sm text-fg mb-2 leading-snug">{name}</h3>
+        <ul className="flex flex-wrap gap-1.5 mb-4 text-xs">
+          <li className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface border border-line text-fg">
+            <svg className="w-3.5 h-3.5 text-cool" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" d="M12 2v20M4.9 7l14.2 10M4.9 17L19.1 7" /></svg>
+            {product.power_kw} kW
+          </li>
+          {(area || rooms) && (
+            <li className="px-2 py-0.5 rounded-md bg-surface border border-line text-fg">
+              {area ? `${area} m²` : roomsLabel(rooms!, l)}
+            </li>
+          )}
+          {pipes && <li className="px-2 py-0.5 rounded-md bg-surface border border-line text-fg">{tc(`pipes${pipes}`)}</li>}
+          {motor && <li className="px-2 py-0.5 rounded-md bg-surface border border-line text-fg">{motor}</li>}
+        </ul>
 
-        <div className="mt-auto border-t border-white/10 pt-3 flex items-end justify-between gap-2">
+        <div className="mt-auto border-t border-line pt-3 flex items-end justify-between gap-2">
           <div>
             {!price ? (
-              <span className="font-syne font-semibold text-sm text-white/80">{t('priceOnRequest')}</span>
+              <span className="font-heading font-semibold text-sm text-fg">{t('priceOnRequest')}</span>
             ) : (
               <>
                 {!!product.discount_percent && (
-                  <span className="block text-xs text-white/60 line-through">{product.price.toLocaleString('lv-LV')} €</span>
+                  <span className="block text-xs text-muted line-through">{product.price.toLocaleString('lv-LV')} €</span>
                 )}
-                <span className={`font-syne font-bold text-xl ${product.discount_percent ? 'text-[#27C4A0]' : 'text-white'}`}>
+                <span className={`font-heading font-bold text-xl ${product.discount_percent ? 'text-primary' : 'text-fg'}`}>
                   {price.toLocaleString('lv-LV')} €
                 </span>
               </>
             )}
           </div>
-          <span className="text-xs text-white/60 text-right">{starred(t('installFrom', { price: installFrom }))}</span>
+          <span className="text-xs text-muted text-right">{starred(t('installFrom', { price: installFrom }))}</span>
         </div>
+        {/* Visual button: the whole card is the link (no nested <a>) */}
+        <span className="mt-3 block text-center bg-primary group-hover:bg-primary-hover text-on-primary font-semibold text-sm py-2.5 rounded-xl transition-colors">
+          {t('order')}
+        </span>
       </div>
     </Link>
   );

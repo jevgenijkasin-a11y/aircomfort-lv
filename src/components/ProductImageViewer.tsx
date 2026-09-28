@@ -41,7 +41,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
     <>
       {/* Main image */}
       <div
-        className="h-80 flex items-center justify-center relative cursor-zoom-in select-none bg-[#F3F6F9]"
+        className="h-80 flex items-center justify-center relative cursor-zoom-in select-none bg-photo"
         onClick={() => hasImages && openLightbox(active)}
       >
 
@@ -92,9 +92,9 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
               key={i}
               aria-label={`${alt} ${i + 1}`}
               onClick={() => setActive(i)}
-              className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all bg-white ${
+              className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all bg-photo ${
                 active === i
-                  ? 'border-[#27C4A0] opacity-100'
+                  ? 'border-accent opacity-100'
                   : 'border-gray-200 opacity-60 hover:opacity-90 hover:border-gray-400'
               }`}
             >
@@ -107,19 +107,21 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
       {/* Lightbox — rendered via portal to escape parent stacking contexts */}
       {lightbox && createPortal(
         <div
-          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+          // the lightbox is always dark: tokens inside resolve to the dark palette
+          data-theme="dark"
+          className="fixed inset-0 z-[9999] bg-black/95 text-fg backdrop-blur-sm flex flex-col items-center justify-center p-4"
           onClick={() => setLightbox(false)}
         >
           <button
             aria-label={t('close')}
-            className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+            className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-fg/10 hover:bg-fg/15 flex items-center justify-center text-fg transition-colors"
             onClick={(e) => { e.stopPropagation(); setLightbox(false); }}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
 
           {hasMultiple && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-white/60 text-sm">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-muted text-sm">
               {lbIndex + 1} / {images.length}
             </div>
           )}
@@ -129,12 +131,12 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
               <button
                 aria-label={t('prevImage')}
                 onClick={(e) => { e.stopPropagation(); prev(); }}
-                className="absolute -left-2 sm:left-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0 z-10"
+                className="absolute -left-2 sm:left-0 w-10 h-10 bg-fg/10 hover:bg-fg/15 rounded-full flex items-center justify-center text-fg transition-colors flex-shrink-0 z-10"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
               </button>
             )}
-            <div className="relative w-full h-full flex items-center justify-center bg-white/5 rounded-2xl mx-4 overflow-hidden">
+            <div className="relative w-full h-full flex items-center justify-center bg-fg/5 rounded-2xl mx-4 overflow-hidden">
               <Image
                 src={images[lbIndex]}
                 alt={`${alt} ${lbIndex + 1}`}
@@ -148,7 +150,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
               <button
                 aria-label={t('nextImage')}
                 onClick={(e) => { e.stopPropagation(); next(); }}
-                className="absolute -right-2 sm:right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0 z-10"
+                className="absolute -right-2 sm:right-0 w-10 h-10 bg-fg/10 hover:bg-fg/15 rounded-full flex items-center justify-center text-fg transition-colors flex-shrink-0 z-10"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
               </button>
@@ -162,7 +164,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
                   key={i}
                   onClick={(e) => { e.stopPropagation(); setLbIndex(i); }}
                   className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
-                    lbIndex === i ? 'border-[#27C4A0]' : 'border-white/15 opacity-50 hover:opacity-80'
+                    lbIndex === i ? 'border-accent' : 'border-line opacity-50 hover:opacity-80'
                   }`}
                 >
                   <span className="relative block w-full h-full"><Image src={src} alt="" fill sizes="96px" className="object-contain" /></span>

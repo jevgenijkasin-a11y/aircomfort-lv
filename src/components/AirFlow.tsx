@@ -65,7 +65,7 @@ export default function AirFlow() {
             key={i}
             d={s.d}
             fill="none"
-            stroke="#27C4A0"
+            stroke="rgb(var(--accent))"
             strokeWidth="2"
             opacity={s.opacity}
             style={{

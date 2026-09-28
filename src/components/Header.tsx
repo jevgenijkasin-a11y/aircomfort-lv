@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const locales = ['lv', 'ru', 'en'] as const;
 
@@ -31,23 +32,25 @@ export default function Header() {
       className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
         scrolled ? 'top-0' : 'top-8 sm:top-9'
       } ${
+        // Light theme: always a white bar with a hairline. Dark theme: transparent
+        // over the hero until the page scrolls (as before).
         scrolled || menuOpen
-          ? 'bg-[#072D47]/98 backdrop-blur-xl shadow-lg shadow-black/20 border-b border-[#1A6B9A]/20'
-          : 'bg-transparent'
+          ? 'bg-page/95 backdrop-blur-xl border-b border-line shadow-soft dark:shadow-lg dark:shadow-black/20'
+          : 'bg-page border-b border-line dark:bg-transparent dark:border-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 lg:h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#27C4A0] to-[#1A6B9A] flex items-center justify-center shadow-lg shadow-[#27C4A0]/20">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-accent to-logo-blue flex items-center justify-center shadow-lg shadow-glow/20">
               <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
                 <circle cx="12" cy="12" r="2.5" fill="white" stroke="none" />
               </svg>
             </div>
-            <span className="font-syne font-bold text-lg sm:text-2xl lg:text-3xl tracking-tight">
-              Air<span className="text-[#27C4A0]">Comfort</span>
+            <span className="font-heading font-bold text-lg sm:text-2xl lg:text-3xl tracking-tight">
+              Air<span className="text-primary">Comfort</span>
             </span>
           </Link>
 
@@ -57,17 +60,17 @@ export default function Header() {
               <Link
                 key={href}
                 href={href}
-                className="text-base font-medium text-white/65 hover:text-white transition-colors duration-200 relative group"
+                className="text-base font-medium text-muted hover:text-fg transition-colors duration-200 relative group"
               >
                 {label}
-                <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#27C4A0] transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-primary transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
           </nav>
 
           {/* Right: lang + CTA */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center bg-[#0D3D5E]/70 rounded-xl p-1 gap-0.5">
+            <div className="hidden sm:flex items-center bg-surface rounded-xl p-1 gap-0.5">
               {locales.map((lang) => (
                 <Link
                   key={lang}
@@ -75,8 +78,8 @@ export default function Header() {
                   locale={lang}
                   className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all duration-200 ${
                     locale === lang
-                      ? 'bg-[#27C4A0] text-[#072D47]'
-                      : 'text-white/60 hover:text-white'
+                      ? 'bg-primary text-on-primary'
+                      : 'text-muted hover:text-fg'
                   }`}
                 >
                   {lang.toUpperCase()}
@@ -86,15 +89,18 @@ export default function Header() {
 
             <Link
               href="/contacts"
-              className="magnetic hidden sm:flex items-center gap-1.5 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-semibold text-base px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-[#27C4A0]/20 hover:shadow-[#27C4A0]/30"
+              className="magnetic hidden sm:flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-on-primary font-semibold text-base px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-glow/20 hover:shadow-glow/30"
             >
               {t('getQuote')}
             </Link>
 
+            <ThemeToggle />
+
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="lg:hidden p-3 -mr-1 text-white/70 hover:text-white transition-colors"
+              className="lg:hidden w-11 h-11 -mr-1 inline-flex items-center justify-center text-muted hover:text-fg transition-colors"
               aria-label="Menu"
+              aria-expanded={menuOpen}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 {menuOpen ? (
@@ -113,19 +119,19 @@ export default function Header() {
             menuOpen ? 'max-h-96 pb-5' : 'max-h-0'
           }`}
         >
-          <div className="border-t border-[#1A6B9A]/20 pt-4 flex flex-col gap-1">
+          <div className="border-t border-line pt-4 flex flex-col gap-1">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className="px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                className="px-3 py-2.5 text-muted hover:text-fg hover:bg-fg/5 rounded-lg transition-all"
               >
                 {label}
               </Link>
             ))}
-            <div className="mt-3 pt-3 border-t border-[#1A6B9A]/20 flex items-center justify-between px-1">
-              <div className="flex items-center bg-[#0D3D5E]/70 rounded-xl p-1 gap-0.5">
+            <div className="mt-3 pt-3 border-t border-line flex items-center justify-between px-1">
+              <div className="flex items-center bg-surface rounded-xl p-1 gap-0.5">
                 {locales.map((lang) => (
                   <Link
                     key={lang}
@@ -134,8 +140,8 @@ export default function Header() {
                     onClick={() => setMenuOpen(false)}
                     className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
                       locale === lang
-                        ? 'bg-[#27C4A0] text-[#072D47]'
-                        : 'text-white/60 hover:text-white'
+                        ? 'bg-primary text-on-primary'
+                        : 'text-muted hover:text-fg'
                     }`}
                   >
                     {lang.toUpperCase()}
@@ -145,7 +151,7 @@ export default function Header() {
               <Link
                 href="/contacts"
                 onClick={() => setMenuOpen(false)}
-                className="bg-[#27C4A0] text-[#072D47] font-semibold text-sm px-4 py-2 rounded-xl"
+                className="bg-primary text-on-primary font-semibold text-sm px-4 py-2 rounded-xl"
               >
                 {t('getQuote')}
               </Link>

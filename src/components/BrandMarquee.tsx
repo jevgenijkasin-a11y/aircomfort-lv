@@ -7,12 +7,12 @@ export default function BrandMarquee() {
   const quad = [...brands, ...brands, ...brands, ...brands];
 
   return (
-    <section className="py-14 border-y border-[#1A6B9A]/15 overflow-hidden">
+    <section className="py-14 border-y border-line overflow-hidden">
       {/* prefers-reduced-motion: static grid */}
       <div className="motion-reduce-show max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
           {brands.map((b) => (
-            <span key={b} className="font-syne font-bold text-xl text-white/60 tracking-wide">
+            <span key={b} className="font-heading font-bold text-xl text-muted tracking-wide">
               {b}
             </span>
           ))}
@@ -25,7 +25,7 @@ export default function BrandMarquee() {
           {quad.map((b, i) => (
             <span
               key={i}
-              className="font-syne font-bold text-xl text-white/60 hover:text-white transition-colors duration-200 tracking-wide cursor-default select-none px-10"
+              className="font-heading font-bold text-xl text-muted hover:text-fg transition-colors duration-200 tracking-wide cursor-default select-none px-10"
             >
               {b}
             </span>

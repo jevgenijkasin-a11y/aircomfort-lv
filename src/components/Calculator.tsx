@@ -88,18 +88,18 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
     router.push(`/contacts?service=consultation&message=${encodeURIComponent(message)}`);
   };
 
-  const labelCls = 'block text-sm font-medium text-white/60 mb-1.5';
+  const labelCls = 'block text-sm font-medium text-muted mb-1.5';
   const inputCls =
-    'w-full bg-[#0A3658]/80 border border-[#1A6B9A]/30 text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors placeholder-white/20';
+    'w-full bg-surface border border-line text-fg text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-accent/50 transition-colors placeholder-muted';
   const selectCls =
-    'w-full bg-[#0A3658]/80 border border-[#1A6B9A]/30 text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors appearance-none cursor-pointer';
+    'w-full bg-surface border border-line text-fg text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-accent/50 transition-colors appearance-none cursor-pointer';
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Form */}
         <div className="glass-card rounded-2xl p-7">
-          <h2 className="font-syne font-semibold text-lg mb-6 text-[#27C4A0]">{t('step1')}</h2>
+          <h2 className="font-heading font-semibold text-lg mb-6 text-primary">{t('step1')}</h2>
 
           <div className="space-y-5">
             <div>
@@ -123,19 +123,19 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                   onChange={(e) => setRoomType(e.target.value)}
                   className={selectCls}
                 >
-                  <option value="bedroom" style={{ background: '#0A3658' }}>{t('bedroom')}</option>
-                  <option value="living" style={{ background: '#0A3658' }}>{t('living')}</option>
-                  <option value="office" style={{ background: '#0A3658' }}>{t('office')}</option>
-                  <option value="kitchen" style={{ background: '#0A3658' }}>{t('kitchen')}</option>
+                  <option value="bedroom" style={{ background: 'rgb(var(--card))' }}>{t('bedroom')}</option>
+                  <option value="living" style={{ background: 'rgb(var(--card))' }}>{t('living')}</option>
+                  <option value="office" style={{ background: 'rgb(var(--card))' }}>{t('office')}</option>
+                  <option value="kitchen" style={{ background: 'rgb(var(--card))' }}>{t('kitchen')}</option>
                 </select>
-                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/70 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <h2 className="font-syne font-semibold text-lg mt-8 mb-6 text-[#27C4A0]">{t('step2')}</h2>
+          <h2 className="font-heading font-semibold text-lg mt-8 mb-6 text-primary">{t('step2')}</h2>
 
           <div className="space-y-5">
             <div>
@@ -151,8 +151,8 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                     onClick={() => setInsulation(val)}
                     className={`py-2.5 px-2 text-xs font-medium rounded-xl border transition-all ${
                       insulation === val
-                        ? 'bg-[#27C4A0]/15 border-[#27C4A0]/50 text-[#27C4A0]'
-                        : 'bg-[#0A3658]/50 border-[#1A6B9A]/25 text-white/60 hover:text-white hover:border-[#1A6B9A]/50'
+                        ? 'bg-accent/15 border-accent/50 text-primary'
+                        : 'bg-surface border-line text-muted hover:text-fg hover:border-line'
                     }`}
                   >
                     {label}
@@ -185,8 +185,8 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                     onClick={() => setFloor(val)}
                     className={`py-2.5 px-3 text-xs font-medium rounded-xl border transition-all ${
                       floor === val
-                        ? 'bg-[#27C4A0]/15 border-[#27C4A0]/50 text-[#27C4A0]'
-                        : 'bg-[#0A3658]/50 border-[#1A6B9A]/25 text-white/60 hover:text-white hover:border-[#1A6B9A]/50'
+                        ? 'bg-accent/15 border-accent/50 text-primary'
+                        : 'bg-surface border-line text-muted hover:text-fg hover:border-line'
                     }`}
                   >
                     {label}
@@ -199,7 +199,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
           <button
             onClick={handleCalc}
             disabled={!area}
-            className="mt-8 w-full bg-[#27C4A0] hover:bg-[#1fa389] disabled:opacity-40 disabled:cursor-not-allowed text-[#072D47] font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-[#27C4A0]/20 hover:shadow-[#27C4A0]/30 text-base"
+            className="mt-8 w-full bg-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-on-primary font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-glow/20 hover:shadow-glow/30 text-base"
           >
             {t('calculate')}
           </button>
@@ -210,39 +210,39 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
           {result ? (
             <div className="glass-card rounded-2xl p-7">
               <div className="flex items-center gap-3 mb-7">
-                <div className="w-10 h-10 rounded-xl bg-[#27C4A0]/15 border border-[#27C4A0]/30 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[#27C4A0]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="font-syne font-semibold text-lg">{t('resultTitle')}</h3>
+                <h3 className="font-heading font-semibold text-lg">{t('resultTitle')}</h3>
               </div>
 
               {/* Recommended power */}
-              <div className="bg-gradient-to-r from-[#27C4A0]/10 to-transparent border border-[#27C4A0]/20 rounded-xl p-5 mb-5">
-                <p className="text-white/60 text-sm mb-1">{t('recommendedPower')}</p>
-                <p className="font-syne font-bold text-4xl text-[#27C4A0]">{result.powerKw} {t('kw')}</p>
+              <div className="bg-gradient-to-r from-accent/10 to-transparent border border-accent/20 rounded-xl p-5 mb-5">
+                <p className="text-muted text-sm mb-1">{t('recommendedPower')}</p>
+                <p className="font-heading font-bold text-4xl text-primary">{result.powerKw} {t('kw')}</p>
               </div>
 
               {/* Cost breakdown */}
               <div className="space-y-3 mb-5">
-                <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
-                  <span className="text-white/60 text-sm">{t('equipmentCost')}</span>
-                  <span className="font-semibold text-white">
+                <div className="flex justify-between items-center py-3 border-b border-line">
+                  <span className="text-muted text-sm">{t('equipmentCost')}</span>
+                  <span className="font-semibold text-fg">
                     {result.equipMin > 0
                       ? `${t('from')} ${result.equipMin.toLocaleString('lv-LV')} €`
                       : t('priceOnRequest')}
                   </span>
                 </div>
-                <div className="flex justify-between items-center py-3 border-b border-[#1A6B9A]/15">
-                  <span className="text-white/60 text-sm">{t('installationCost')}</span>
-                  <span className="font-semibold text-white">
+                <div className="flex justify-between items-center py-3 border-b border-line">
+                  <span className="text-muted text-sm">{t('installationCost')}</span>
+                  <span className="font-semibold text-fg">
                     {starred(`${t('from')} ${result.installMin} €*`)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-3">
-                  <span className="font-syne font-semibold">{t('totalCost')}</span>
-                  <span className="font-syne font-bold text-xl text-[#27C4A0]">
+                  <span className="font-heading font-semibold">{t('totalCost')}</span>
+                  <span className="font-heading font-bold text-xl text-primary">
                     {result.equipMin > 0
                       ? `${t('from')} ${(result.equipMin + result.installMin).toLocaleString('lv-LV')} €`
                       : t('priceOnRequest')}
@@ -252,7 +252,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
 
               <button
                 onClick={handleGetOffer}
-                className="w-full flex items-center justify-center gap-2 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-[#27C4A0]/20 text-base"
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-on-primary font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-glow/20 text-base"
               >
                 {t('getOffer')}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -260,20 +260,20 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
                 </svg>
               </button>
 
-              <p className="text-white/60 text-xs mt-4 leading-relaxed">{starred(tp('installNote'))}</p>
+              <p className="text-muted text-xs mt-4 leading-relaxed">{starred(tp('installNote'))}</p>
               {/* The '*' belongs to the installation note above; the general disclaimer gets none */}
-              <p className="text-white/60 text-xs mt-1 leading-relaxed">{t('disclaimer').replace(/^\*\s*/, '')}</p>
+              <p className="text-muted text-xs mt-1 leading-relaxed">{t('disclaimer').replace(/^\*\s*/, '')}</p>
             </div>
           ) : (
             <div className="glass-card rounded-2xl p-10 text-center flex flex-col items-center justify-center min-h-[360px]">
-              <div className="w-16 h-16 rounded-2xl bg-[#1A6B9A]/15 border border-[#1A6B9A]/25 flex items-center justify-center mb-5">
-                <svg viewBox="0 0 24 24" className="w-8 h-8 text-[#1A6B9A]" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <div className="w-16 h-16 rounded-2xl bg-cool/15 border border-line flex items-center justify-center mb-5">
+                <svg viewBox="0 0 24 24" className="w-8 h-8 text-muted" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path strokeLinecap="round" d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
                   <circle cx="12" cy="12" r="2.5" />
                 </svg>
               </div>
-              <p className="font-syne font-semibold text-white/60 mb-1">{t('resultTitle')}</p>
-              <p className="text-sm text-white/60">{t('areaPlaceholder')}</p>
+              <p className="font-heading font-semibold text-muted mb-1">{t('resultTitle')}</p>
+              <p className="text-sm text-muted">{t('areaPlaceholder')}</p>
             </div>
           )}
         </div>
@@ -282,7 +282,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
       {/* Suitable catalogue models (3–6), cheapest first */}
       {result && result.models.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-syne font-semibold text-xl mb-6">{SUITABLE[L]} — {result.powerKw} {t('kw')}</h2>
+          <h2 className="font-heading font-semibold text-xl mb-6">{SUITABLE[L]} — {result.powerKw} {t('kw')}</h2>
           <ProductGrid products={result.models.slice(0, 6)} locale={locale} installFrom={installFrom} />
         </section>
       )}

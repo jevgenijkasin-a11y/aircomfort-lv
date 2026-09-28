@@ -6,7 +6,7 @@ function StarRating({ count }: { count: number }) {
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <svg key={i} className={`w-4 h-4 ${i <= count ? 'text-[#00C2E0]' : 'text-white/15'}`} viewBox="0 0 24 24" fill="currentColor">
+        <svg key={i} className={`w-4 h-4 ${i <= count ? 'text-cool' : 'text-muted/70'}`} viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ))}
@@ -48,25 +48,25 @@ export default async function Reviews() {
 
   return (
     <section className="section-padding relative overflow-hidden">
-      <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full bg-[#1A6FF4]/6 blur-[80px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full bg-cool/6 blur-[80px] pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-12">
-          <h2 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{t('title')}</h2>
-          <p className="text-white/60 text-base">{t('subtitle')}</p>
+          <h2 className="font-heading font-bold text-3xl sm:text-4xl mb-3">{t('title')}</h2>
+          <p className="text-muted text-base">{t('subtitle')}</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((r) => (
             <div key={r.id} className="glass-card rounded-2xl p-6 flex flex-col gap-4">
               <StarRating count={r.rating} />
-              <p className="text-white/70 text-sm leading-relaxed flex-1">&ldquo;{r.text}&rdquo;</p>
-              <div className="flex items-center gap-3 pt-3 border-t border-[#1A6B9A]/20">
-                <div className="w-9 h-9 rounded-full bg-[#1A6FF4]/20 border border-[#1A6FF4]/30 flex items-center justify-center text-[#00C2E0] text-xs font-bold flex-shrink-0">
+              <p className="text-muted text-sm leading-relaxed flex-1">&ldquo;{r.text}&rdquo;</p>
+              <div className="flex items-center gap-3 pt-3 border-t border-line">
+                <div className="w-9 h-9 rounded-full bg-cool/10 border border-cool/30 flex items-center justify-center text-cool text-xs font-bold flex-shrink-0">
                   {getInitials(r.author_name)}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">{r.author_name}</p>
+                  <p className="text-sm font-semibold text-fg">{r.author_name}</p>
                   {r.dateStr && (
-                    <p className="text-xs text-white/60">
+                    <p className="text-xs text-muted">
                       {r.fromDb
                         ? new Date(r.dateStr).toLocaleDateString(locale === 'ru' ? 'ru-RU' : locale === 'lv' ? 'lv-LV' : 'en-GB', { month: 'long', year: 'numeric' })
                         : r.dateStr}

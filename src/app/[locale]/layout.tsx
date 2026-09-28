@@ -12,14 +12,13 @@ import ScrollToTop from '@/components/ScrollToTop';
 import CookieBanner from '@/components/CookieBanner';
 import SiteAnimations from '@/components/SiteAnimations';
 import { localizedAlternates } from '@/lib/seo';
+import { THEME_COLOR, THEME_SCRIPT } from '@/lib/theme';
 import '../globals.css';
 
-// Headings: Manrope (has Cyrillic, unlike the previous Syne). Bold headings
-// render at 800 (see globals.css). The CSS variable keeps the historical name
-// --font-syne so the existing `font-syne` utility classes keep working.
-const syne = Manrope({
+// Headings: Manrope (`font-heading`), bold headings render at 800 (globals.css).
+const manrope = Manrope({
   subsets: ['latin', 'latin-ext', 'cyrillic'],
-  variable: '--font-syne',
+  variable: '--font-manrope',
   weight: ['600', '700', '800'],
   display: 'swap',
 });
@@ -109,8 +108,13 @@ export default async function LocaleLayout({
   const messages = (await import(`@/messages/${locale}.json`)).default;
 
   return (
-    <html lang={locale} className={`${syne.variable} ${inter.variable}`}>
-      <body className={`${inter.className} bg-[#0A1628] text-white font-sans antialiased`}>
+    // data-theme is set by THEME_SCRIPT before hydration → suppress the attribute mismatch warning
+    <html lang={locale} className={`${manrope.variable} ${inter.variable}`} suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content={THEME_COLOR.light} suppressHydrationWarning />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body className={`${inter.className} bg-page text-fg font-sans antialiased`}>
         <div id="scroll-progress-bar" aria-hidden="true" />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
