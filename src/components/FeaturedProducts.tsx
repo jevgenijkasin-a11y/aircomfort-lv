@@ -29,14 +29,14 @@ export default async function FeaturedProducts() {
 
   return (
     <section className="section-padding relative overflow-hidden">
-      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-[#1A6B9A]/8 blur-[80px]" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-cool/8 blur-[80px]" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="reveal flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
-            <h2 className="font-syne font-bold text-3xl sm:text-4xl mb-2">{t('featured')}</h2>
-            <p className="text-white/60">{t('featuredSubtitle')}</p>
+            <h2 className="font-heading font-bold text-3xl sm:text-4xl mb-2">{t('featured')}</h2>
+            <p className="text-muted">{t('featuredSubtitle')}</p>
           </div>
-          <Link href="/catalog" className="inline-flex items-center gap-2 text-[#27C4A0] hover:text-white text-sm font-semibold transition-colors group flex-shrink-0">
+          <Link href="/catalog" className="inline-flex items-center gap-2 text-primary hover:text-fg text-sm font-semibold transition-colors group flex-shrink-0">
             {t('viewAll')}
             <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
@@ -50,7 +50,7 @@ export default async function FeaturedProducts() {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-xs text-white/60">{starred(t('installNote'))}</p>
+        <p className="mt-4 text-xs text-muted">{starred(t('installNote'))}</p>
       </div>
     </section>
   );

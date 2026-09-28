@@ -47,12 +47,20 @@ function IndustrialIcon() {
   );
 }
 
-const CAT_META = [
-  { tKey: 'home' as const, sk: 'cat_home', slug: 'home', Icon: HomeIcon, accent: '#27C4A0' },
-  { tKey: 'heatPump' as const, sk: 'cat_hp', slug: 'heat_pump', Icon: HeatPumpIcon, accent: '#3B82F6' },
-  { tKey: 'commercial' as const, sk: 'cat_comm', slug: 'commercial', Icon: CommercialIcon, accent: '#F59E0B' },
-  { tKey: 'commercialHeatPump' as const, sk: 'cat_ihp', slug: 'commercial_heat_pump', Icon: IndustrialIcon, accent: '#8B5CF6' },
-] as const;
+// Card tones from theme tokens (full class names so Tailwind keeps them); AA in both themes
+const TONE = {
+  primary: { icon: 'bg-primary/10 border-primary/30 text-primary', btn: 'text-primary border-primary/40' },
+  cool: { icon: 'bg-cool/10 border-cool/30 text-cool', btn: 'text-cool border-cool/40' },
+  heat: { icon: 'bg-heat/10 border-heat/30 text-heat', btn: 'text-heat border-heat/40' },
+} as const;
+type Tone = keyof typeof TONE;
+
+const CAT_META: { tKey: 'home' | 'heatPump' | 'commercial' | 'commercialHeatPump'; sk: string; slug: string; Icon: () => JSX.Element; accent: Tone }[] = [
+  { tKey: 'home', sk: 'cat_home', slug: 'home', Icon: HomeIcon, accent: 'primary' },
+  { tKey: 'heatPump', sk: 'cat_hp', slug: 'heat_pump', Icon: HeatPumpIcon, accent: 'heat' },
+  { tKey: 'commercial', sk: 'cat_comm', slug: 'commercial', Icon: CommercialIcon, accent: 'cool' },
+  { tKey: 'commercialHeatPump', sk: 'cat_ihp', slug: 'commercial_heat_pump', Icon: IndustrialIcon, accent: 'heat' },
+];
 
 export default async function Categories() {
   const [t, locale, settings] = await Promise.all([
@@ -64,7 +72,7 @@ export default async function Categories() {
   const title = settings[`cats_title_${locale}`] || t('title');
   const subtitle = settings[`cats_subtitle_${locale}`] || t('subtitle');
 
-  const cards: { slug: string; href: string; Icon: () => JSX.Element; image?: string; accent: string; name: string; desc: string; explore: string }[] = CAT_META.map(({ tKey, sk, slug, Icon, accent }) => ({
+  const cards: { slug: string; href: string; Icon: () => JSX.Element; image?: string; accent: Tone; name: string; desc: string; explore: string }[] = CAT_META.map(({ tKey, sk, slug, Icon, accent }) => ({
     slug,
     href: `/catalog?category=${slug}`,
     Icon,
@@ -85,7 +93,7 @@ export default async function Categories() {
       href: `/catalog/category/${c.slug}`,
       Icon: FanCoilIcon,
       image: c.image_url || undefined,
-      accent: '#06B6D4',
+      accent: 'cool',
       name: catName(c, l),
       desc: c[`seo_description_${l}`] || c[`seo_intro_${l}`].split(/\n/)[0] || '',
       explore: t('explore'),
@@ -94,12 +102,12 @@ export default async function Categories() {
 
   return (
     <section className="section-padding relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#1A6B9A]/40 to-transparent" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-line to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
-          <h2 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{title}</h2>
-          <p className="text-white/60 text-lg">{subtitle}</p>
+          <h2 className="font-heading font-bold text-3xl sm:text-4xl mb-3">{title}</h2>
+          <p className="text-muted text-lg">{subtitle}</p>
         </div>
 
         <div className={`reveal-grid grid grid-cols-1 sm:grid-cols-2 gap-6 ${cards.length > 4 ? 'lg:grid-cols-3 xl:grid-cols-5' : 'lg:grid-cols-4'}`}>
@@ -110,20 +118,14 @@ export default async function Categories() {
               className="glass-card glass-card-hover rounded-2xl p-7 group flex flex-col h-full"
             >
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 border overflow-hidden relative"
-                style={{
-                  background: `linear-gradient(135deg, ${accent}20, ${accent}08)`,
-                  borderColor: `${accent}30`,
-                  color: accent,
-                }}
+                className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 border overflow-hidden relative ${TONE[accent].icon}`}
               >
                 {image ? <Image src={image} alt="" fill sizes="48px" className="object-cover" /> : <Icon />}
               </div>
-              <h3 className="font-syne font-semibold text-lg mb-2">{name}</h3>
-              <p className="text-white/60 text-sm leading-relaxed flex-1">{desc}</p>
+              <h3 className="font-heading font-semibold text-lg mb-2">{name}</h3>
+              <p className="text-muted text-sm leading-relaxed flex-1">{desc}</p>
               <div
-                className="mt-5 flex items-center justify-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl border transition-all group-hover:gap-3"
-                style={{ color: accent, borderColor: `${accent}40`, background: `${accent}12` }}
+                className={`mt-5 flex items-center justify-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl border transition-all group-hover:gap-3 ${TONE[accent].btn}`}
               >
                 {explore}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

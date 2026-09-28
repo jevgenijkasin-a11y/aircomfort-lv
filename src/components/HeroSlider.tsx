@@ -48,7 +48,7 @@ export default function HeroSlider({ slides }: Props) {
               onClick={() => setCurrent(i)}
               aria-label={`Slide ${i + 1}`}
               className={`h-2 rounded-full transition-all duration-300 ${
-                i === current ? 'bg-[#27C4A0] w-8' : 'bg-white/30 hover:bg-white/60 w-2'
+                i === current ? 'bg-accent w-8' : 'bg-fg/25 hover:bg-fg/60 w-2'
               }`}
             />
           ))}

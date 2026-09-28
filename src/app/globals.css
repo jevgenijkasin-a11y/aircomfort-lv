@@ -2,15 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-primary: #0A1628;
-  --color-accent: #27C4A0;
-  --color-accent-dark: #1fa389;
+/* ── THEME TOKENS ───────────────────────────────────────────────────────
+   Values are "R G B" channels so Tailwind can add opacity (tailwind.config).
+   Light is the default; [data-theme="dark"] is set before first paint by the
+   inline script in the locale layout (saved choice → OS setting → light). */
+/* :root = light default; [data-theme='light'] also lets a block inside the dark
+   theme (e.g. the always-light product photo plate) use the light palette */
+:root, [data-theme='light'] {
+  --bg: 255 255 255;
+  --surface: 244 247 250;
+  --card: 255 255 255;
+  --border: 227 232 238;
+  --border-strong: 201 211 221;
+  --text: 15 27 45;
+  --text-muted: 91 103 118;
+  --primary: 11 122 99;
+  --primary-hover: 9 102 82;
+  --on-primary: 255 255 255;
+  --accent: 39 196 160;
+  --tint: 230 247 242;
+  --cool: 11 107 203;
+  --heat: 194 81 28;
+  --energy-bg: 227 245 233;
+  --energy-fg: 29 107 58;
+  --photo-bg: 248 250 252;
+  /* teal glows slightly softer on white than on navy */
+  --glow-k: 0.8;
+  --grad-from: 11 107 203;
+  --grad-to: 11 122 99;
+  --shadow-soft: 0 1px 2px rgba(15, 27, 45, 0.06), 0 8px 24px rgba(15, 27, 45, 0.06);
+  --color-accent-glow: rgba(39, 196, 160, 0.28);
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: 10 22 40;
+  --surface: 14 30 53;
+  --card: 17 36 64;
+  --border: 30 51 82;
+  --border-strong: 52 73 106;
+  --text: 255 255 255;
+  --text-muted: 169 182 200;
+  --primary: 39 196 160;
+  --primary-hover: 58 212 176;
+  --on-primary: 10 22 40;
+  --accent: 39 196 160;
+  --tint: 18 51 47;
+  --cool: 127 182 240;
+  --heat: 242 161 114;
+  --energy-bg: 23 58 38;
+  --energy-fg: 125 219 158;
+  --photo-bg: 244 247 250;
+  --glow-k: 1;
+  --grad-from: 0 194 224;
+  --grad-to: 39 196 160;
+  --shadow-soft: none;
   --color-accent-glow: rgba(39, 196, 160, 0.35);
-  --color-highlight: #00C2E0;
-  --color-surface: #0D2137;
-  --color-border: rgba(26, 111, 244, 0.2);
-  --color-link: #1A6FF4;
+  color-scheme: dark;
 }
 
 html {
@@ -18,8 +66,8 @@ html {
 }
 
 body {
-  background-color: var(--color-primary);
-  color: white;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--text));
   font-family: var(--font-inter), sans-serif;
 }
 
@@ -30,7 +78,7 @@ body {
   left: 0;
   height: 3px;
   width: 0%;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-highlight));
+  background: linear-gradient(90deg, rgb(var(--accent)), #00C2E0);
   z-index: 9999;
   transition: width 0.1s linear;
   pointer-events: none;
@@ -41,11 +89,7 @@ body {
 }
 
 /* ── SCROLL REVEAL (3D depth, driven by GSAP ScrollTrigger) ─────────────
-   GSAP animates the wrapper (.reveal-3d); the inner card keeps its own
-   :hover transform, so the two never fight. Before JS runs we hide the
-   wrapper to prevent a flash; .gsap-ready flips it to visible if GSAP
-   never initializes (reduced motion / JS disabled). */
-/* Cards are visible by default. JS adds .reveal-init the moment it takes
+   Cards are visible by default. JS adds .reveal-init the moment it takes
    over, which hides them so GSAP can animate them in. If JS never runs or
    throws before init, the cards simply stay visible (no blank sections). */
 @media (prefers-reduced-motion: no-preference) {
@@ -55,11 +99,10 @@ body {
 /* Parent needs perspective for the rotateX to read as depth */
 .reveal-grid { perspective: 900px; }
 
-/* While a card is animating in, glow its direct card child so the motion
-   reads against the dark background. Fades out after the reveal. */
+/* While a card is animating in, glow its direct card child. Fades out after the reveal. */
 .reveal-3d.revealing > * {
-  border-color: rgba(39, 196, 160, 0.55) !important;
-  box-shadow: 0 12px 40px var(--color-accent-glow, rgba(39, 196, 160, 0.25));
+  border-color: rgb(var(--accent) / calc(0.55 * var(--glow-k))) !important;
+  box-shadow: 0 12px 40px var(--color-accent-glow);
   transition: border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
@@ -71,19 +114,7 @@ body {
   .product-card-hover:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 40px var(--color-accent-glow);
-    border-color: rgba(39, 196, 160, 0.35);
-  }
-}
-
-/* ── CATALOG CARD HOVER (white cards, neutral shadow) ──────────────── */
-@media (prefers-reduced-motion: no-preference) {
-  .catalog-card-hover {
-    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
-  }
-  .catalog-card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
-    border-color: #27C4A0;
+    border-color: rgb(var(--accent) / calc(0.35 * var(--glow-k) + 0.15));
   }
 }
 
@@ -95,17 +126,19 @@ body {
 }
 
 @layer utilities {
+  /* teal gradient in dark; readable blue→green on white (tokens per theme) */
   .gradient-text {
-    background: linear-gradient(135deg, var(--color-highlight), var(--color-accent));
+    background: linear-gradient(135deg, rgb(var(--grad-from)), rgb(var(--grad-to)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .glass-card {
-    background: rgba(13, 33, 55, 0.6);
-    border: 1px solid rgba(26, 111, 244, 0.2);
+    background: rgb(var(--card) / 0.85);
+    border: 1px solid rgb(var(--border));
     backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-soft);
   }
 
   .glass-card-hover {
@@ -113,8 +146,8 @@ body {
   }
 
   .glass-card-hover:hover {
-    background: rgba(13, 33, 55, 0.8);
-    border-color: rgba(0, 194, 224, 0.3);
+    background: rgb(var(--card));
+    border-color: rgb(var(--accent) / 0.4);
     transform: translateY(-2px);
   }
 
@@ -126,7 +159,7 @@ body {
 
 @layer base {
   h1, h2, h3, h4 {
-    font-family: var(--font-syne), sans-serif;
+    font-family: var(--font-manrope), sans-serif;
   }
 
   * {
@@ -138,16 +171,16 @@ body {
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--color-primary);
+    background: rgb(var(--bg));
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-accent);
+    background: rgb(var(--accent));
     border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-highlight);
+    background: rgb(var(--primary));
   }
 }
 
@@ -176,7 +209,6 @@ body {
   .airflow-layer { display: none !important; }
 }
 
-
 /* ── Room for the floating "Contact" button ──────────────────────────────
    On mobile the FAB (56px + 48px gap) sits bottom-right; pad the page so
    the last content (footer, CTAs) can always scroll clear of it. */
@@ -185,4 +217,11 @@ body {
 }
 
 /* Headings font (Manrope): bold headings use the 800 weight */
-.font-syne.font-bold { font-weight: 800; }
+.font-heading.font-bold { font-weight: 800; }
+
+/* Theme switch: no colour transitions on first paint / while switching */
+.theme-switching, .theme-switching * { transition: none !important; }
+
+/* Primary CTA teal glow (half strength in the light theme via --glow-k) */
+.cta-glow { box-shadow: 0 8px 40px rgb(39 196 160 / calc(0.5 * var(--glow-k))); }
+.cta-glow:hover { box-shadow: 0 12px 50px rgb(39 196 160 / calc(0.65 * var(--glow-k))); }

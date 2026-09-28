@@ -25,16 +25,17 @@ const SYSTEM_LABEL: Record<string, string> = {
   home: 'catHome', heat_pump: 'catHeatPump', commercial: 'catCommercial', commercial_heat_pump: 'catCommercialHeatPump',
 };
 
-const selectCls = 'w-full bg-[#0A3658]/80 border border-[#1A6B9A]/30 text-white text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors appearance-none cursor-pointer';
-const opt = { background: '#0A3658' };
+const selectCls = 'w-full bg-surface border border-line text-fg text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-accent/50 transition-colors appearance-none cursor-pointer';
+// native <option> popups need an explicit themed background
+const opt = { background: 'rgb(var(--card))' };
 
 function Field({ id, label, children }: { id: string; label: string; children: ReactNode }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-xs text-white/60 mb-1.5 font-medium">{label}</label>
+      <label htmlFor={id} className="block text-xs text-muted mb-1.5 font-medium">{label}</label>
       <div className="relative">
         {children}
-        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
+        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/70 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
       </div>
     </div>
   );
@@ -48,7 +49,7 @@ export function ProductGrid({ products, locale, installFrom = 250 }: { products:
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {products.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
       </div>
-      <p className="mt-4 text-xs text-white/60">{starred(tp('installNote'))}</p>
+      <p className="mt-4 text-xs text-muted">{starred(tp('installNote'))}</p>
     </>
   );
 }
@@ -86,9 +87,9 @@ export default function CatalogClient(props: Props) {
       onReset={reset}
       fallback={(retry) => (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center" role="alert">
-          <p className="text-white text-lg font-syne">{t('errorTitle')}</p>
-          <p className="text-white/60 text-sm mt-1">{t('errorHint')}</p>
-          <button onClick={retry} className="mt-5 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold text-sm px-5 py-2.5 rounded-xl transition-colors">
+          <p className="text-fg text-lg font-heading">{t('errorTitle')}</p>
+          <p className="text-muted text-sm mt-1">{t('errorHint')}</p>
+          <button onClick={retry} className="mt-5 bg-primary hover:bg-primary-hover text-on-primary font-bold text-sm px-5 py-2.5 rounded-xl transition-colors">
             {t('resetFilters')}
           </button>
         </div>
@@ -178,7 +179,7 @@ function CatalogInner({
       <div className="glass-card rounded-2xl p-5 mb-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="col-span-2 sm:col-span-4 relative">
           <label htmlFor="cat-search" className="sr-only">{TXT.search[L]}</label>
-          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <input
             id="cat-search"
             type="search"
@@ -186,7 +187,7 @@ function CatalogInner({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={TXT.search[L]}
             autoComplete="off"
-            className="w-full bg-[#0A3658]/80 border border-[#1A6B9A]/30 text-white text-sm pl-10 pr-3.5 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors placeholder-white/50"
+            className="w-full bg-surface border border-line text-fg text-sm pl-10 pr-3.5 py-2.5 rounded-xl focus:outline-none focus:border-accent/50 transition-colors placeholder-muted"
           />
         </div>
 
@@ -255,9 +256,9 @@ function CatalogInner({
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <p className="text-white/60 text-sm"><span className="text-white font-semibold">{filtered.length}</span> {t('results')}</p>
+        <p className="text-muted text-sm"><span className="text-fg font-semibold">{filtered.length}</span> {t('results')}</p>
         {(hasFilters(filters) || query) && (
-          <button onClick={resetAll} className="text-[#27C4A0] text-sm hover:text-white transition-colors flex items-center gap-1.5">
+          <button onClick={resetAll} className="text-primary text-sm hover:text-fg transition-colors flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
             {t('resetFilters')}
           </button>
@@ -266,35 +267,35 @@ function CatalogInner({
 
       {filtered.length === 0 ? (
         <div className="text-center py-20">
-          <div className="w-16 h-16 rounded-2xl bg-[#0A3658] border border-[#1A6B9A]/20 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <div className="w-16 h-16 rounded-2xl bg-surface border border-line flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </div>
-          <p className="text-white/60 text-lg font-syne">{t('noResults')}</p>
-          <p className="text-white/60 text-sm mt-1">{t('noResultsHint')}</p>
-          <button onClick={resetAll} className="mt-5 text-[#27C4A0] text-sm font-semibold hover:text-white transition-colors">{t('resetFilters')}</button>
+          <p className="text-muted text-lg font-heading">{t('noResults')}</p>
+          <p className="text-muted text-sm mt-1">{t('noResultsHint')}</p>
+          <button onClick={resetAll} className="mt-5 text-primary text-sm font-semibold hover:text-fg transition-colors">{t('resetFilters')}</button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {shown.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
         </div>
       )}
-      {filtered.length > 0 && <p className="mt-4 text-xs text-white/60">{starred(tp('installNote'))}</p>}
+      {filtered.length > 0 && <p className="mt-4 text-xs text-muted">{starred(tp('installNote'))}</p>}
 
       {/* Pagination — real <a href> links that keep the active filters */}
       {totalPages > 1 && (
         <nav aria-label={PG.label[L]} className="mt-10 flex flex-wrap items-center justify-center gap-2">
           {curPage > 1 && (
-            <Link href={pageHref(curPage - 1) as any} rel="prev" className="px-3.5 py-2 rounded-xl text-sm text-white/70 bg-[#0A3658]/60 border border-[#1A6B9A]/30 hover:border-[#27C4A0]/50 hover:text-white transition-colors">← {PG.prev[L]}</Link>
+            <Link href={pageHref(curPage - 1) as any} rel="prev" className="px-3.5 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">← {PG.prev[L]}</Link>
           )}
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
             n === curPage ? (
-              <span key={n} aria-current="page" className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm font-bold bg-[#27C4A0] text-[#072D47]">{n}</span>
+              <span key={n} aria-current="page" className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm font-bold bg-primary text-on-primary">{n}</span>
             ) : (
-              <Link key={n} href={pageHref(n) as any} className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm text-white/70 bg-[#0A3658]/60 border border-[#1A6B9A]/30 hover:border-[#27C4A0]/50 hover:text-white transition-colors">{n}</Link>
+              <Link key={n} href={pageHref(n) as any} className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">{n}</Link>
             )
           ))}
           {curPage < totalPages && (
-            <Link href={pageHref(curPage + 1) as any} rel="next" className="px-3.5 py-2 rounded-xl text-sm text-white/70 bg-[#0A3658]/60 border border-[#1A6B9A]/30 hover:border-[#27C4A0]/50 hover:text-white transition-colors">{PG.next[L]} →</Link>
+            <Link href={pageHref(curPage + 1) as any} rel="next" className="px-3.5 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">{PG.next[L]} →</Link>
           )}
         </nav>
       )}

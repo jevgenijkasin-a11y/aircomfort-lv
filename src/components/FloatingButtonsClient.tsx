@@ -66,9 +66,9 @@ export default function FloatingButtonsClient({ whatsapp, telegram, phone }: Pro
   }, []);
 
   const items = [
-    whatsapp && { href: `https://wa.me/${whatsapp.replace(/^\+/, '')}`, label: 'WhatsApp', bg: 'bg-[#25D366]', path: WA_PATH, external: true },
-    telegram && { href: `https://t.me/${telegram}`, label: 'Telegram', bg: 'bg-[#229ED9]', path: TG_PATH, external: true },
-    phone && { href: `tel:${phone.replace(/\s/g, '')}`, label: `${LBL.call[l]} ${phone}`, bg: 'bg-[#1A6B9A]', path: null, external: false },
+    whatsapp && { href: `https://wa.me/${whatsapp.replace(/^\+/, '')}`, label: 'WhatsApp', bg: 'bg-whatsapp text-white', path: WA_PATH, external: true },
+    telegram && { href: `https://t.me/${telegram}`, label: 'Telegram', bg: 'bg-telegram text-white', path: TG_PATH, external: true },
+    phone && { href: `tel:${phone.replace(/\s/g, '')}`, label: `${LBL.call[l]} ${phone}`, bg: 'bg-primary text-on-primary', path: null, external: false },
   ].filter(Boolean) as { href: string; label: string; bg: string; path: string | null; external: boolean }[];
 
   if (!items.length) return null;
@@ -90,14 +90,14 @@ export default function FloatingButtonsClient({ whatsapp, telegram, phone }: Pro
                 href={it.href}
                 {...(it.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 pl-4 pr-1.5 py-1.5 rounded-full bg-[#072D47] border border-white/15 shadow-xl text-sm font-semibold text-white hover:border-[#27C4A0]/60 transition-colors"
+                className="flex items-center gap-3 pl-4 pr-1.5 py-1.5 rounded-full bg-card border border-line shadow-xl text-sm font-semibold text-fg hover:border-accent/60 transition-colors"
               >
                 {it.label}
                 <span className={`w-10 h-10 rounded-full ${it.bg} flex items-center justify-center`}>
                   {it.path ? (
-                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d={it.path} /></svg>
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d={it.path} /></svg>
                   ) : (
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   )}
@@ -115,7 +115,7 @@ export default function FloatingButtonsClient({ whatsapp, telegram, phone }: Pro
         aria-expanded={open}
         aria-controls={menuId}
         aria-label={open ? LBL.close[l] : LBL.contact[l]}
-        className="h-14 pl-4 pr-5 rounded-full bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold text-sm shadow-lg shadow-black/30 flex items-center gap-2 transition-colors"
+        className="h-14 pl-4 pr-5 rounded-full bg-primary hover:bg-primary-hover text-on-primary font-bold text-sm shadow-lg shadow-black/30 flex items-center gap-2 transition-colors"
       >
         {open ? (
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>

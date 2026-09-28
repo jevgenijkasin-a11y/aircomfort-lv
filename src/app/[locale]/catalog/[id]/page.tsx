@@ -52,9 +52,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const energyColors: Record<string, string> = {
-  'A+++': 'text-[#27C4A0] border-[#27C4A0]/30 bg-[#27C4A0]/10',
-  'A++': 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10',
-  'A+': 'text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10',
+  'A+++': 'text-primary border-accent/30 bg-accent/10',
+  'A++': 'text-energy-fg border-energy-fg/30 bg-energy-bg',
+  'A+': 'text-energy-fg border-energy-fg/30 bg-energy-bg',
 };
 
 /** Prefilled contact-form message. Uses fullName() so the brand is not duplicated
@@ -152,7 +152,7 @@ export default async function ProductPage({ params }: Props) {
   const name = productName(p, locale);
   const features = productFeatures(p, locale);
   const images = productImages(p);
-  const energyCls = energyColors[p.energy_class] ?? 'text-white/60 border-white/20 bg-white/5';
+  const energyCls = energyColors[p.energy_class] ?? 'text-muted border-line bg-fg/5';
 
   const contactMessage = buildContactMessage(p, name, locale, installFrom);
   const contactHref = `/contacts?service=install&message=${encodeURIComponent(contactMessage)}`;
@@ -261,31 +261,31 @@ export default async function ProductPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(productJsonLd(p, locale, pageUrl, metaDescription)) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumbJsonLd(crumbs.map(({ name: n, url }) => ({ name: n, url })))) }} />
       {/* Header */}
-      <div className="pt-36 pb-6 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+      <div className="pt-36 pb-6 bg-gradient-to-b from-surface to-page relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, rgb(var(--text)) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <BackLink label={t('backToCatalog')} />
           <nav aria-label="Breadcrumb" className="mb-3">
-            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-white/60">
+            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
               {crumbs.map((c, i) => (
                 <li key={i} className="flex items-center gap-1.5">
                   {c.href ? (
-                    <Link href={c.href as any} className="hover:text-[#27C4A0] transition-colors">{c.name}</Link>
+                    <Link href={c.href as any} className="hover:text-primary transition-colors">{c.name}</Link>
                   ) : (
-                    <span className="text-white/70" aria-current="page">{c.name}</span>
+                    <span className="text-muted" aria-current="page">{c.name}</span>
                   )}
                   {i < crumbs.length - 1 && <span aria-hidden="true">/</span>}
                 </li>
               ))}
             </ol>
           </nav>
-          <p className="text-[#27C4A0] text-xs font-semibold uppercase tracking-widest mb-1">{p.brand}</p>
-          <h1 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{name}</h1>
+          <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-1">{p.brand}</p>
+          <h1 className="font-heading font-bold text-3xl sm:text-4xl mb-3">{name}</h1>
           {(p.is_hit || p.is_promo || !!p.discount_percent) && (
             <div className="flex flex-wrap gap-2">
-              {p.is_hit && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#f97316] text-white shadow-md">{tp('badgeHit')}</span>}
-              {p.is_promo && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#e91e8c] text-white shadow-md">{tp('badgePromo')}</span>}
-              {!!p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-[#eab308] text-black shadow-md">−{p.discount_percent}%</span>}
+              {p.is_hit && <span className="text-sm font-bold px-3 py-1 rounded-full bg-hit text-white shadow-md">{tp('badgeHit')}</span>}
+              {p.is_promo && <span className="text-sm font-bold px-3 py-1 rounded-full bg-promo text-white shadow-md">{tp('badgePromo')}</span>}
+              {!!p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-sale text-black shadow-md">−{p.discount_percent}%</span>}
             </div>
           )}
         </div>
@@ -303,22 +303,22 @@ export default async function ProductPage({ params }: Props) {
               brandColor={p.brand_color}
               brand={p.brand}
             />
-            {p.energy_class && <div className={`absolute top-4 right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>}
+            {p.energy_class && <div data-theme="light" className={`absolute top-4 right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>}
             {(p.is_hit || p.is_promo || !!p.discount_percent) && (
               <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                {p.is_hit && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#f97316] text-white shadow-sm">{tp('badgeHit')}</span>}
-                {p.is_promo && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#e91e8c] text-white shadow-sm">{tp('badgePromo')}</span>}
-                {!!p.discount_percent && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#eab308] text-black shadow-sm">−{p.discount_percent}%</span>}
+                {p.is_hit && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-hit text-white shadow-sm">{tp('badgeHit')}</span>}
+                {p.is_promo && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-promo text-white shadow-sm">{tp('badgePromo')}</span>}
+                {!!p.discount_percent && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-sale text-black shadow-sm">−{p.discount_percent}%</span>}
               </div>
             )}
 
             {/* Features */}
             {features.length > 0 && (
-              <div className="p-6 border-t border-[#1A6B9A]/15">
-                <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3">{t('features')}</p>
+              <div className="p-6 border-t border-line">
+                <p className="text-muted text-xs font-semibold uppercase tracking-widest mb-3">{t('features')}</p>
                 <div className="flex flex-wrap gap-2">
                   {features.map((f) => (
-                    <span key={f} className="text-sm text-white/70 bg-[#0A3658] border border-[#1A6B9A]/25 px-3 py-1.5 rounded-xl">{f}</span>
+                    <span key={f} className="text-sm text-muted bg-surface border border-line px-3 py-1.5 rounded-xl">{f}</span>
                   ))}
                 </div>
               </div>
@@ -329,86 +329,86 @@ export default async function ProductPage({ params }: Props) {
           <div className="space-y-6">
             <div className="glass-card rounded-2xl p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                  <p className="text-white/60 text-xs mb-1">{fanCoil ? t('specCooling') : tp('power')}</p>
-                  <p className="font-syne font-bold text-2xl text-[#27C4A0]">{(fanCoil && fan('cooling_kw')) || p.power_kw} <span className="text-sm font-normal">kW</span></p>
+                <div className="bg-surface rounded-xl p-4">
+                  <p className="text-muted text-xs mb-1">{fanCoil ? t('specCooling') : tp('power')}</p>
+                  <p className="font-heading font-bold text-2xl text-primary">{(fanCoil && fan('cooling_kw')) || p.power_kw} <span className="text-sm font-normal">kW</span></p>
                 </div>
                 {fanCoil && fan('heating_kw') ? (
-                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                    <p className="text-white/60 text-xs mb-1">{t('specHeating')}</p>
-                    <p className="font-syne font-bold text-2xl text-[#27C4A0]">{fan('heating_kw')} <span className="text-sm font-normal">kW</span></p>
+                  <div className="bg-surface rounded-xl p-4">
+                    <p className="text-muted text-xs mb-1">{t('specHeating')}</p>
+                    <p className="font-heading font-bold text-2xl text-primary">{fan('heating_kw')} <span className="text-sm font-normal">kW</span></p>
                   </div>
                 ) : areaTxt ? (
-                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                    <p className="text-white/60 text-xs mb-1">{tp('area')}</p>
-                    <p className="font-syne font-bold text-2xl text-[#27C4A0]">{areaTxt} <span className="text-sm font-normal">m²</span></p>
+                  <div className="bg-surface rounded-xl p-4">
+                    <p className="text-muted text-xs mb-1">{tp('area')}</p>
+                    <p className="font-heading font-bold text-2xl text-primary">{areaTxt} <span className="text-sm font-normal">m²</span></p>
                   </div>
                 ) : rooms ? (
-                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                    <p className="text-white/60 text-xs mb-1">{SPEC_LABELS.rooms[l]}</p>
-                    <p className="font-syne font-bold text-2xl text-[#27C4A0]">{rooms}</p>
+                  <div className="bg-surface rounded-xl p-4">
+                    <p className="text-muted text-xs mb-1">{SPEC_LABELS.rooms[l]}</p>
+                    <p className="font-heading font-bold text-2xl text-primary">{rooms}</p>
                   </div>
                 ) : null}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {p.energy_class ? (
-                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                    <p className="text-white/60 text-xs mb-1">{tp('energyClass')}</p>
-                    <p className={`font-syne font-bold text-xl ${energyColors[p.energy_class]?.split(' ')[0] ?? 'text-white'}`}>{p.energy_class}</p>
+                  <div className="bg-surface rounded-xl p-4">
+                    <p className="text-muted text-xs mb-1">{tp('energyClass')}</p>
+                    <p className={`font-heading font-bold text-xl ${energyColors[p.energy_class]?.split(' ')[0] ?? 'text-fg'}`}>{p.energy_class}</p>
                   </div>
                 ) : fanCoil && fan('pipe_system') ? (
-                  <div className="bg-[#0A3658]/50 rounded-xl p-4">
-                    <p className="text-white/60 text-xs mb-1">{t('specPipes')}</p>
-                    <p className="font-syne font-bold text-xl text-white">{t(`pipes${fan('pipe_system')}`)}{fan('fan_motor') ? ` · ${fan('fan_motor')}` : ''}</p>
+                  <div className="bg-surface rounded-xl p-4">
+                    <p className="text-muted text-xs mb-1">{t('specPipes')}</p>
+                    <p className="font-heading font-bold text-xl text-fg">{t(`pipes${fan('pipe_system')}`)}{fan('fan_motor') ? ` · ${fan('fan_motor')}` : ''}</p>
                   </div>
                 ) : <div />}
-                <div className="bg-[#0A3658]/50 rounded-xl p-4">
+                <div className="bg-surface rounded-xl p-4">
                   {!p.price ? (
-                    <p className="font-syne font-semibold text-base text-white/60">{tp('priceOnRequest')}</p>
+                    <p className="font-heading font-semibold text-base text-muted">{tp('priceOnRequest')}</p>
                   ) : p.discount_percent ? (
                     <>
-                      <p className="text-sm text-white/60 line-through leading-none mb-1">{p.price.toLocaleString('lv-LV')} €</p>
-                      <p className="font-syne font-bold text-2xl text-[#27C4A0]">
+                      <p className="text-sm text-muted line-through leading-none mb-1">{p.price.toLocaleString('lv-LV')} €</p>
+                      <p className="font-heading font-bold text-2xl text-primary">
                         {Math.round(p.price * (1 - p.discount_percent / 100)).toLocaleString('lv-LV')} €
                       </p>
                     </>
                   ) : (
-                    <p className="font-syne font-bold text-2xl text-white">{p.price.toLocaleString('lv-LV')} €</p>
+                    <p className="font-heading font-bold text-2xl text-fg">{p.price.toLocaleString('lv-LV')} €</p>
                   )}
                 </div>
               </div>
               {!!p.price && !!p.discount_percent && (
-                <div className="bg-[#eab308]/10 border border-[#eab308]/25 rounded-xl p-4 flex items-center justify-between">
+                <div className="bg-sale/10 border border-sale/25 rounded-xl p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-white/60 text-xs mb-0.5">{tp('wasPrice')}</p>
-                    <p className="text-white/60 text-base line-through">{p.price.toLocaleString('lv-LV')} €</p>
+                    <p className="text-muted text-xs mb-0.5">{tp('wasPrice')}</p>
+                    <p className="text-muted text-base line-through">{p.price.toLocaleString('lv-LV')} €</p>
                   </div>
-                  <svg className="w-5 h-5 text-[#eab308]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" /></svg>
+                  <svg className="w-5 h-5 text-sale" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" /></svg>
                   <div className="text-right">
-                    <p className="text-[#27C4A0] text-xs mb-0.5">{tp('nowPrice')} −{p.discount_percent}%</p>
-                    <p className="font-syne font-bold text-xl text-[#27C4A0]">
+                    <p className="text-primary text-xs mb-0.5">{tp('nowPrice')} −{p.discount_percent}%</p>
+                    <p className="font-heading font-bold text-xl text-primary">
                       {Math.round(p.price * (1 - p.discount_percent / 100)).toLocaleString('lv-LV')} €
                     </p>
                   </div>
                 </div>
               )}
-              <div className="py-3 border-t border-[#1A6B9A]/15 space-y-1" data-fab-avoid>
-                <p className="text-white/60 text-sm">{starred(tp('installFrom', { price: installFrom }))}</p>
+              <div className="py-3 border-t border-line space-y-1" data-fab-avoid>
+                <p className="text-muted text-sm">{starred(tp('installFrom', { price: installFrom }))}</p>
                 {!!p.price && (
-                  <p className="font-syne font-semibold text-base text-[#27C4A0]">
+                  <p className="font-heading font-semibold text-base text-primary">
                     {starred(TX.total[l](
                       ((p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price) + installFrom).toLocaleString('lv-LV')
                     ))}
                   </p>
                 )}
-                <p className="text-xs text-white/60 leading-snug">{starred(tp('installNote'))}</p>
+                <p className="text-xs text-muted leading-snug">{starred(tp('installNote'))}</p>
               </div>
             </div>
 
             <Link
               data-fab-avoid
               href={contactHref as any}
-              className="w-full flex items-center justify-center gap-2 bg-[#27C4A0] hover:bg-[#1fa389] text-[#072D47] font-bold py-4 rounded-2xl transition-all duration-200 shadow-xl shadow-[#27C4A0]/25 hover:-translate-y-0.5 text-base"
+              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-on-primary font-bold py-4 rounded-2xl transition-all duration-200 shadow-xl shadow-glow/25 hover:-translate-y-0.5 text-base"
             >
               {tp('order')}
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -418,24 +418,24 @@ export default async function ProductPage({ params }: Props) {
 
             {/* Description (manual text, or generated from product data) */}
             <div className="glass-card rounded-2xl p-6">
-              <h2 className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3">{TX.about[l]}</h2>
+              <h2 className="text-muted text-xs font-semibold uppercase tracking-widest mb-3">{TX.about[l]}</h2>
               <div className="space-y-3">
                 {paragraphs.map((para, i) => (
-                  <p key={i} className="text-white/70 text-sm leading-relaxed">{para}</p>
+                  <p key={i} className="text-muted text-sm leading-relaxed">{para}</p>
                 ))}
               </div>
             </div>
 
             {/* Installation — site-wide facts only (settings + trust bar) */}
             <div className="glass-card rounded-2xl p-6">
-              <h2 className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3">{TX.install[l]}</h2>
-              <ul className="space-y-1.5 text-sm text-white/70 list-disc pl-5">
+              <h2 className="text-muted text-xs font-semibold uppercase tracking-widest mb-3">{TX.install[l]}</h2>
+              <ul className="space-y-1.5 text-sm text-muted list-disc pl-5">
                 <li>{starred(TX.installFrom[l])}</li>
                 <li>{tTrust('installation')}</li>
                 <li>{tTrust('warranty')}</li>
                 <li>{tTrust('consultation')}</li>
               </ul>
-              {installDesc && <p className="text-white/60 text-sm mt-3">{installDesc}</p>}
+              {installDesc && <p className="text-muted text-sm mt-3">{installDesc}</p>}
             </div>
           </div>
         </div>
@@ -444,16 +444,16 @@ export default async function ProductPage({ params }: Props) {
         {specs.length > 0 && (
           <div className="mt-10">
             <div className="glass-card rounded-2xl p-6">
-              <h2 className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-5">
+              <h2 className="text-muted text-xs font-semibold uppercase tracking-widest mb-5">
                 {t('specsLabel')}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
                 {specs.map(([key, value], i) => (
-                  <div key={key} className={`flex items-start justify-between py-3 px-4 ${i % 2 === 0 ? '' : ''} border-b border-[#1A6B9A]/12 last:border-b-0`}>
-                    <span className="text-white/60 text-sm pr-4">
+                  <div key={key} className={`flex items-start justify-between py-3 px-4 ${i % 2 === 0 ? '' : ''} border-b border-line last:border-b-0`}>
+                    <span className="text-muted text-sm pr-4">
                       {FAN_LABEL[key] ?? SPEC_LABELS[key]?.[locale] ?? SPEC_LABELS[key]?.en ?? key}
                     </span>
-                    <span className="text-white font-medium text-sm text-right">{key === 'install' ? starred(value) : value}</span>
+                    <span className="text-fg font-medium text-sm text-right">{key === 'install' ? starred(value) : value}</span>
                   </div>
                 ))}
               </div>
@@ -464,8 +464,8 @@ export default async function ProductPage({ params }: Props) {
         {/* Fan coil → compatible air-to-water heat pumps */}
         {worksWith.length > 0 && (
           <section className="mt-12">
-            <h2 className="font-syne font-bold text-2xl mb-2">{t('worksWithHeatPump')}</h2>
-            <p className="text-white/60 text-sm mb-6">{t('worksWithHint')}</p>
+            <h2 className="font-heading font-bold text-2xl mb-2">{t('worksWithHeatPump')}</h2>
+            <p className="text-muted text-sm mb-6">{t('worksWithHint')}</p>
             <ProductGrid products={worksWith} locale={locale} installFrom={installFrom} />
           </section>
         )}
@@ -473,7 +473,7 @@ export default async function ProductPage({ params }: Props) {
         {/* Air-to-water heat pump → fan coils that work with it */}
         {matchingFanCoils.length > 0 && (
           <section className="mt-12">
-            <h2 className="font-syne font-bold text-2xl mb-6">{t('matchingFanCoils')}</h2>
+            <h2 className="font-heading font-bold text-2xl mb-6">{t('matchingFanCoils')}</h2>
             <ProductGrid products={matchingFanCoils} locale={locale} installFrom={installFrom} />
           </section>
         )}
@@ -481,7 +481,7 @@ export default async function ProductPage({ params }: Props) {
         {/* Similar models — crawlable links to related product pages */}
         {similar.length > 0 && (
           <section className="mt-12">
-            <h2 className="font-syne font-bold text-2xl mb-6">{TX.similar[l]}</h2>
+            <h2 className="font-heading font-bold text-2xl mb-6">{TX.similar[l]}</h2>
             <ProductGrid products={similar} locale={locale} installFrom={installFrom} />
           </section>
         )}

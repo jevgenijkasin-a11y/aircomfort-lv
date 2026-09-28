@@ -22,6 +22,10 @@ export default function SiteAnimations() {
     if (reduced) {
       // Ensure 3D-reveal elements are visible when motion is reduced
       document.querySelectorAll('.reveal-3d').forEach((n) => (n as HTMLElement).classList.add('is-revealed'));
+      // …and counters show their final value instead of staying at "0"
+      document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+        el.textContent = (el.getAttribute('data-count') || '0') + (el.getAttribute('data-suffix') || '');
+      });
       return () => window.removeEventListener('scroll', onScroll);
     }
 

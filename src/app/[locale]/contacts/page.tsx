@@ -25,12 +25,12 @@ function InfoCard({
 }) {
   const content = (
     <div className="glass-card glass-card-hover rounded-2xl p-5 flex items-start gap-4">
-      <div className="w-10 h-10 rounded-xl bg-[#27C4A0]/10 border border-[#27C4A0]/20 flex items-center justify-center text-[#27C4A0] flex-shrink-0">
+      <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-primary flex-shrink-0">
         {icon}
       </div>
       <div>
-        <p className="text-white/60 text-xs font-medium uppercase tracking-wider mb-0.5">{label}</p>
-        <p className="text-white font-medium text-sm">{value}</p>
+        <p className="text-muted text-xs font-medium uppercase tracking-wider mb-0.5">{label}</p>
+        <p className="text-fg font-medium text-sm">{value}</p>
       </div>
     </div>
   );
@@ -61,18 +61,18 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
 
   return (
     <>
-      <div className="pt-36 pb-10 bg-gradient-to-b from-[#051e31] to-[#072D47] relative overflow-hidden">
+      <div className="pt-36 pb-10 bg-gradient-to-b from-surface to-page relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgb(var(--text)) 1px, transparent 1px)',
             backgroundSize: '32px 32px',
           }}
         />
-        <div className="absolute bottom-0 left-1/3 w-80 h-80 rounded-full bg-[#1A6B9A]/10 blur-[80px]" />
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 rounded-full bg-cool/10 blur-[80px]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <p className="text-[#27C4A0] text-sm font-semibold uppercase tracking-widest mb-3">{pageTitle}</p>
-          <h1 className="font-syne font-bold text-4xl sm:text-5xl mb-3">{pageTitle}</h1>
-          <p className="text-white/60 text-lg max-w-xl">{pageSubtitle}</p>
+          <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">{pageTitle}</p>
+          <h1 className="font-heading font-bold text-4xl sm:text-5xl mb-3">{pageTitle}</h1>
+          <p className="text-muted text-lg max-w-xl">{pageSubtitle}</p>
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -125,12 +125,14 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Google Maps embed — address from admin settings */}
-            <div className="mt-4 rounded-2xl overflow-hidden border border-[#1A6B9A]/25 h-48">
+            <div className="mt-4 rounded-2xl overflow-hidden border border-line h-48">
               <iframe
                 src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
                 width="100%"
                 height="100%"
-                style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg)' }}
+                // dark-styled map only in the dark theme
+                style={{ border: 0 }}
+                className="dark:[filter:invert(90%)_hue-rotate(180deg)]"
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

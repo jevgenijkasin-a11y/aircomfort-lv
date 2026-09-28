@@ -10,19 +10,34 @@ const FROM_TEMP = 32;
 const TO_TEMP = 22;
 const DURATION = 2500;
 
-// warm→cool color interpolation
-function lerpColor(t: number) {
-  // #FF8C42 → #27C4A0
-  const r = Math.round(0xff + (0x27 - 0xff) * t);
-  const g = Math.round(0x8c + (0xc4 - 0x8c) * t);
-  const b = Math.round(0x42 + (0xa0 - 0x42) * t);
-  return `rgb(${r},${g},${b})`;
+// warm→cool color interpolation. Dark theme: #FF8C42 → #27C4A0 (as before).
+// Light theme: the --heat → --primary tokens, which stay readable on white.
+const RAMP = { dark: [[0xff, 0x8c, 0x42], [0x27, 0xc4, 0xa0]], light: [[0xc2, 0x51, 0x1c], [0x0b, 0x7a, 0x63]] } as const;
+function lerpColor(t: number, dark = true) {
+  const [a, b] = dark ? RAMP.dark : RAMP.light;
+  const c = a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+/** Follows the site theme (html[data-theme]) including live switches. */
+function useDarkTheme() {
+  const [dark, setDark] = useState(true);
+  useEffect(() => {
+    const html = document.documentElement;
+    const read = () => setDark(html.getAttribute('data-theme') === 'dark');
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => mo.disconnect();
+  }, []);
+  return dark;
 }
 
 export default function CoolWidget({ label }: Props) {
   const [temp, setTemp] = useState(FROM_TEMP);
   const [progress, setProgress] = useState(0);
   const [fired, setFired] = useState(false);
+  const dark = useDarkTheme();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,8 +66,10 @@ export default function CoolWidget({ label }: Props) {
     return () => obs.disconnect();
   }, [fired]);
 
-  const color = lerpColor(progress);
-  const glow = `0 0 ${Math.round(8 + progress * 16)}px ${color.replace('rgb', 'rgba').replace(')', `,${0.3 + progress * 0.4})`)}`;
+  const color = lerpColor(progress, dark);
+  // teal glow a bit softer on the light theme (matches --glow-k)
+  const glowAlpha = (0.3 + progress * 0.4) * (dark ? 1 : 0.8);
+  const glow = `0 0 ${Math.round(8 + progress * 16)}px ${color.replace('rgb', 'rgba').replace(')', `,${glowAlpha})`)}`;
 
   const fadeOut = Math.max(0, 1 - progress * 1.5); // fades out by ~67% progress
 
@@ -60,9 +77,9 @@ export default function CoolWidget({ label }: Props) {
     <div ref={ref} className="flex flex-col items-center sm:items-start">
       <div className="flex items-baseline">
         <span
-          className="font-syne font-bold text-2xl overflow-hidden whitespace-nowrap"
+          className="font-heading font-bold text-2xl overflow-hidden whitespace-nowrap"
           style={{
-            color: lerpColor(0),
+            color: lerpColor(0, dark),
             opacity: fadeOut,
             maxWidth: `${fadeOut * 3.5}rem`,
             transition: 'none',
@@ -72,9 +89,8 @@ export default function CoolWidget({ label }: Props) {
           +{FROM_TEMP}°
         </span>
         <span
-          className="font-syne font-bold text-base overflow-hidden whitespace-nowrap"
+          className="font-heading font-bold text-base overflow-hidden whitespace-nowrap text-muted"
           style={{
-            color: 'rgba(255,255,255,0.4)',
             opacity: fadeOut,
             maxWidth: `${fadeOut * 1.5}rem`,
             transition: 'none',
@@ -83,14 +99,14 @@ export default function CoolWidget({ label }: Props) {
           &nbsp;→&nbsp;
         </span>
         <span
-          className="font-syne font-bold text-3xl transition-none"
+          className="font-heading font-bold text-3xl transition-none"
           style={{ color, textShadow: glow }}
           suppressHydrationWarning
         >
           +{temp}°
         </span>
       </div>
-      <span className="text-sm text-white/75 mt-0.5">{label}</span>
+      <span className="text-sm text-muted mt-0.5">{label}</span>
     </div>
   );
 }

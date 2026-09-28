@@ -4,7 +4,8 @@
     "catalog": "Catalog",
     "calculator": "Calculator",
     "contacts": "Contacts",
-    "getQuote": "Get a Quote"
+    "getQuote": "Get a Quote",
+    "themeToggle": "Switch light/dark theme"
   },
   "hero": {
     "badge": "Professional installation with warranty",

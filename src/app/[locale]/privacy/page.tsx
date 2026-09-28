@@ -28,41 +28,41 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <Link href="/" className="inline-flex items-center text-[#27C4A0] hover:text-white text-sm mb-10 transition-colors">
+        <Link href="/" className="inline-flex items-center text-primary hover:text-fg text-sm mb-10 transition-colors">
           {t('back')}
         </Link>
 
-        <h1 className="font-syne font-bold text-3xl sm:text-4xl mb-3">{t('title')}</h1>
-        <p className="text-white/60 text-sm mb-12">{t('updated')}</p>
+        <h1 className="font-heading font-bold text-3xl sm:text-4xl mb-3">{t('title')}</h1>
+        <p className="text-muted text-sm mb-12">{t('updated')}</p>
 
-        <p className="text-white/65 leading-relaxed mb-10">{t('intro')}</p>
+        <p className="text-muted leading-relaxed mb-10">{t('intro')}</p>
 
         <div className="space-y-8">
           {sections.map(({ title, body }) => (
             <section key={title}>
-              <h2 className="font-syne font-semibold text-lg mb-3 text-white">{title}</h2>
-              <p className="text-white/60 leading-relaxed">{body}</p>
+              <h2 className="font-heading font-semibold text-lg mb-3 text-fg">{title}</h2>
+              <p className="text-muted leading-relaxed">{body}</p>
             </section>
           ))}
 
           <section>
-            <h2 className="font-syne font-semibold text-lg mb-3 text-white">{t('s6title')}</h2>
-            <p className="text-white/60 leading-relaxed mb-4">{t('s6body')}</p>
-            <ul className="space-y-1 text-white/60 text-sm">
+            <h2 className="font-heading font-semibold text-lg mb-3 text-fg">{t('s6title')}</h2>
+            <p className="text-muted leading-relaxed mb-4">{t('s6body')}</p>
+            <ul className="space-y-1 text-muted text-sm">
               <li>
-                <span className="text-white/60">Email: </span>
-                <a href={`mailto:${tc('emailValue')}`} className="text-[#27C4A0] hover:text-white transition-colors">
+                <span className="text-muted">Email: </span>
+                <a href={`mailto:${tc('emailValue')}`} className="text-primary hover:text-fg transition-colors">
                   {tc('emailValue')}
                 </a>
               </li>
               <li>
-                <span className="text-white/60">{tc('phone')}: </span>
-                <a href={`tel:${tc('phoneValue')}`} className="text-[#27C4A0] hover:text-white transition-colors">
+                <span className="text-muted">{tc('phone')}: </span>
+                <a href={`tel:${tc('phoneValue')}`} className="text-primary hover:text-fg transition-colors">
                   {tc('phoneValue')}
                 </a>
               </li>
               <li>
-                <span className="text-white/60">{tc('address')}: </span>
+                <span className="text-muted">{tc('address')}: </span>
                 <span>{tc('addressValue')}</span>
               </li>
             </ul>
