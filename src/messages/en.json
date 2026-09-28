@@ -202,7 +202,9 @@
       "sending": "Sending...",
       "success": "Thank you! We will contact you shortly.",
       "error": "Error. Please try again or give us a call."
-    }
+    },
+    "onGoogle": "Find us on Google",
+    "leaveReview": "Leave a Google review"
   },
   "reviews": {
     "title": "Customer Reviews",

@@ -38,8 +38,13 @@ export const siteConfig = {
   social: {
     facebook: '',
     instagram: '',
-    googleBusiness: '',
+    // Google Business Profile (knowledge graph id) — used in JSON-LD sameAs
+    googleBusiness: 'https://www.google.com/search?kgmid=/g/11zz2h3r72',
+    // Short share link to the same profile — for the "Find us on Google" link
+    googleShare: 'https://share.google/9tGum3j2ZWNO61y01',
   },
+  // TODO(owner): Google "write a review" link; the review buttons stay hidden while empty
+  googleReviewUrl: '',
 } as const;
 
 export type SiteConfig = typeof siteConfig;

@@ -23,15 +23,26 @@ export function getCompany(settings: Record<string, string> = {}, locale = 'lv')
     address: settings.address?.trim() || `${a.street}, ${a.locality}, ${a.postalCode}`,
     hours: siteConfig.hoursLabel[loc(locale)],
     mapQuery: `${a.street}, ${a.locality}, ${a.postalCode}, Latvia`,
-    social: Object.values(siteConfig.social).filter(Boolean) as string[],
+    googleShare: siteConfig.social.googleShare as string,
+    googleReviewUrl: siteConfig.googleReviewUrl as string,
   };
+}
+
+/**
+ * Profile URLs for JSON-LD sameAs: the Google Business Profile plus every
+ * non-empty social profile. The share.google short link is a redirect to the
+ * same Google profile, so it is not repeated here.
+ */
+export function sameAsUrls(): string[] {
+  const { googleShare: _share, ...profiles } = siteConfig.social;
+  return Object.values(profiles).filter((u): u is string => !!u);
 }
 
 /** Organization + HVACBusiness node (one @id, referenced from other nodes). */
 export function organizationNode(settings: Record<string, string> = {}) {
   const c = getCompany(settings);
   const a = siteConfig.address;
-  const sameAs = c.social;
+  const sameAs = sameAsUrls();
   return {
     '@type': ['Organization', 'HVACBusiness'],
     '@id': ORG_ID,

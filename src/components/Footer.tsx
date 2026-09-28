@@ -2,6 +2,7 @@
 import { Link } from '@/i18n/navigation';
 import { getSettings } from '@/lib/db';
 import { getCompany } from '@/lib/company';
+import GoogleIcon from '@/components/GoogleIcon';
 
 export default async function Footer() {
   const [t, settings, locale] = await Promise.all([getTranslations(), getSettings(), getLocale()]);
@@ -127,6 +128,14 @@ export default async function Footer() {
                 </svg>
                 <span className="text-muted text-sm">{hours}</span>
               </li>
+              {company.googleShare && (
+                <li className="flex items-start gap-3">
+                  <GoogleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <a href={company.googleShare} target="_blank" rel="noopener" className="text-muted hover:text-primary text-sm transition-colors">
+                    {t('contacts.onGoogle')}
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>
