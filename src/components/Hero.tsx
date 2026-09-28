@@ -113,7 +113,7 @@ export default async function Hero() {
             </Link>
             <Link
               href="/calculator"
-              className="magnetic inline-flex items-center justify-center gap-3 bg-fg/10 hover:bg-fg/15 border-2 border-line-strong hover:border-fg/60 text-fg font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 backdrop-blur-sm tracking-wide"
+              className="magnetic inline-flex items-center justify-center gap-3 bg-fg/10 hover:bg-fg/15 border-2 border-line-strong hover:border-primary dark:hover:border-fg/60 text-fg font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 backdrop-blur-sm tracking-wide"
             >
               {t('ctaCalculator')}
             </Link>
@@ -151,7 +151,7 @@ export default async function Hero() {
 
           <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 items-stretch">
             {heroServices.map(({ icon, label, color, href }) => (
-              <Link key={label} href={href} className="flex items-center gap-3 bg-fg/5 border border-line rounded-xl px-4 py-3 hover:border-line-strong hover:bg-fg/10 transition-colors h-full min-h-[52px]">
+              <Link key={label} href={href} className="flex items-center gap-3 bg-fg/5 border border-line rounded-xl px-4 py-3 hover:border-primary dark:hover:border-line-strong hover:bg-fg/10 transition-colors h-full min-h-[52px]">
                 <span className={`flex-shrink-0 ${color}`}>{icon}</span>
                 <span className="text-muted text-xs font-medium leading-snug">{label}</span>
               </Link>
