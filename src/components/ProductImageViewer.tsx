@@ -47,7 +47,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
 
         {hasImages ? (
           <>
-            <Image src={images[active]} alt={alt} fill priority sizes="(max-width: 1024px) 100vw, 50vw" quality={80} className="object-contain p-8" />
+            <Image src={images[active]} alt={alt} fill priority sizes="(max-width: 1024px) 100vw, 50vw" quality={80} className="object-contain p-8 mix-blend-multiply" />
 
             {hasMultiple && (
               <>
@@ -98,7 +98,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
                   : 'border-gray-200 opacity-60 hover:opacity-90 hover:border-gray-400'
               }`}
             >
-              <span className="relative block w-full h-full"><Image src={src} alt={`${alt} ${i + 1}`} fill sizes="96px" className="object-contain p-1" /></span>
+              <span className="relative block w-full h-full"><Image src={src} alt={`${alt} ${i + 1}`} fill sizes="96px" className="object-contain p-1 mix-blend-multiply" /></span>
             </button>
           ))}
         </div>

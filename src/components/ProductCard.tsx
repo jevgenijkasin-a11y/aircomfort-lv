@@ -73,7 +73,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
             fill
             sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
             quality={75}
-            className="object-contain p-4"
+            className="object-contain p-4 mix-blend-multiply"
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
