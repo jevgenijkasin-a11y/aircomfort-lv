@@ -1,12 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function SiteAnimations() {
+  // Lives in the layout, so it survives client-side navigation. Re-run on every
+  // route change: otherwise a page opened via a link (not a reload) keeps its
+  // counters at "0" and its cards hidden, because they were never registered.
+  const pathname = usePathname();
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -69,7 +74,8 @@ export default function SiteAnimations() {
         gsap.set(cards, { opacity: 0, y: 55, rotateX: 18, overwrite: true });
       };
 
-      reveal3d.forEach((el) => el.classList.add('reveal-init'));
+      // (the previous route's cleanup may have marked these as revealed)
+      reveal3d.forEach((el) => { el.classList.remove('is-revealed'); el.classList.add('reveal-init'); });
       gsap.set(reveal3d, { opacity: 0, y: 55, rotateX: 18 });
 
       // Cards already in the viewport on load: reveal them right away, so a
@@ -302,7 +308,7 @@ export default function SiteAnimations() {
       counterObs.disconnect();
       cleanups.forEach((fn) => fn());
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }
