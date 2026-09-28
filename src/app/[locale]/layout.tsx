@@ -80,7 +80,7 @@ export async function generateMetadata({
       description: meta.description,
       locale: meta.ogLocale,
       alternateLocale: ['lv_LV', 'ru_RU', 'en_US'].filter((l) => l !== meta.ogLocale),
-      siteName: 'AirComfort.lv',
+      siteName: 'AirComfort',
     },
     twitter: {
       card: 'summary_large_image',

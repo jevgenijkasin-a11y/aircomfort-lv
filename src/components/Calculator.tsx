@@ -6,6 +6,7 @@ import { useRouter } from '@/i18n/navigation';
 import type { SupabaseProduct } from '@/lib/types';
 import { recommendedPowerKw, matchingPowerRange } from '@/lib/calc';
 import { ProductGrid } from '@/components/CatalogClient';
+import { saveContactPrefill } from '@/lib/contactPrefill';
 import { starred } from '@/components/FootnoteStar';
 
 interface CalcResult {
@@ -85,7 +86,9 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
       `${t('installationCost')}: ${t('from')} ${result.installMin} €`,
       `${t('totalCost')}: ${t('from')} ${result.equipMin + result.installMin} €`,
     ].join('\n');
-    router.push(`/contacts?service=consultation&message=${encodeURIComponent(message)}`);
+    // hand over via sessionStorage: no indexable ?message= URLs
+    saveContactPrefill({ service: 'consultation', message });
+    router.push('/contacts');
   };
 
   const labelCls = 'block text-sm font-medium text-muted mb-1.5';

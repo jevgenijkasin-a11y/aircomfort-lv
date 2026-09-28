@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { takeContactPrefill } from '@/lib/contactPrefill';
 
 type Status = 'idle' | 'sending' | 'success' | 'error';
 
@@ -10,11 +11,10 @@ export default function ContactForm({ formTitle }: { formTitle?: string }) {
   const [form, setForm] = useState({ name: '', phone: '', email: '', service: '', message: '' });
   const [status, setStatus] = useState<Status>('idle');
 
-  // Pre-fill service and message from URL params (e.g., from product page or calculator)
+  // Pre-fill service and message handed over by the product "Order" button or
+  // the calculator (sessionStorage; legacy ?service=&message= links still work)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const service = params.get('service') ?? '';
-    const message = params.get('message') ?? '';
+    const { service = '', message = '' } = takeContactPrefill();
     if (service || message) {
       setForm((f) => ({
         ...f,
