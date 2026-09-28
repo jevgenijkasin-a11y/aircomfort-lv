@@ -48,8 +48,7 @@ export default function HeroSlider({ slides }: Props) {
               onClick={() => setCurrent(i)}
               aria-label={`Slide ${i + 1}`}
               className={`h-2 rounded-full transition-all duration-300 ${
-                // dots sit on the photo, so they stay white in both themes
-                i === current ? 'bg-accent w-8' : 'bg-white/40 hover:bg-white/70 w-2'
+                i === current ? 'bg-accent w-8' : 'bg-fg/25 hover:bg-fg/60 w-2'
               }`}
             />
           ))}

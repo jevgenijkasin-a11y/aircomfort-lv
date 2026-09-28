@@ -26,12 +26,12 @@
   --energy-bg: 227 245 233;
   --energy-fg: 29 107 58;
   --photo-bg: 244 247 250;
-  /* teal glows are half as strong on white */
-  --glow-k: 0.5;
+  /* teal glows slightly softer on white than on navy */
+  --glow-k: 0.8;
   --grad-from: 11 107 203;
   --grad-to: 11 122 99;
   --shadow-soft: 0 1px 2px rgba(15, 27, 45, 0.06), 0 8px 24px rgba(15, 27, 45, 0.06);
-  --color-accent-glow: rgba(39, 196, 160, 0.18);
+  --color-accent-glow: rgba(39, 196, 160, 0.28);
   color-scheme: light;
 }
 

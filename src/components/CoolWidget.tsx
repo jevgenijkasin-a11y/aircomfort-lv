@@ -67,8 +67,8 @@ export default function CoolWidget({ label }: Props) {
   }, [fired]);
 
   const color = lerpColor(progress, dark);
-  // teal glow is halved on the light theme
-  const glowAlpha = (0.3 + progress * 0.4) * (dark ? 1 : 0.5);
+  // teal glow a bit softer on the light theme (matches --glow-k)
+  const glowAlpha = (0.3 + progress * 0.4) * (dark ? 1 : 0.8);
   const glow = `0 0 ${Math.round(8 + progress * 16)}px ${color.replace('rgb', 'rgba').replace(')', `,${glowAlpha})`)}`;
 
   const fadeOut = Math.max(0, 1 - progress * 1.5); // fades out by ~67% progress

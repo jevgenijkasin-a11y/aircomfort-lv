@@ -32,7 +32,7 @@ const config: Config = {
         'energy-bg': token('energy-bg'),
         'energy-fg': token('energy-fg'),
         photo: token('photo-bg'),
-        // Brand teal for glows/shadows: half as strong in the light theme
+        // Brand teal for glows/shadows: a bit softer in the light theme (--glow-k)
         glow: 'rgb(39 196 160 / calc(<alpha-value> * var(--glow-k)))',
         // Constant brand navy (top strip, footer, CTA banner) in both themes
         ink: '#0A1628',

@@ -71,18 +71,12 @@ export default async function Hero() {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-b from-surface to-page dark:from-transparent dark:to-transparent">
-      {/* One slider for both themes. Dark: full-bleed under a navy overlay.
-          Light: a rounded photo frame on the right (desktop only).
-          TODO: replace with an interior photo showing an indoor unit. */}
-      <div className="absolute z-10 overflow-hidden hidden lg:block lg:top-40 lg:bottom-24 lg:right-8 xl:right-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:w-[38%] rounded-3xl border border-line shadow-soft dark:block dark:inset-0 dark:w-auto dark:rounded-none dark:border-0 dark:shadow-none dark:z-0">
-        <HeroSlider slides={slideUrls} />
-      </div>
-      <div className="absolute inset-0 hidden dark:block bg-gradient-to-br from-page/90 via-surface/80 to-card/85" />
-      {/* Air streams and diagonal lines keep the brand teal; softer on white */}
-      <div className="absolute inset-0 opacity-50 dark:opacity-100 pointer-events-none">
-        <AirFlow />
-      </div>
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Same layout in both themes: full-bleed photo slider under an overlay
+          made of theme tokens (navy in dark, white in light). */}
+      <HeroSlider slides={slideUrls} />
+      <div className="absolute inset-0 bg-gradient-to-br from-page/90 via-surface/80 to-card/85" />
+      <AirFlow />
       <div className="absolute top-0 right-0 w-1/2 h-full opacity-5 pointer-events-none z-10 text-accent">
         <svg viewBox="0 0 500 800" className="w-full h-full" preserveAspectRatio="none">
           {Array.from({ length: 12 }, (_, i) => (
@@ -92,7 +86,7 @@ export default async function Hero() {
       </div>
 
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 w-full">
-        <div className="max-w-3xl lg:max-w-[52%] dark:lg:max-w-3xl mx-auto sm:mx-0 text-center sm:text-left">
+        <div className="max-w-3xl mx-auto sm:mx-0 text-center sm:text-left">
           <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/25 text-primary text-sm font-medium px-4 py-1.5 rounded-full mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             {t('badge')}
@@ -119,7 +113,7 @@ export default async function Hero() {
             </Link>
             <Link
               href="/calculator"
-              className="magnetic inline-flex items-center justify-center gap-3 bg-transparent dark:bg-fg/10 hover:bg-fg/5 dark:hover:bg-fg/15 border-2 border-line-strong hover:border-primary text-fg font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 backdrop-blur-sm tracking-wide"
+              className="magnetic inline-flex items-center justify-center gap-3 bg-fg/10 hover:bg-fg/15 border-2 border-line-strong hover:border-fg/60 text-fg font-extrabold text-xl px-12 py-6 rounded-2xl transition-all duration-200 backdrop-blur-sm tracking-wide"
             >
               {t('ctaCalculator')}
             </Link>
@@ -165,7 +159,7 @@ export default async function Hero() {
           </div>
         </div>
 
-        <div className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 hidden dark:xl:block opacity-20 pointer-events-none">
+        <div className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 hidden xl:block opacity-20 pointer-events-none">
           <div className="w-72 h-48 rounded-3xl border border-accent/40 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent" />
             <div className="absolute top-0 left-0 right-0 h-2 bg-accent/30 rounded-t-3xl" />
@@ -181,7 +175,7 @@ export default async function Hero() {
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-page to-transparent z-10 hidden dark:block" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-page to-transparent z-10" />
     </section>
   );
 }

@@ -32,11 +32,10 @@ export default function Header() {
       className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
         scrolled ? 'top-0' : 'top-8 sm:top-9'
       } ${
-        // Light theme: always a white bar with a hairline. Dark theme: transparent
-        // over the hero until the page scrolls (as before).
+        // Same in both themes: transparent over the hero until the page scrolls
         scrolled || menuOpen
-          ? 'bg-page/95 backdrop-blur-xl border-b border-line shadow-soft dark:shadow-lg dark:shadow-black/20'
-          : 'bg-page border-b border-line dark:bg-transparent dark:border-transparent'
+          ? 'bg-page/95 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-black/20 border-b border-line'
+          : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">

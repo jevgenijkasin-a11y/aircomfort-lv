@@ -61,7 +61,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
   return (
     <Link
       href={`/catalog/${product.id}` as any}
-      className="bg-card border border-line shadow-soft product-card-hover rounded-2xl overflow-hidden flex flex-col group h-full p-3"
+      className="glass-card product-card-hover rounded-2xl overflow-hidden flex flex-col group h-full p-3"
     >
       {/* Photo on a light plate in both themes (data-theme="light" keeps the
           badges on it in the light palette) — same height on every card */}
@@ -98,19 +98,12 @@ export default function ProductCard({ product, locale, installFrom }: { product:
       <div className="px-2 pt-4 pb-1 flex flex-col flex-1">
         <p className="text-primary text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
         <h3 className="font-heading font-semibold text-sm text-fg mb-2 leading-snug">{name}</h3>
-        <ul className="flex flex-wrap gap-1.5 mb-4 text-xs">
-          <li className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface border border-line text-fg">
-            <svg className="w-3.5 h-3.5 text-cool" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" d="M12 2v20M4.9 7l14.2 10M4.9 17L19.1 7" /></svg>
-            {product.power_kw} kW
-          </li>
-          {(area || rooms) && (
-            <li className="px-2 py-0.5 rounded-md bg-surface border border-line text-fg">
-              {area ? `${area} m²` : roomsLabel(rooms!, l)}
-            </li>
-          )}
-          {pipes && <li className="px-2 py-0.5 rounded-md bg-surface border border-line text-fg">{tc(`pipes${pipes}`)}</li>}
-          {motor && <li className="px-2 py-0.5 rounded-md bg-surface border border-line text-fg">{motor}</li>}
-        </ul>
+        <p className="text-xs text-muted mb-4">
+          {product.power_kw} kW
+          {area ? ` · ${area} m²` : rooms ? ` · ${roomsLabel(rooms, l)}` : ''}
+          {pipes ? ` · ${tc(`pipes${pipes}`)}` : ''}
+          {motor ? ` · ${motor}` : ''}
+        </p>
 
         <div className="mt-auto border-t border-line pt-3 flex items-end justify-between gap-2">
           <div>
@@ -129,10 +122,6 @@ export default function ProductCard({ product, locale, installFrom }: { product:
           </div>
           <span className="text-xs text-muted text-right">{starred(t('installFrom', { price: installFrom }))}</span>
         </div>
-        {/* Visual button: the whole card is the link (no nested <a>) */}
-        <span className="mt-3 block text-center bg-primary group-hover:bg-primary-hover text-on-primary font-semibold text-sm py-2.5 rounded-xl transition-colors">
-          {t('order')}
-        </span>
       </div>
     </Link>
   );
