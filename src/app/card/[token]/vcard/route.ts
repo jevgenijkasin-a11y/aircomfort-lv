@@ -1,11 +1,12 @@
-import { getCardByToken } from '@/lib/db';
+import { getCardByKey } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
 
-  const data = await getCardByToken(token);
+  // slug or (legacy) token
+  const data = (await getCardByKey(decodeURIComponent(token)))?.card;
 
   if (!data) {
     return new Response('Not found', { status: 404 });

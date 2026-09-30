@@ -500,6 +500,17 @@ export async function getCardByToken(token: string): Promise<EmployeeCard | null
   return row ? mapCard(row) : null;
 }
 
+/**
+ * Card by its public key: the readable slug (/card/ivans-berzins) or, for
+ * links and QR codes printed before slugs were used, the random token.
+ */
+export async function getCardByKey(key: string): Promise<{ card: EmployeeCard; bySlug: boolean } | null> {
+  const bySlug = db().prepare('SELECT * FROM employees_cards WHERE slug = ? AND is_active = 1').get(key);
+  if (bySlug) return { card: mapCard(bySlug), bySlug: true };
+  const card = await getCardByToken(key);
+  return card ? { card, bySlug: false } : null;
+}
+
 export async function createCard(c: Record<string, unknown>): Promise<void> {
   db().prepare(
     'INSERT INTO employees_cards (id, slug, token, name, title, phone, email, photo_url, photo_position, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'

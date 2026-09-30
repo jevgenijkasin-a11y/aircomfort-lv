@@ -212,7 +212,8 @@ export default function AdminCards({ lang }: { lang: Lang }) {
     }
   };
 
-  const cardUrl = (token: string) => `https://aircomfort.lv/card/${token}`;
+  // Readable address by name; old token links still open (and redirect here)
+  const cardUrl = (key: string) => `https://aircomfort.lv/card/${key}`;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -372,7 +373,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                   </div>
                   <p className="text-[#27C4A0] text-sm">{card.title}</p>
                   <p className="text-white/40 text-xs mt-1">{card.phone} · {card.email}</p>
-                  <a href={cardUrl(card.token)} target="_blank" rel="noreferrer"
+                  <a href={cardUrl(card.slug || card.token)} target="_blank" rel="noreferrer"
                     className="text-xs text-white/30 hover:text-[#27C4A0] transition-colors font-mono mt-1 block truncate">
                     aircomfort.lv/card/{card.slug}
                   </a>
@@ -403,14 +404,14 @@ export default function AdminCards({ lang }: { lang: Lang }) {
 
               {expandedQr === card.id && (
                 <div className="border-t border-white/8 p-5 flex flex-col sm:flex-row items-center gap-5 bg-white/2">
-                  <QrImage url={cardUrl(card.token)} size={160} />
+                  <QrImage url={cardUrl(card.slug || card.token)} size={160} />
                   <div className="space-y-3">
                     <p className="text-sm text-white/60">{s.link}:</p>
-                    <a href={cardUrl(card.token)} target="_blank" rel="noreferrer"
+                    <a href={cardUrl(card.slug || card.token)} target="_blank" rel="noreferrer"
                       className="text-[#27C4A0] text-sm font-mono break-all hover:underline">
-                      {cardUrl(card.token)}
+                      {cardUrl(card.slug || card.token)}
                     </a>
-                    <button onClick={() => downloadQr(cardUrl(card.token), card.slug)}
+                    <button onClick={() => downloadQr(cardUrl(card.slug || card.token), card.slug)}
                       className="flex items-center gap-2 bg-white/8 hover:bg-white/14 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />

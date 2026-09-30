@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Image from 'next/image';
-import { getCardByToken } from '@/lib/db';
+import { getCardByKey } from '@/lib/db';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
-  const data = await getCardByToken(token);
+  const data = (await getCardByKey(decodeURIComponent(token)))?.card;
   if (!data) return { title: 'AirComfort' };
   return {
     title: `${data.name} — AirComfort`,
@@ -25,11 +25,14 @@ const MAPS_URL = 'https://maps.google.com/?q=Katlakalna+iela+8,+Rīga,+LV-1073';
 export default async function CardPage({ params }: Props) {
   const { token } = await params;
 
-  const data = await getCardByToken(token);
+  // The URL segment is the readable slug (/card/ivans-berzins) or an old token
+  const found = await getCardByKey(decodeURIComponent(token));
+  if (!found) notFound();
+  const data = found.card;
+  // Old token links / printed QR codes → the readable address
+  if (!found.bySlug && data.slug) permanentRedirect(`/card/${encodeURIComponent(data.slug)}`);
 
-  if (!data) notFound();
-
-  const vcardUrl = `/card/${token}/vcard`;
+  const vcardUrl = `/card/${encodeURIComponent(data.slug || token)}/vcard`;
   const phoneClean = data.phone.replace(/[\s\-()]/g, '');
   const whatsappUrl = `https://wa.me/${phoneClean.replace(/^\+/, '')}`;
 
@@ -60,7 +63,7 @@ export default async function CardPage({ params }: Props) {
     <>
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #1a1a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        body { background: #1a1a2e; font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         @media (max-height: 750px) {
           .card-header { padding: 16px 24px 12px !important; gap: 8px !important; }
           .card-photo { width: 96px !important; height: 96px !important; }
@@ -99,7 +102,7 @@ export default async function CardPage({ params }: Props) {
           )}
 
           <div style={{ textAlign: 'center' }}>
-            <h1 className="card-name" style={{ color: 'white', fontSize: 26, fontWeight: 700, letterSpacing: '-0.3px' }}>{data.name}</h1>
+            <h1 className="card-name" style={{ color: 'white', fontSize: 26, fontWeight: 800, letterSpacing: '-0.3px', fontFamily: 'var(--font-manrope), sans-serif' }}>{data.name}</h1>
             <p className="card-title" style={{ color: 'rgba(255,255,255,0.6)', fontSize: 16, marginTop: 4 }}>{data.title}</p>
           </div>
 
