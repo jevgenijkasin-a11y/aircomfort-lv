@@ -40,8 +40,9 @@ export const siteConfig = {
     instagram: '',
     // Google Business Profile (knowledge graph id) — used in JSON-LD sameAs
     googleBusiness: 'https://www.google.com/search?kgmid=/g/11zz2h3r72',
-    // Short share link to the same profile — for the "Find us on Google" link
-    googleShare: 'https://share.google/9tGum3j2ZWNO61y01',
+    // "Find us on Google" link (footer + contacts) is switched off at the owner's
+    // request; put https://share.google/9tGum3j2ZWNO61y01 back to show it again.
+    googleShare: '',
   },
   // TODO(owner): Google "write a review" link; the review buttons stay hidden while empty
   googleReviewUrl: '',
