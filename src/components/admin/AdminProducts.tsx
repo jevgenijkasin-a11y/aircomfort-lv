@@ -4,33 +4,11 @@ import { Fragment, useState, useEffect, useRef, useMemo } from 'react';
 import { T, Lang, AdminProduct, ProductSpecs } from './adminStrings';
 import { type Category, categoryTree, descendantKeys, isFanCoil, isWithin, FAN_COILS_DUCTED_KEY, AIR_WATER_KEY } from '@/lib/categories';
 import { validateFanCoilSpecs, PIPE_SYSTEMS, FAN_MOTORS } from '@/lib/fanCoil';
-
-// Spec keys used only by fan coils (removed when a product is not a fan coil)
-const FAN_ONLY_SPECS = ['pipe_system', 'fan_motor', 'esp_pa'] as const;
-// General spec fields that the fan coil block already edits
-const FAN_SHARED_SPECS = ['cooling_kw', 'heating_kw', 'airflow', 'noise_db'];
-
-type ProductForm = Omit<AdminProduct, 'id' | 'created_at'> & { id?: string };
-
-const EMPTY_SPECS: ProductSpecs = {
-  manufacturer: '', cooling_kw: '', heating_kw: '',
-  scop: '', seer: '', noise_db: '', airflow: '',
-  operating_temp: '', mounting: '', refrigerant: '',
-  wifi: '', electrical: '', indoor_dims: '', outdoor_dims: '',
-};
-
-const EMPTY: ProductForm = {
-  brand: '', name_lv: '', name_ru: '', name_en: '',
-  category: 'home', power_kw: 2.5, area_coverage: '20–25',
-  price: 0, install_price: 249, energy_class: 'A++',
-  features: [], features_lv: [], features_ru: [], features_en: [],
-  description_lv: '', description_ru: '', description_en: '',
-  specs: { ...EMPTY_SPECS },
-  brand_color: '#1A6B9A', image_url: '', image_urls: [], in_stock: true,
-  is_hit: false, is_promo: false, discount_percent: null, compatible_ids: [],
-};
-
-const energyClasses = ['A+++', 'A++', 'A+', 'A', 'B'];
+// Form <-> payload logic shared with /admin-v2
+import {
+  type ProductForm, EMPTY_PRODUCT as EMPTY, EMPTY_SPECS, FAN_SHARED_SPECS, ENERGY_CLASSES as energyClasses,
+  MOUNTING_OPTIONS, ELECTRICAL_OPTIONS, productToForm, productCopyForm, buildProductPayload, firstImage,
+} from '@/lib/adminShared';
 
 export default function AdminProducts({ lang }: { lang: Lang }) {
   const s = T[lang];
@@ -89,65 +67,14 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
 
   const openAdd = () => { setSaveErrors([]); setModal({ open: true, product: { ...EMPTY, specs: { ...EMPTY_SPECS } } }); };
 
-  const parseProductForModal = (p: AdminProduct) => {
-    const hasLocale = p.features.some(f => /^(lv|ru|en):/.test(f));
-    let imgs: string[] = [];
-    if (p.image_url?.startsWith('[')) {
-      try { imgs = JSON.parse(p.image_url); } catch { imgs = p.image_url ? [p.image_url] : []; }
-    } else if (p.image_url) {
-      imgs = [p.image_url];
-    }
-    return {
-      ...p,
-      image_urls: imgs,
-      features_lv: hasLocale ? p.features.filter(f => f.startsWith('lv:')).map(f => f.slice(3)) : [],
-      features_ru: hasLocale ? p.features.filter(f => f.startsWith('ru:')).map(f => f.slice(3)) : [],
-      features_en: hasLocale ? p.features.filter(f => f.startsWith('en:')).map(f => f.slice(3)) : p.features,
-      description_lv: p.description_lv ?? '',
-      description_ru: p.description_ru ?? '',
-      description_en: p.description_en ?? '',
-      specs: { ...EMPTY_SPECS, ...(p.specs ?? {}) },
-    };
-  };
-
   const openCopy = (p: AdminProduct) => {
-    const { id: _id, created_at: _ca, ...rest } = parseProductForModal(p) as AdminProduct & { image_urls: string[]; features_lv: string[]; features_ru: string[]; features_en: string[] };
     setSaveErrors([]);
-    // The copy keeps category, fan coil parameters (specs) and compatible products
-    setModal({
-      open: true,
-      product: {
-        ...rest,
-        compatible_ids: [...(rest.compatible_ids ?? [])],
-        name_lv: rest.name_lv ? rest.name_lv + ' (kopija)' : rest.name_lv,
-        name_ru: rest.name_ru ? rest.name_ru + ' (копия)' : rest.name_ru,
-        name_en: rest.name_en ? rest.name_en + ' (copy)' : rest.name_en,
-      },
-    });
+    setModal({ open: true, product: productCopyForm(p) });
   };
 
   const openEdit = (p: AdminProduct) => {
     setSaveErrors([]);
-    const hasLocale = p.features.some(f => /^(lv|ru|en):/.test(f));
-    let imgs: string[] = [];
-    if (p.image_url?.startsWith('[')) {
-      try { imgs = JSON.parse(p.image_url); } catch { imgs = p.image_url ? [p.image_url] : []; }
-    } else if (p.image_url) {
-      imgs = [p.image_url];
-    }
-    setModal({
-      open: true, product: {
-        ...p,
-        image_urls: imgs,
-        features_lv: hasLocale ? p.features.filter(f => f.startsWith('lv:')).map(f => f.slice(3)) : [],
-        features_ru: hasLocale ? p.features.filter(f => f.startsWith('ru:')).map(f => f.slice(3)) : [],
-        features_en: hasLocale ? p.features.filter(f => f.startsWith('en:')).map(f => f.slice(3)) : p.features,
-        description_lv: p.description_lv ?? '',
-        description_ru: p.description_ru ?? '',
-        description_en: p.description_en ?? '',
-        specs: { ...EMPTY_SPECS, ...(p.specs ?? {}) },
-      },
-    });
+    setModal({ open: true, product: productToForm(p) });
   };
   const closeModal = () => setModal({ open: false, product: EMPTY });
 
@@ -196,47 +123,7 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     setSaveErrors([]);
     setSaving(true);
 
-    const parseStr = (v: unknown) =>
-      typeof v === 'string' ? v.split(',').map(f => f.trim()).filter(Boolean)
-      : Array.isArray(v) ? v : [];
-
-    const tagged = (arr: string[], lng: string) => arr.map(f => `${lng}:${f}`);
-
-    const lv = parseStr(fields.features_lv);
-    const ru = parseStr(fields.features_ru);
-    const en = parseStr(fields.features_en);
-    const hasLocale = lv.length || ru.length || en.length;
-    const features = hasLocale
-      ? [...tagged(lv, 'lv'), ...tagged(ru, 'ru'), ...tagged(en, 'en')]
-      : parseStr(fields.features);
-
-    // Filter out empty spec values
-    const rawSpecs = fields.specs ?? {};
-    const specs: Record<string, string> = {};
-    for (const [k, v] of Object.entries(rawSpecs)) {
-      if (v && v.trim()) specs[k] = v.trim();
-    }
-    if (!fanCoil) for (const k of FAN_ONLY_SPECS) delete specs[k];
-
-    const { features_lv: _flv, features_ru: _fru, features_en: _fen, features: _f, image_urls: _iu, specs: _sp, ...restFields } = fields;
-    const imageUrls: string[] = (fields.image_urls as string[]) || [];
-    const imageUrlValue = imageUrls.length > 1
-      ? JSON.stringify(imageUrls)
-      : (imageUrls[0] || '');
-    const payload = {
-      ...restFields,
-      features,
-      image_url: imageUrlValue,
-      power_kw: Number(fields.power_kw),
-      price: Number(fields.price),
-      install_price: Number(fields.install_price),
-      discount_percent: fields.discount_percent ? Number(fields.discount_percent) : null,
-      description_lv: fields.description_lv ?? '',
-      description_ru: fields.description_ru ?? '',
-      description_en: fields.description_en ?? '',
-      specs: Object.keys(specs).length ? specs : null,
-      compatible_ids: fields.compatible_ids ?? [],
-    };
+    const payload = buildProductPayload(fields, fanCoil);
 
     const r = await fetch(id ? `/api/admin/products/${id}` : '/api/admin/products', {
       method: id ? 'PUT' : 'POST',
@@ -263,13 +150,6 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     await fetch('/api/admin/revalidate', { method: 'POST' });
   };
 
-  const firstImage = (imageUrl: string): string => {
-    if (imageUrl?.startsWith('[')) {
-      try { return (JSON.parse(imageUrl) as string[])[0] || ''; } catch { /* ignore */ }
-    }
-    return imageUrl || '';
-  };
-
   const inp = 'w-full bg-white/5 border border-white/10 text-white text-sm px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#27C4A0]/50 transition-colors placeholder-white/20';
   const lbl = 'block text-xs text-white/50 mb-1.5 font-medium';
   const sectionHdr = 'text-white/60 text-xs font-semibold uppercase tracking-widest mb-3 pb-2 border-b border-white/8';
@@ -289,25 +169,6 @@ export default function AdminProducts({ lang }: { lang: Lang }) {
     { key: 'electrical', label: s.specElectrical },
     { key: 'indoor_dims', label: s.specIndoorDims },
     { key: 'outdoor_dims', label: s.specOutdoorDims },
-  ];
-
-  const MOUNTING_OPTIONS = [
-    { value: 'wall',     ru: 'Настенный',    en: 'Wall-mounted' },
-    { value: 'cassette', ru: 'Кассетный',    en: 'Cassette' },
-    { value: 'floor',    ru: 'Напольный',    en: 'Floor-standing' },
-    { value: 'ceiling',  ru: 'Потолочный',   en: 'Ceiling' },
-    { value: 'duct',     ru: 'Канальный',    en: 'Ducted' },
-    { value: 'column',   ru: 'Колонный',     en: 'Column' },
-    { value: 'rooftop',  ru: 'Руфтоп',       en: 'Rooftop' },
-  ];
-
-  const ELECTRICAL_OPTIONS = [
-    { value: '1ph_220',      ru: '1Ф, 220~240 В',          en: '1Ph, 220~240 V' },
-    { value: '1ph_220_50hz', ru: '1Ф, 220~240 В, 50 Гц',   en: '1Ph, 220~240 V, 50 Hz' },
-    { value: '2ph_220',      ru: '2Ф, 220~240 В',          en: '2Ph, 220~240 V' },
-    { value: '2ph_220_50hz', ru: '2Ф, 220~240 В, 50 Гц',   en: '2Ph, 220~240 V, 50 Hz' },
-    { value: '3ph_380',      ru: '3Ф, 380~415 В',          en: '3Ph, 380~415 V' },
-    { value: '3ph_380_50hz', ru: '3Ф, 380~415 В, 50 Гц',   en: '3Ph, 380~415 V, 50 Hz' },
   ];
 
   // Fan coil block + compatible products (form state)

@@ -2,36 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { T, Lang } from './adminStrings';
+import { TEXT_KEYS } from '@/lib/adminShared';
 
 type TextsState = Record<string, string>;
 
-const ALL_KEYS = [
-  // Hero
-  'hero_title_lv', 'hero_title_ru', 'hero_title_en',
-  'hero_subtitle_lv', 'hero_subtitle_ru', 'hero_subtitle_en',
-  // Services section
-  'services_title_lv', 'services_title_ru', 'services_title_en',
-  'services_subtitle_lv', 'services_subtitle_ru', 'services_subtitle_en',
-  'svc_supply_lv', 'svc_supply_ru', 'svc_supply_en',
-  'svc_supply_desc_lv', 'svc_supply_desc_ru', 'svc_supply_desc_en',
-  'svc_install_lv', 'svc_install_ru', 'svc_install_en',
-  'svc_install_desc_lv', 'svc_install_desc_ru', 'svc_install_desc_en',
-  'svc_maint_lv', 'svc_maint_ru', 'svc_maint_en',
-  'svc_maint_desc_lv', 'svc_maint_desc_ru', 'svc_maint_desc_en',
-  'svc_consult_lv', 'svc_consult_ru', 'svc_consult_en',
-  'svc_consult_desc_lv', 'svc_consult_desc_ru', 'svc_consult_desc_en',
-  // Categories section
-  'cats_title_lv', 'cats_title_ru', 'cats_title_en',
-  'cats_subtitle_lv', 'cats_subtitle_ru', 'cats_subtitle_en',
-  'cat_home_lv', 'cat_home_ru', 'cat_home_en',
-  'cat_home_desc_lv', 'cat_home_desc_ru', 'cat_home_desc_en',
-  'cat_hp_lv', 'cat_hp_ru', 'cat_hp_en',
-  'cat_hp_desc_lv', 'cat_hp_desc_ru', 'cat_hp_desc_en',
-  'cat_comm_lv', 'cat_comm_ru', 'cat_comm_en',
-  'cat_comm_desc_lv', 'cat_comm_desc_ru', 'cat_comm_desc_en',
-  'cat_ihp_lv', 'cat_ihp_ru', 'cat_ihp_en',
-  'cat_ihp_desc_lv', 'cat_ihp_desc_ru', 'cat_ihp_desc_en',
-];
+// Keys shared with /admin-v2
+const ALL_KEYS = TEXT_KEYS;
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (

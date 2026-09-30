@@ -2,21 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { T, Lang, SiteSettings } from './adminStrings';
+import { SETTINGS_DEFAULTS } from '@/lib/adminShared';
 
-const DEFAULTS: SiteSettings = {
-  phone: '', email: '', address: '', hours: '',
-  whatsapp_number: '', telegram_username: '',
-  hero_title_lv: '', hero_title_ru: '', hero_title_en: '',
-  hero_subtitle_lv: '', hero_subtitle_ru: '', hero_subtitle_en: '',
-  stat1_value: '500+', stat1_label_lv: '', stat1_label_ru: '', stat1_label_en: '',
-  stat2_value: '5', stat2_label_lv: '', stat2_label_ru: '', stat2_label_en: '',
-  stat3_value: '10+', stat3_label_lv: '', stat3_label_ru: '', stat3_label_en: '',
-  contacts_title_lv: '', contacts_title_ru: '', contacts_title_en: '',
-  contacts_subtitle_lv: '', contacts_subtitle_ru: '', contacts_subtitle_en: '',
-  contacts_form_title_lv: '', contacts_form_title_ru: '', contacts_form_title_en: '',
-  install_price_from: '250',
-  install_price_to: '350',
-};
+// Defaults shared with /admin-v2
+const DEFAULTS: SiteSettings = SETTINGS_DEFAULTS;
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
