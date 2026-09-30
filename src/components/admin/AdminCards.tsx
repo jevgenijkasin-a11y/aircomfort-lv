@@ -30,6 +30,8 @@ const CARD_STR = {
     email: 'Email',
     slug: 'URL-ключ (slug)',
     slugHint: 'Только латинские буквы, цифры, дефис. Пример: ivans-berzins',
+    slugFromName: 'Из имени',
+    slugWarn: 'Если изменить адрес, прежняя ссылка по имени перестанет открываться — скачайте новый QR-код. Ссылки и QR с длинным кодом продолжат работать.',
     photo: 'Фото',
     photoClick: 'Нажмите для загрузки фото',
     photoPosition: 'Позиция фото (по вертикали)',
@@ -57,6 +59,8 @@ const CARD_STR = {
     email: 'Email',
     slug: 'URL slug',
     slugHint: 'Latin letters, digits, hyphens only. E.g. ivans-berzins',
+    slugFromName: 'From name',
+    slugWarn: 'Changing the address breaks the previous name link — download a new QR code. Links and QR codes with the long code keep working.',
     photo: 'Photo',
     photoClick: 'Click to upload photo',
     photoPosition: 'Photo position (vertical)',
@@ -148,6 +152,10 @@ export default function AdminCards({ lang }: { lang: Lang }) {
       .replace(/[ļ]/g, 'l').replace(/[ņ]/g, 'n').replace(/[šß]/g, 's')
       .replace(/[ūùúû]/g, 'u').replace(/[žź]/g, 'z').replace(/[ö]/g, 'o')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  // While typing: lowercase, Latvian letters → Latin, anything else → "-"
+  // (a trailing "-" is allowed mid-typing; the server rejects it on save)
+  const slugTyping = (v: string) => toSlug(v + 'x').slice(0, -1);
 
   const openAdd = () => { setForm(BLANK); setEditId(null); setShowForm(true); };
 
@@ -294,6 +302,29 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                 />
               </div>
 
+              {/* Card address: aircomfort.lv/card/<slug> (filled from the name, editable) */}
+              <div>
+                <label className="block text-xs text-white/50 mb-1.5">{s.slug}</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 flex items-center bg-white/5 border border-white/15 rounded-xl focus-within:border-[#27C4A0]/60 overflow-hidden">
+                    <span className="pl-3 text-white/30 text-sm whitespace-nowrap">aircomfort.lv/card/</span>
+                    <input
+                      type="text"
+                      value={form.slug}
+                      onChange={e => setForm(f => ({ ...f, slug: slugTyping(e.target.value) }))}
+                      className="flex-1 min-w-0 bg-transparent text-white text-sm pr-3 py-2.5 focus:outline-none font-mono"
+                      placeholder="ivans-berzins"
+                    />
+                  </div>
+                  <button type="button" onClick={() => setForm(f => ({ ...f, slug: toSlug(f.name) }))}
+                    className="text-xs text-white/70 bg-white/8 hover:bg-white/12 px-3 rounded-xl whitespace-nowrap">
+                    {s.slugFromName}
+                  </button>
+                </div>
+                <p className="text-white/30 text-xs mt-1">{s.slugHint}</p>
+                {editId !== null && <p className="text-amber-300/80 text-xs mt-1">{s.slugWarn}</p>}
+              </div>
+
               {([
                 { key: 'title', label: s.jobTitle },
                 { key: 'phone', label: s.phone },
@@ -387,7 +418,7 @@ export default function AdminCards({ lang }: { lang: Lang }) {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
                     </svg>
                   </button>
-                  <button onClick={() => openEdit(card)}
+                  <button onClick={() => openEdit(card)} title={s.edit} aria-label={s.edit}
                     className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
