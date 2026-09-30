@@ -1,0 +1,47 @@
+/* /admin-v2 only — own Tailwind config, nothing here reaches the public site. */
+@config "../../components/admin-v2/tailwind.config.ts";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-gray-50 font-sans text-gray-800 antialiased dark:bg-gray-950 dark:text-gray-100; }
+  :focus-visible { outline: 2px solid #27C4A0; outline-offset: 2px; }
+}
+
+/* Menu + form primitives ported from TailAdmin (MIT) */
+@layer components {
+  .menu-item { @apply relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium transition-colors; }
+  .menu-item-active { @apply bg-brand-50 text-brand-600 dark:bg-accent/[0.12] dark:text-accent; }
+  .menu-item-inactive { @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5; }
+  .menu-item-icon-active { @apply text-brand-500 dark:text-accent; }
+  .menu-item-icon-inactive { @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300; }
+
+  .field-label { @apply mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400; }
+  .field-input {
+    @apply h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs
+      placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-4 focus:ring-brand-500/10
+      dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-700;
+  }
+  .field-input:disabled { @apply cursor-not-allowed opacity-60; }
+  textarea.field-input { @apply h-auto; }
+  select.field-input { @apply appearance-none bg-no-repeat pr-10; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none'%3E%3Cpath stroke='%23667085' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M4.792 7.396 10 12.604l5.208-5.208'/%3E%3C/svg%3E"); background-position: right 12px center; }
+  .field-hint { @apply mt-1.5 text-xs text-gray-500 dark:text-gray-400; }
+  .field-error { @apply mt-1.5 text-xs text-error-500; }
+
+  .card { @apply rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]; }
+  .card-title { @apply text-lg font-semibold text-gray-800 dark:text-white/90; }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { @apply rounded-full bg-gray-200 dark:bg-gray-700; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* ApexCharts tooltip in the dark theme */
+.dark .apexcharts-tooltip { @apply border-gray-700 bg-gray-900 text-gray-100; }
+.dark .apexcharts-tooltip-title { @apply border-gray-700 bg-gray-800; }
