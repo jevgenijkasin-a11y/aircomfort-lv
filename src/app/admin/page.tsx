@@ -1,5 +1,7 @@
-import AdminApp from '@/components/admin/AdminApp';
+import AdminV2App from '@/components/admin-v2/AdminV2App';
 
-export default function AdminPage() {
-  return <AdminApp />;
+export const dynamic = 'force-dynamic';
+
+export default function AdminV2Page() {
+  return <AdminV2App />;
 }

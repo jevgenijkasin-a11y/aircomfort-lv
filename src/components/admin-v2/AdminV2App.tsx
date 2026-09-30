@@ -134,7 +134,7 @@ export default function AdminV2App() {
               })}
             </ul>
             <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-800">
-              <a href="/admin" className="group menu-item menu-item-inactive">
+              <a href="/admin-old" className="group menu-item menu-item-inactive">
                 <IconBack className="h-5 w-5 menu-item-icon-inactive" />
                 {t.navOldAdmin}
               </a>

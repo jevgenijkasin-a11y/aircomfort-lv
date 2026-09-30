@@ -1,4 +1,4 @@
-/* /admin-v2 only — own Tailwind config, nothing here reaches the public site. */
+/* Admin panel (/admin) only — own Tailwind config, nothing here reaches the public site. */
 @config "../../components/admin-v2/tailwind.config.ts";
 
 @tailwind base;

@@ -1,4 +1,4 @@
-// Logic shared by both admin panels (/admin and /admin-v2): product form
+// Logic shared by both admin panels (/admin and /admin-old): product form
 // <-> API payload conversion, site-text keys and settings defaults.
 // Moved here unchanged from AdminProducts / AdminTexts / AdminSettings.
 import type { AdminProduct, ProductSpecs, SiteSettings } from '@/components/admin/adminStrings';

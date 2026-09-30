@@ -34,6 +34,8 @@ const nextConfig = {
         destination: '/lv',
         permanent: false,
       },
+      // The new admin moved from /admin-v2 to /admin
+      { source: '/admin-v2', destination: '/admin', permanent: true },
     ];
   },
 

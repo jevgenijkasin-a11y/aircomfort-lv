@@ -1,11 +1,11 @@
 import type { Config } from 'tailwindcss';
 
-// Tailwind config used ONLY by /admin-v2 (loaded via @config in admin-v2.css),
-// so the admin palette/utilities never reach the public site's CSS bundle.
+// Tailwind config used ONLY by the admin panel at /admin (loaded via @config in
+// admin-v2.css), so the admin palette/utilities never reach the public site's CSS bundle.
 // Palette ported from TailAdmin (MIT), brand scale re-tinted to AirComfort.
 const config: Config = {
   content: [
-    './src/app/admin-v2/**/*.{ts,tsx}',
+    './src/app/admin/**/*.{ts,tsx}',
     './src/components/admin-v2/**/*.{ts,tsx}',
   ],
   darkMode: 'class',
