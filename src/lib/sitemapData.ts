@@ -2,7 +2,8 @@ import { listProducts, hiddenCategoryKeys, listCategories } from './db';
 import { descendantKeys, hiddenKeys } from './categories';
 import { visibleProducts } from './catalogData';
 import { BASE_URL } from './seo';
-import { brandSlug, CATEGORY_SLUGS } from './productSeo';
+import { brandSlug, CATEGORY_SLUGS, absUrl } from './productSeo';
+import { productImages } from './types';
 import { publishedArticles } from './blogData';
 
 export const SITEMAP_LOCALES = ['lv', 'ru', 'en'] as const;
@@ -18,7 +19,12 @@ const STATIC_PAGES: { path: string; lastmod: string; priority: number; changefre
   { path: '/privacy', lastmod: '2026-05-13', priority: 0.3, changefreq: 'yearly' },
 ];
 
-type Entry = { loc: string; lastmod: string; priority: number; changefreq: string };
+/** images: absolute photo URLs of the page (Google image sitemap extension). */
+type Entry = { loc: string; lastmod: string; priority: number; changefreq: string; images?: string[] };
+
+/** Pictures used in an article: cover + markdown images. */
+const articleImages = (cover: string, body: string) =>
+  Array.from(new Set([cover, ...Array.from(body.matchAll(/!\[[^\]]*\]\(([^)\s]+)/g), (m) => m[1])].filter((u) => u && (u.startsWith('/') || u.startsWith('http'))))).map(absUrl);
 
 const day = (iso?: string | null) => (iso ? iso.slice(0, 10) : undefined);
 const maxDate = (dates: (string | undefined)[]) => dates.filter(Boolean).sort().at(-1) ?? '2026-07-08';
@@ -56,14 +62,14 @@ export async function sitemapEntries(locale: string): Promise<Entry[]> {
   }
   // Products
   for (const p of products) {
-    out.push({ loc: `${base}/catalog/${p.id}`, lastmod: pDate(p), priority: 0.6, changefreq: 'monthly' });
+    out.push({ loc: `${base}/catalog/${p.id}`, lastmod: pDate(p), priority: 0.6, changefreq: 'monthly', images: productImages(p).map(absUrl) });
   }
   // Blog: published articles that exist in this language (drafts never listed)
   const articles = publishedArticles(locale);
   if (articles.length) {
     out.push({ loc: `${base}/blog`, lastmod: maxDate(articles.map((a) => day(a.updated_at))), priority: 0.6, changefreq: 'weekly' });
     for (const a of articles) {
-      out.push({ loc: `${base}/blog/${a.slug}`, lastmod: day(a.updated_at)!, priority: 0.7, changefreq: 'monthly' });
+      out.push({ loc: `${base}/blog/${a.slug}`, lastmod: day(a.updated_at)!, priority: 0.7, changefreq: 'monthly', images: articleImages(a.cover_url, a[`body_${locale as 'lv' | 'ru' | 'en'}`]) });
     }
   }
   return out;
@@ -73,9 +79,9 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 
 export function urlsetXml(entries: Entry[]): string {
   const body = entries
-    .map((e) => `<url><loc>${esc(e.loc)}</loc><lastmod>${e.lastmod}</lastmod><changefreq>${e.changefreq}</changefreq><priority>${e.priority.toFixed(1)}</priority></url>`)
+    .map((e) => `<url><loc>${esc(e.loc)}</loc><lastmod>${e.lastmod}</lastmod><changefreq>${e.changefreq}</changefreq><priority>${e.priority.toFixed(1)}</priority>${(e.images ?? []).map((u) => `<image:image><image:loc>${esc(u)}</image:loc></image:image>`).join('')}</url>`)
     .join('\n');
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${body}\n</urlset>\n`;
 }
 
 export function indexXml(items: { loc: string; lastmod: string }[]): string {

@@ -110,15 +110,95 @@ export function fullName(p: SupabaseProduct, l: Loc): string {
   return n.toLowerCase().startsWith(p.brand.toLowerCase()) ? n : `${p.brand} ${n}`;
 }
 
-// ── title / description ──────────────────────────────────────────────
-const KW: Record<Loc, string> = { lv: 'kW', ru: 'кВт', en: 'kW' };
-const UP_TO: Record<Loc, string> = { lv: 'līdz', ru: 'до', en: 'up to' };
+// ── name parts: brand · series · model code · capacity ───────────────
+// Product names are free text ("Daikin Comfora FTXTP35N", "Mitsubishi Electric
+// MSZ-LN35VGHV / MUZ-LN35VGHZ 3.5кВт Zubadan (цветной)", "HAVA Smart Plus 7.2 кВт",
+// "Мицубиши Зубадан 12кВт"). They are split into parts so H1 / title / JSON-LD
+// read "Brand Series Model Capacity kW" and models of one series can be linked.
 
-/** `{Brand} {Model} — {kW} kW, up to {m²} m²` (layout appends “| AirComfort”). */
-export function productTitle(p: SupabaseProduct, locale: string): string {
+/** Brand spellings that may start a name (incl. Cyrillic ones used in RU names). */
+const BRAND_ALIASES: Record<string, string[]> = {
+  'Mitsubishi Electric': ['Mitsubishi Electric', 'Mitsubishi', 'Мицубиши Электрик', 'Мицубиши'],
+  'Panasonic': ['Panasonic', 'Панасоник'],
+  'Samsung': ['Samsung', 'Самсунг'],
+  'Daikin': ['Daikin', 'Дайкин'],
+  'Toshiba': ['Toshiba', 'Тошиба'],
+  'Hisense': ['Hisense', 'Хайсенс'],
+};
+const POWER_RE = /(\d+(?:[.,]\d+)?)\s*(?:кВт|kW)(?![A-Za-zА-Яа-яЁёĀ-ž\d])/gi;
+/** Model / article code: letters + digits, 4+ chars (refrigerants R32/R290 and volumes like 200L excluded). */
+const isModelCode = (t: string) =>
+  t.length >= 4 && /\d/.test(t) && /[A-Z]/.test(t) && !/[a-z]{3,}/.test(t) && /^[A-Za-z0-9][A-Za-z0-9\-+.]*$/.test(t) &&
+  !/^R\d{2,4}[A-Za-z]?$/.test(t) && !/^\d+(?:[.,]\d+)?L$/i.test(t);
+
+export type NameParts = { series: string; model: string; extras: string[] };
+
+export function nameParts(p: SupabaseProduct, l: Loc): NameParts {
+  let s = (productName(p, l) || p.name_en || '').replace(/\s+/g, ' ').trim();
+  // Leading brand (any known spelling)
+  for (const a of [...(BRAND_ALIASES[p.brand] ?? []), p.brand].sort((x, y) => y.length - x.length)) {
+    if (s.toLowerCase().startsWith(a.toLowerCase() + ' ') || s.toLowerCase() === a.toLowerCase()) { s = s.slice(a.length).trim(); break; }
+  }
+  // Capacity comes from power_kw, so "8 кВт" / "3.5kW" in the name is dropped
+  s = s.replace(POWER_RE, ' ');
+  const codes: string[] = [];
+  const extras: string[] = [];
+  // (EGSAH10DW9) → model code; (3 комнаты, ) / (цветной) → extra
+  s = s.replace(/\(([^)]*)\)/g, (_, inner: string) => {
+    const tokens = inner.split(/[\s,/]+/).filter(Boolean);
+    if (tokens.length && tokens.every(isModelCode)) codes.push(...tokens);
+    else {
+      const clean = inner.replace(/\s*,\s*(,\s*)*$/, '').replace(/^\s*,\s*/, '').replace(/\s+/g, ' ').trim();
+      if (clean) extras.push(`(${clean})`);
+    }
+    return ' ';
+  });
+  // "+ бойлер 180 л" stays after the capacity
+  const plus = s.indexOf(' + ');
+  if (plus >= 0) { extras.unshift(s.slice(plus + 1).replace(/\s+/g, ' ').trim()); s = s.slice(0, plus); }
+  const series: string[] = [];
+  for (const t of s.split(/\s+/).filter(Boolean)) {
+    if (t === '/') continue;
+    if (isModelCode(t)) codes.push(t);
+    else series.push(t);
+  }
+  const unique = codes.filter((c, i) => codes.indexOf(c) === i);
+  return { series: series.join(' '), model: orderCodes(productName(p, l) || '', unique).join(' / '), extras };
+}
+/** Codes sorted by where they appear in the original name. */
+const orderCodes = (name: string, codes: string[]) => [...codes].sort((a, b) => name.indexOf(a) - name.indexOf(b));
+
+const kwText = (p: SupabaseProduct, l: Loc) => (p.power_kw > 0 ? `${String(p.power_kw)} ${l === 'ru' ? 'кВт' : 'kW'}` : '');
+
+/** H1 / title / JSON-LD name: "Brand Series Model 3.5 kW (extra)"; without a code: "Brand Series 3.5 kW". */
+export function productHeading(p: SupabaseProduct, locale: string): string {
   const l = asLoc(locale);
-  const a = areaMax(p);
-  return `${fullName(p, l)} — ${kw(p)} ${KW[l]}${a ? `, ${UP_TO[l]} ${a} ${l === 'ru' ? 'м²' : 'm²'}` : ''}`;
+  const { series, model, extras } = nameParts(p, l);
+  return [p.brand, series, model, kwText(p, l), ...extras].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+/** Key shared by the models of one series (same brand + category + series, or code family). */
+export function seriesKey(p: SupabaseProduct): string | null {
+  const { series, model } = nameParts(p, 'en');
+  const family = model ? model.split(' / ')[0].replace(/\d.*$/, '') : '';
+  const base = series.toLowerCase() || (family.length >= 2 ? family.toUpperCase() : '');
+  return base ? `${p.brand}|${textKey(p.category)}|${base}` : null;
+}
+
+/** Other in-stock models of the same series (different capacity first), by capacity. */
+export function seriesSiblings(all: SupabaseProduct[], p: SupabaseProduct): SupabaseProduct[] {
+  const key = seriesKey(p);
+  if (!key) return [];
+  return all
+    .filter((x) => x.id !== p.id && seriesKey(x) === key)
+    .sort((a, b) => a.power_kw - b.power_kw || a.price - b.price);
+}
+
+// ── title / description ──────────────────────────────────────────────
+
+/** <title> = the H1, "Brand Series Model 3.5 kW" (layout appends “| AirComfort”). */
+export function productTitle(p: SupabaseProduct, locale: string): string {
+  return productHeading(p, locale);
 }
 
 /** 140–160 char meta description assembled from product data. */
@@ -353,33 +433,45 @@ export function similarProducts(all: SupabaseProduct[], p: SupabaseProduct, n = 
 // ── structured data ──────────────────────────────────────────────────
 export const absUrl = (u: string) => (u.startsWith('http') ? u : `${BASE_URL}${u.startsWith('/') ? '' : '/'}${u}`);
 
-export function productJsonLd(p: SupabaseProduct, locale: string, url: string, description: string) {
+/** First ~300 characters of a text, cut at a word boundary. */
+export function clip(text: string, max = 300): string {
+  const t = text.replace(/\s+/g, ' ').trim();
+  if (t.length <= max) return t;
+  return t.slice(0, max - 1).replace(/\s+\S*$/, '') + '…';
+}
+
+/**
+ * schema.org Product. name = the page H1; model / sku = the model code (sku
+ * falls back to our product id); description = start of the product text.
+ * Products without a price get no Product markup (Google requires an Offer
+ * with a price, otherwise the item is reported as invalid).
+ */
+export function productJsonLd(p: SupabaseProduct, locale: string, url: string, descriptionText: string) {
   const l = asLoc(locale);
   const price = finalPrice(p);
+  if (!price) return null;
   const images = productImages(p).map(absUrl);
+  const { model } = nameParts(p, l);
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: fullName(p, l),
+    name: productHeading(p, l),
     brand: { '@type': 'Brand', name: p.brand },
-    sku: p.id,
-    model: productName(p, l),
+    ...(model ? { model } : {}),
+    sku: model || p.id,
     category: categoryNoun(p.category, l),
     ...(images.length ? { image: images } : {}),
-    description,
+    description: clip(descriptionText, 300),
     url,
-    ...(price
-      ? {
-          offers: {
-            '@type': 'Offer',
-            price: String(price),
-            priceCurrency: 'EUR',
-            availability: p.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-            url,
-            seller: { '@type': 'Organization', name: 'AirComfort', url: BASE_URL },
-          },
-        }
-      : {}),
+    offers: {
+      '@type': 'Offer',
+      price: String(price),
+      priceCurrency: 'EUR',
+      availability: p.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      url,
+      seller: { '@type': 'Organization', name: 'AirComfort', url: BASE_URL },
+    },
   };
 }
 

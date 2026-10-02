@@ -3,10 +3,12 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { listProducts, getSettings, listCategories } from '@/lib/db';
-import CatalogClient from '@/components/CatalogClient';
-import { localizedAlternates } from '@/lib/seo';
+import CatalogClient, { type CatalogCategory } from '@/components/CatalogClient';
+import { jsonLdString } from '@/lib/productSeo';
+import { toCards } from '@/lib/productCard';
+import { listingMetadata, itemListJsonLd, paginate, parsePage, PAGE_WORD } from '@/lib/pagination';
 import { asLoc, brandSlug, CATEGORY_SLUGS, CATEGORY_MSG_KEY } from '@/lib/productSeo';
-import { visibleProducts, CATALOG_PAGE_SIZE } from '@/lib/catalogData';
+import { visibleProducts } from '@/lib/catalogData';
 import { hiddenKeys, descendantKeys, catName } from '@/lib/categories';
 import { parseFilters, hasFilters, filterProducts } from '@/lib/catalogFilter';
 
@@ -14,17 +16,11 @@ export const dynamic = 'force-dynamic';
 
 type SP = Record<string, string | string[] | undefined>;
 
-const parsePage = (v?: string | string[]) => {
-  const n = parseInt((Array.isArray(v) ? v[0] : v) || '1', 10);
-  return Number.isFinite(n) && n > 1 ? n : 1;
-};
-
 const DESC = {
   lv: 'Kondicionieru un siltumsūkņu katalogs: Daikin, Mitsubishi Electric, Hisense, Midea un citi. Cenas, jauda, energoefektivitāte un montāža visā Latvijā.',
   ru: 'Каталог кондиционеров и тепловых насосов: Daikin, Mitsubishi Electric, Hisense, Midea и другие. Цены, мощность, энергоэффективность и монтаж по всей Латвии.',
   en: 'Catalogue of air conditioners and heat pumps: Daikin, Mitsubishi Electric, Hisense, Midea and more. Prices, capacity, efficiency and installation across Latvia.',
 };
-const PAGE_WORD = { lv: 'lapa', ru: 'страница', en: 'page' };
 
 export async function generateMetadata({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<SP> }): Promise<Metadata> {
   const [{ locale }, sp] = await Promise.all([params, searchParams]);
@@ -35,11 +31,12 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
   // Plain pagination pages are self-canonical; filtered/sorted views
   // canonicalize to the clean /catalog URL.
   const path = !filtered && page > 1 ? `/catalog?page=${page}` : '/catalog';
-  return {
+  return listingMetadata({
+    locale,
+    path,
     title: page > 1 ? `${t('title')} — ${PAGE_WORD[l]} ${page}` : t('title'),
     description: page > 1 ? `${DESC[l]} (${PAGE_WORD[l]} ${page})` : DESC[l],
-    alternates: localizedAlternates(locale, path),
-  };
+  });
 }
 
 export default async function CatalogPage({
@@ -69,10 +66,14 @@ export default async function CatalogPage({
   const filters = parseFilters(sp);
   // Unknown or hidden category in the URL → show everything instead of an empty list
   if (filters.category && !categories.some((c) => c.key === filters.category)) delete filters.category;
-  const count = filterProducts(products, filters, categories).length;
-  const totalPages = Math.max(1, Math.ceil(count / CATALOG_PAGE_SIZE));
+  // Filter, sort and page on the server: the browser only gets this page's cards
+  const filtered = filterProducts(products, filters, categories);
   const page = parsePage(sp.page);
+  const { items, totalPages, offset } = paginate(filtered, page);
   if (page > totalPages) notFound(); // no duplicate "last page" under other numbers
+  const cards = toCards(items, locale);
+  const slimCats: CatalogCategory[] = categories.map(({ key, parent_key, slug, name_lv, name_ru, name_en, sort_order, is_visible, is_system }) =>
+    ({ key, parent_key, slug, name_lv, name_ru, name_en, sort_order, is_visible, is_system }));
 
   const brands = Array.from(new Set(products.map((p) => p.brand))).sort();
   const cats = Object.keys(CATEGORY_SLUGS).filter((c) => products.some((p) => p.category === c));
@@ -98,12 +99,18 @@ export default async function CatalogPage({
           <p className="text-muted text-lg">{t('subtitle')}</p>
         </div>
       </div>
+      {cards.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(itemListJsonLd(locale, cards, offset, t('title'))) }} />
+      )}
       <CatalogClient
-        initialProducts={products}
-        categories={categories}
+        cards={cards}
+        total={filtered.length}
+        page={page}
+        totalPages={totalPages}
+        brands={brands}
+        categories={slimCats}
         locale={locale}
         initialFilters={filters}
-        page={page}
         installFrom={installFrom}
       />
 

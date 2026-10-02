@@ -13,6 +13,13 @@ const DEFAULT_SLIDES = [
   'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=1920&q=80',
 ];
 
+// Alt text of the background photos (installed air conditioners / heat pumps)
+const SLIDE_ALT = {
+  lv: 'AirComfort uzstādīts kondicionieris vai siltumsūknis',
+  ru: 'Кондиционер или тепловой насос, установленный AirComfort',
+  en: 'Air conditioner or heat pump installed by AirComfort',
+};
+
 export default async function Hero() {
   const [t, locale, settings, dbSlides] = await Promise.all([
     getTranslations('hero'),
@@ -74,7 +81,7 @@ export default async function Hero() {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Same layout in both themes: full-bleed photo slider under an overlay
           made of theme tokens (navy in dark, white in light). */}
-      <HeroSlider slides={slideUrls} />
+      <HeroSlider slides={slideUrls} alt={SLIDE_ALT[locale as 'lv' | 'ru' | 'en'] ?? SLIDE_ALT.lv} />
       <div className="absolute inset-0 bg-gradient-to-br from-page/90 via-surface/80 to-card/85" />
       <AirFlow />
       <div className="absolute top-0 right-0 w-1/2 h-full opacity-5 pointer-events-none z-10 text-accent">

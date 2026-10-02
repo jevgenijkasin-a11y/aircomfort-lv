@@ -120,7 +120,7 @@ export default async function Categories() {
               <div
                 className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 border overflow-hidden relative ${TONE[accent].icon}`}
               >
-                {image ? <Image src={image} alt="" fill sizes="48px" className="object-cover" /> : <Icon />}
+                {image ? <Image src={image} alt={name} fill sizes="48px" className="object-cover" /> : <Icon />}
               </div>
               <h3 className="font-heading font-semibold text-lg mb-2">{name}</h3>
               <p className="text-muted text-sm leading-relaxed flex-1">{desc}</p>

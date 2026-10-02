@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import type { SupabaseProduct } from '@/lib/types';
-import { recommendedPowerKw, matchingPowerRange } from '@/lib/calc';
-import { ProductGrid } from '@/components/CatalogClient';
+import type { CardProduct } from '@/lib/productCard';
+import { recommendedPowerKw } from '@/lib/calc';
+import { ProductGrid } from '@/components/ProductGrid';
 import { saveContactPrefill } from '@/lib/contactPrefill';
 import { starred } from '@/components/FootnoteStar';
 
@@ -15,27 +15,21 @@ interface CalcResult {
   equipMax: number;
   installMin: number;
   installMax: number;
-  models: SupabaseProduct[];
-}
-
-const finalPrice = (p: SupabaseProduct) =>
-  p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price;
-
-/** Models whose capacity fits the recommended size, cheapest first. Falls back to the next larger capacity available. */
-function matchingModels(powerKw: number, products: SupabaseProduct[]): SupabaseProduct[] {
-  const { min, max } = matchingPowerRange(powerKw);
-  let list = products.filter((p) => p.power_kw >= min && p.power_kw <= max);
-  if (!list.length) {
-    const bigger = products.filter((p) => p.power_kw >= min);
-    const nearest = bigger.length ? Math.min(...bigger.map((p) => p.power_kw)) : null;
-    list = nearest !== null ? bigger.filter((p) => p.power_kw <= nearest + 0.5) : [];
-  }
-  return list.sort((a, b) => finalPrice(a) - finalPrice(b));
+  models: CardProduct[];
 }
 
 const SUITABLE = { lv: 'Piemēroti modeļi', ru: 'Подходящие модели', en: 'Suitable models' };
 
-export default function Calculator({ installFrom = 250, installTo = 350, products = [], locale = 'lv' }: { installFrom?: number; installTo?: number; products?: SupabaseProduct[]; locale?: string }) {
+/** Matching models + price range for a capacity, from /api/calc-models (not embedded in the page). */
+async function fetchModels(powerKw: number, locale: string): Promise<{ equipMin: number; equipMax: number; models: CardProduct[] }> {
+  try {
+    const r = await fetch(`/api/calc-models?kw=${powerKw}&locale=${locale}`);
+    if (r.ok) return await r.json();
+  } catch { /* offline: show the capacity without models */ }
+  return { equipMin: 0, equipMax: 0, models: [] };
+}
+
+export default function Calculator({ installFrom = 250, installTo = 350, locale = 'lv' }: { installFrom?: number; installTo?: number; locale?: string }) {
   const t = useTranslations('calculator');
   const tp = useTranslations('products');
   const router = useRouter();
@@ -49,20 +43,15 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
   const [floor, setFloor] = useState('middle');
   const [result, setResult] = useState<CalcResult | null>(null);
 
-  const handleCalc = () => {
+  const [loading, setLoading] = useState(false);
+  const handleCalc = async () => {
     const areaNum = parseFloat(area);
-    if (!areaNum || areaNum <= 0) return;
+    if (!areaNum || areaNum <= 0 || loading) return;
     const powerKw = recommendedPowerKw({ area: areaNum, roomType, insulation, windows: parseInt(windows) || 0, floor });
-    const models = matchingModels(powerKw, products);
-    const prices = models.map(finalPrice);
-    setResult({
-      powerKw,
-      equipMin: prices.length ? Math.min(...prices) : 0,
-      equipMax: prices.length ? Math.max(...prices) : 0,
-      installMin: installFrom,
-      installMax: installTo,
-      models,
-    });
+    setLoading(true);
+    const { equipMin, equipMax, models } = await fetchModels(powerKw, locale);
+    setLoading(false);
+    setResult({ powerKw, equipMin, equipMax, installMin: installFrom, installMax: installTo, models });
   };
 
   // After each calculation, bring the result into view (mostly matters on mobile,
@@ -201,7 +190,8 @@ export default function Calculator({ installFrom = 250, installTo = 350, product
 
           <button
             onClick={handleCalc}
-            disabled={!area}
+            disabled={!area || loading}
+            aria-busy={loading}
             className="mt-8 w-full bg-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-on-primary font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-glow/20 hover:shadow-glow/30 text-base"
           >
             {t('calculate')}

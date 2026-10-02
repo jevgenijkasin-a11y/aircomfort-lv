@@ -1,18 +1,22 @@
 'use client';
 
-import { Component, Fragment, useState, useMemo, useEffect, type ReactNode } from 'react';
+// Catalog filters + one page of results. Filtering, sorting and paging run on
+// the server (lib/catalogFilter): a filter change replaces the URL query and
+// the server renders the next 24 cards, so the browser never receives the
+// whole product base.
+import { Component, Fragment, useState, useEffect, useRef, useTransition, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { type SupabaseProduct } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
-import { CATALOG_PAGE_SIZE } from '@/lib/catalogData';
+import type { CardProduct } from '@/lib/productCard';
 import { type Category, categoryTree, catName } from '@/lib/categories';
 import { KW_RANGES, PIPE_SYSTEMS, FAN_MOTORS } from '@/lib/fanCoil';
-import {
-  type Filters, AREA_BUCKETS, FAN_FILTER_KEYS, filterProducts, filtersQuery, fanFiltersActive, hasFilters,
-} from '@/lib/catalogFilter';
+import { type Filters, AREA_BUCKETS, FAN_FILTER_KEYS, filtersQuery, fanFiltersActive, hasFilters } from '@/lib/catalogFilter';
 import { starred } from '@/components/FootnoteStar';
+
+/** Fields of a category the filters need (the rest stays on the server). */
+export type CatalogCategory = Pick<Category, 'key' | 'parent_key' | 'slug' | 'name_lv' | 'name_ru' | 'name_en' | 'sort_order' | 'is_visible' | 'is_system'>;
 
 const TXT = {
   search: { lv: 'Meklēt pēc nosaukuma vai modeļa', ru: 'Поиск по названию или модели', en: 'Search by name or model' },
@@ -41,25 +45,17 @@ function Field({ id, label, children }: { id: string; label: string; children: R
   );
 }
 
-/** Grid of product cards (crawlable <a> links). Used by catalog, landing pages and "similar models". */
-export function ProductGrid({ products, locale, installFrom = 250 }: { products: SupabaseProduct[]; locale: string; installFrom?: number }) {
-  const tp = useTranslations('products');
-  return (
-    <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-        {products.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
-      </div>
-      <p className="mt-4 text-xs text-muted">{starred(tp('installNote'))}</p>
-    </>
-  );
-}
-
 type Props = {
-  initialProducts: SupabaseProduct[];
-  categories: Category[];
+  /** Cards of the current page only */
+  cards: CardProduct[];
+  /** Number of products matching the filters */
+  total: number;
+  page: number;
+  totalPages: number;
+  brands: string[];
+  categories: CatalogCategory[];
   locale: string;
   initialFilters?: Filters;
-  page?: number;
   installFrom?: number;
 };
 
@@ -75,11 +71,12 @@ class CatalogBoundary extends Component<{ children: ReactNode; fallback: (reset:
 export default function CatalogClient(props: Props) {
   const t = useTranslations('catalog');
   const pathname = usePathname();
+  const router = useRouter();
   // After a crash + reset, remount with no filters on page 1
   const [generation, setGeneration] = useState(0);
   const reset = () => {
     try { sessionStorage.removeItem('catalogParams'); } catch { /* storage blocked */ }
-    window.history.replaceState(null, '', pathname);
+    router.replace(pathname, { scroll: false });
     setGeneration((g) => g + 1);
   };
   return (
@@ -95,74 +92,73 @@ export default function CatalogClient(props: Props) {
         </div>
       )}
     >
-      <CatalogInner
-        key={generation}
-        {...props}
-        initialFilters={generation ? {} : props.initialFilters}
-        page={generation ? 1 : props.page}
-      />
+      <CatalogInner key={generation} {...props} initialFilters={generation ? {} : props.initialFilters} />
     </CatalogBoundary>
   );
 }
 
+const sameFilters = (a: Filters, b: Filters, cats: Category[]) => filtersQuery(a, 1, cats) === filtersQuery(b, 1, cats);
+
 function CatalogInner({
-  initialProducts, categories, locale, initialFilters = {}, page: initialPage = 1, installFrom = 250,
+  cards, total, page, totalPages, brands, categories: slimCats, locale, initialFilters = {}, installFrom = 250,
 }: Props) {
   const t = useTranslations('catalog');
   const tp = useTranslations('products');
   const pathname = usePathname();
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const L = (locale === 'ru' || locale === 'en' ? locale : 'lv') as 'lv' | 'ru' | 'en';
+  // The helpers only read key / parent / names / order of a category
+  const categories = slimCats as Category[];
 
-  // Initial state comes from the server (search params), so SSR HTML and the
-  // hydrated client agree.
   const [filters, setFilters] = useState<Filters>({ sort: 'asc', ...initialFilters });
   const [query, setQuery] = useState(initialFilters.q ?? '');
-  const [page, setPage] = useState(initialPage);
-  const [touched, setTouched] = useState(false);
-  // Pagination links navigate on the server; follow the new ?page=N
-  useEffect(() => { setPage(initialPage); }, [initialPage]);
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
 
-  const update = (patch: Filters) => {
-    setTouched(true);
-    setPage(1);
-    setFilters((prev) => {
-      const next = { ...prev, ...patch };
-      // Leaving the fan coil category drops its extra filters
-      if (!fanFiltersActive(next, categories)) for (const k of FAN_FILTER_KEYS) delete next[k];
-      return next;
-    });
+  // Browser back/forward (or a link) changed the URL → take the filters from it
+  useEffect(() => {
+    if (!sameFilters(initialFilters, filtersRef.current, categories)) {
+      setFilters({ sort: 'asc', ...initialFilters });
+      setQuery(initialFilters.q ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersQuery(initialFilters, 1, categories)]);
+
+  // Remember the current listing for the product page's "Back to catalog"
+  useEffect(() => {
+    try { sessionStorage.setItem('catalogParams', filtersQuery(initialFilters, page, categories)); } catch { /* storage blocked */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersQuery(initialFilters, page, categories)]);
+
+  const navigate = (next: Filters) => {
+    const qs = filtersQuery(next, 1, categories);
+    startTransition(() => router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false }));
   };
 
-  // Debounce typing → filter + URL update 250 ms after the last keystroke
+  const update = (patch: Filters) => {
+    const next = { ...filtersRef.current, ...patch };
+    // Leaving the fan coil category drops its extra filters
+    if (!fanFiltersActive(next, categories)) for (const k of FAN_FILTER_KEYS) delete next[k];
+    setFilters(next);
+    navigate(next);
+  };
+
+  // Debounce typing → server search 300 ms after the last keystroke
   useEffect(() => {
     const id = setTimeout(() => {
       const q = query.trim();
-      if (q !== (filters.q ?? '')) update({ q });
-    }, 250);
+      if (q !== (filtersRef.current.q ?? '')) update({ q });
+    }, 300);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
-  // Mirror filters in the URL without a Next.js navigation (only after the
-  // user changed something, so server-rendered ?page=N links stay intact).
-  useEffect(() => {
-    if (!touched) return;
-    const qs = filtersQuery(filters, page, categories);
-    window.history.replaceState(null, '', qs ? `${pathname}?${qs}` : pathname);
-    try { sessionStorage.setItem('catalogParams', qs); } catch { /* storage blocked */ }
-  }, [filters, page, touched, pathname, categories]);
-
-  const brands = useMemo(() => Array.from(new Set(initialProducts.map((p) => p.brand))).sort(), [initialProducts]);
-  const tree = useMemo(() => categoryTree(categories), [categories]);
-  const filtered = useMemo(() => filterProducts(initialProducts, filters, categories), [initialProducts, filters, categories]);
+  const tree = categoryTree(categories);
   const fan = fanFiltersActive(filters, categories);
-
-  const resetAll = () => { setQuery(''); setTouched(true); setPage(1); setFilters({ sort: 'asc' }); };
+  const resetAll = () => { setQuery(''); const next = { sort: 'asc' }; setFilters(next); navigate(next); };
   const select = (k: keyof Filters) => (e: React.ChangeEvent<HTMLSelectElement>) => update({ [k]: e.target.value });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / CATALOG_PAGE_SIZE));
-  const curPage = Math.min(Math.max(1, page), totalPages);
-  const shown = filtered.slice((curPage - 1) * CATALOG_PAGE_SIZE, curPage * CATALOG_PAGE_SIZE);
   const pageHref = (n: number) => {
     const qs = filtersQuery(filters, n, categories);
     return qs ? `/catalog?${qs}` : '/catalog';
@@ -256,7 +252,7 @@ function CatalogInner({
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <p className="text-muted text-sm"><span className="text-fg font-semibold">{filtered.length}</span> {t('results')}</p>
+        <p className="text-muted text-sm" aria-live="polite"><span className="text-fg font-semibold">{total}</span> {t('results')}</p>
         {(hasFilters(filters) || query) && (
           <button onClick={resetAll} className="text-primary text-sm hover:text-fg transition-colors flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -265,37 +261,39 @@ function CatalogInner({
         )}
       </div>
 
-      {filtered.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="w-16 h-16 rounded-2xl bg-surface border border-line flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+      <div className={`transition-opacity duration-200 ${pending ? 'opacity-50' : ''}`} aria-busy={pending}>
+        {total === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-16 h-16 rounded-2xl bg-surface border border-line flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+            <p className="text-muted text-lg font-heading">{t('noResults')}</p>
+            <p className="text-muted text-sm mt-1">{t('noResultsHint')}</p>
+            <button onClick={resetAll} className="mt-5 text-primary text-sm font-semibold hover:text-fg transition-colors">{t('resetFilters')}</button>
           </div>
-          <p className="text-muted text-lg font-heading">{t('noResults')}</p>
-          <p className="text-muted text-sm mt-1">{t('noResultsHint')}</p>
-          <button onClick={resetAll} className="mt-5 text-primary text-sm font-semibold hover:text-fg transition-colors">{t('resetFilters')}</button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {shown.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
-        </div>
-      )}
-      {filtered.length > 0 && <p className="mt-4 text-xs text-muted">{starred(tp('installNote'))}</p>}
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {cards.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
+          </div>
+        )}
+      </div>
+      {total > 0 && <p className="mt-4 text-xs text-muted">{starred(tp('installNote'))}</p>}
 
       {/* Pagination — real <a href> links that keep the active filters */}
       {totalPages > 1 && (
         <nav aria-label={PG.label[L]} className="mt-10 flex flex-wrap items-center justify-center gap-2">
-          {curPage > 1 && (
-            <Link href={pageHref(curPage - 1) as any} rel="prev" className="px-3.5 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">← {PG.prev[L]}</Link>
+          {page > 1 && (
+            <Link href={pageHref(page - 1) as any} rel="prev" className="px-3.5 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">← {PG.prev[L]}</Link>
           )}
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-            n === curPage ? (
+            n === page ? (
               <span key={n} aria-current="page" className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm font-bold bg-primary text-on-primary">{n}</span>
             ) : (
               <Link key={n} href={pageHref(n) as any} className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">{n}</Link>
             )
           ))}
-          {curPage < totalPages && (
-            <Link href={pageHref(curPage + 1) as any} rel="next" className="px-3.5 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">{PG.next[L]} →</Link>
+          {page < totalPages && (
+            <Link href={pageHref(page + 1) as any} rel="next" className="px-3.5 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">{PG.next[L]} →</Link>
           )}
         </nav>
       )}

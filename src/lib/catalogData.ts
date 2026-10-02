@@ -19,3 +19,7 @@ export const DUPLICATE_REDIRECTS: Record<string, string> = {
  */
 export const visibleProducts = (all: SupabaseProduct[], hidden: Set<string> = new Set()) =>
   all.filter((p) => !DUPLICATE_REDIRECTS[p.id] && !hidden.has(p.category));
+
+/** Cheapest first is the SQL order; "price on request" (0) goes last, like in the catalog. */
+export const pricedFirst = <T extends { price: number }>(list: T[]) =>
+  [...list].sort((a, b) => (a.price > 0 ? 0 : 1) - (b.price > 0 ? 0 : 1));

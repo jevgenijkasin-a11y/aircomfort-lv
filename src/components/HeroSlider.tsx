@@ -4,9 +4,11 @@ import Image from 'next/image';
 
 interface Props {
   slides: string[];
+  /** Alt text of the photos (numbered when there are several) */
+  alt: string;
 }
 
-export default function HeroSlider({ slides }: Props) {
+export default function HeroSlider({ slides, alt }: Props) {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -29,13 +31,13 @@ export default function HeroSlider({ slides }: Props) {
               AirComfort installation photos (managed in Admin → Slider). */}
           <Image
             src={url}
-            alt=""
+            alt={slides.length > 1 ? `${alt} (${i + 1}/${slides.length})` : alt}
             fill
             sizes="100vw"
             quality={70}
             priority={i === 0}
             className="object-cover"
-            aria-hidden
+            aria-hidden={i !== current}
             style={{ filter: 'brightness(1.05) saturate(0.88) contrast(0.96)' }}
           />
         </div>

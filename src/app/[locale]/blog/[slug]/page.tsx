@@ -11,7 +11,8 @@ import { renderMarkdown, extractFaq, excerpt, articleLocales, type Article, type
 import { asLoc, articleAlternates, publicArticle, publishedDate, relatedProducts } from '@/lib/blogData';
 import { organizationNode, ORG_ID, WEBSITE_ID } from '@/lib/company';
 import { siteConfig } from '@/config/site';
-import { ProductGrid } from '@/components/CatalogClient';
+import { ProductGrid } from '@/components/ProductGrid';
+import { toCards } from '@/lib/productCard';
 import { ArticleCover, CategoryIcon } from '@/components/BlogList';
 import OrderLink from '@/components/OrderLink';
 import { PageLocales } from '@/lib/pageLocales';
@@ -149,7 +150,7 @@ export default async function ArticlePage({ params }: Props) {
               <Link href={a.related_catalog as '/catalog'} className="text-sm font-semibold text-primary hover:underline">{t('seeAll')} →</Link>
             )}
           </div>
-          <ProductGrid products={products} locale={locale} installFrom={installFrom} />
+          <ProductGrid products={toCards(products, locale)} locale={locale} installFrom={installFrom} />
         </section>
       )}
 

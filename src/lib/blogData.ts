@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { listArticles, getArticleBySlug, listProducts, listCategories, hiddenCategoryKeys } from './db';
 import { type Article, type Loc, hasLocale, articleLocales } from './articles';
 import { visibleProducts } from './catalogData';
-import { brandSlug, categoryFromSlug } from './productSeo';
+import { brandSlug, categoryFromSlug, CATEGORY_SLUGS } from './productSeo';
 import { descendantKeys } from './categories';
 import { BASE_URL } from './seo';
 import type { SupabaseProduct } from './types';
@@ -51,6 +51,36 @@ export async function relatedProducts(a: Article, n = 4): Promise<SupabaseProduc
     .sort((x, y) => rank(x.p) - rank(y.p) || x.i - y.i)
     .slice(0, n)
     .map((x) => x.p);
+}
+
+// Product category → article topics that fit it (points)
+const TOPIC_FIT: Record<string, Partial<Record<Article['category'], number>>> = {
+  home: { cooling: 2 },
+  heat_pump: { heating: 2, cooling: 1 },
+  commercial: { cooling: 2 },
+  commercial_heat_pump: { heating: 2, subsidy: 1 },
+  fan_coils: { heating: 2 },
+};
+
+/**
+ * "Useful articles" for a product page: published articles in this language,
+ * best first — linked to the product's catalog section (+3), topic fit
+ * (+1…2); topped up with the latest articles so the block has `n` items.
+ */
+export function articlesForProduct(p: SupabaseProduct, locale: string, n = 2): Article[] {
+  const list = publishedArticles(locale);
+  const topicKey = p.category.startsWith('fan_coils') ? 'fan_coils' : p.category;
+  const typeSlug = CATEGORY_SLUGS[p.category];
+  const ownPaths = new Set([
+    ...(typeSlug ? [`/catalog/type/${typeSlug}`] : []),
+    ...(topicKey === 'fan_coils' ? listCategories().filter((c) => c.key.startsWith('fan_coils')).map((c) => `/catalog/category/${c.slug}`) : []),
+  ]);
+  const score = (a: Article) => (ownPaths.has(a.related_catalog) ? 3 : 0) + (TOPIC_FIT[topicKey]?.[a.category] ?? 0);
+  return list
+    .map((a, i) => ({ a, s: score(a), i }))
+    .sort((x, y) => y.s - x.s || x.i - y.i)
+    .slice(0, n)
+    .map((x) => x.a);
 }
 
 /** canonical + hreflang between the article's languages only. */

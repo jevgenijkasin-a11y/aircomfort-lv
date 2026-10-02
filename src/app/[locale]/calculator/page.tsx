@@ -3,30 +3,31 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Calculator from '@/components/Calculator';
-import { getSettings, listProducts, hiddenCategoryKeys } from '@/lib/db';
-import { visibleProducts } from '@/lib/catalogData';
-import { localizedAlternates } from '@/lib/seo';
+import { getSettings } from '@/lib/db';
+import { asLoc } from '@/lib/productSeo';
+import { listingMetadata } from '@/lib/pagination';
+
+const DESC = {
+  lv: 'Bezmaksas kondicioniera jaudas kalkulators: ievadiet telpas platību, siltināšanu un logus — uzzināsiet vajadzīgo jaudu kW, piemērotus modeļus un aptuvenās izmaksas ar montāžu.',
+  ru: 'Бесплатный калькулятор мощности кондиционера: укажите площадь, утепление и окна — узнаете нужную мощность в кВт, подходящие модели и примерную стоимость с монтажом.',
+  en: 'Free air conditioner size calculator: enter room area, insulation and windows to get the capacity you need in kW, matching models and an estimated price with installation.',
+};
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations('calculator');
-  return { title: t('title'), alternates: localizedAlternates(locale, '/calculator') };
+  const t = await getTranslations({ locale, namespace: 'calculator' });
+  return listingMetadata({ locale, path: '/calculator', title: t('title'), description: DESC[asLoc(locale)] });
 }
 
 export default async function CalculatorPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [t, tn, settings, allProducts] = await Promise.all([
+  const [t, tn, settings] = await Promise.all([
     getTranslations('calculator'),
     getTranslations('nav'),
     getSettings(),
-    listProducts({ inStockOnly: true }),
   ]);
-  // Room calculator → residential air-to-air units only (home ACs + air-to-air heat pumps)
-  const residential = visibleProducts(allProducts, hiddenCategoryKeys()).filter(
-    (p) => p.price > 0 && (p.category === 'home' || p.category === 'heat_pump')
-  );
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
   const installTo = parseInt(settings.install_price_to || '350') || 350;
 
@@ -49,7 +50,8 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
           <p className="text-muted text-lg max-w-xl mx-auto">{t('subtitle')}</p>
         </div>
       </div>
-      <Calculator installFrom={installFrom} installTo={installTo} products={residential} locale={locale} />
+      {/* Matching models are fetched from /api/calc-models when the user calculates */}
+      <Calculator installFrom={installFrom} installTo={installTo} locale={locale} />
     </>
   );
 }

@@ -1,13 +1,12 @@
 // Single product card used everywhere (home "featured", catalog, landing
 // pages, similar models, calculator suggestions). Works in both server and
-// client trees. Images go through next/image — originals never reach the client.
+// client trees. Takes the slim CardProduct (lib/productCard), never the full
+// product. Images go through next/image — originals never reach the client.
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { type SupabaseProduct, productName, productImages } from '@/lib/types';
-import { areaLabel, roomCount, asLoc } from '@/lib/productSeo';
+import type { CardProduct } from '@/lib/productCard';
 import { starred } from '@/components/FootnoteStar';
-import { fanSpec } from '@/lib/fanCoil';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-primary border-accent/40 bg-accent/10',
@@ -43,17 +42,12 @@ function CategoryIcon({ category }: { category: string }) {
   );
 }
 
-export default function ProductCard({ product, locale, installFrom }: { product: SupabaseProduct; locale: string; installFrom: number }) {
+export default function ProductCard({ product, locale, installFrom }: { product: CardProduct; locale: string; installFrom: number }) {
   const t = useTranslations('products');
   const tc = useTranslations('catalog');
-  const l = asLoc(locale);
-  // Fan coil parameters (only fan coils have them)
-  const pipes = fanSpec(product, 'pipe_system');
-  const motor = fanSpec(product, 'fan_motor');
-  const name = productName(product, locale);
-  const image = productImages(product)[0];
-  const area = areaLabel(product, l);
-  const rooms = roomCount(product);
+  const l = (locale === 'ru' || locale === 'en' ? locale : 'lv') as 'lv' | 'ru' | 'en';
+  // Fan coil parameters (pipes / motor) are only set for fan coils
+  const { name, image, area, rooms, pipes, motor } = product;
   const price = product.price
     ? product.discount_percent ? Math.round(product.price * (1 - product.discount_percent / 100)) : product.price
     : 0;

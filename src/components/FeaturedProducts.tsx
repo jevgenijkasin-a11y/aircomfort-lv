@@ -1,10 +1,10 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { type SupabaseProduct } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import { starred } from '@/components/FootnoteStar';
 import { listProducts, getSettings, hiddenCategoryKeys } from '@/lib/db';
 import { visibleProducts } from '@/lib/catalogData';
+import { toCard } from '@/lib/productCard';
 
 // Seeded LCG shuffle — same result all day, different result tomorrow (UTC midnight)
 function dailyShuffle<T>(arr: T[]): T[] {
@@ -46,7 +46,7 @@ export default async function FeaturedProducts() {
         <div className="reveal-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((p, i) => (
             <div key={p.id} className="reveal-3d flex flex-col" data-stagger={i}>
-              <ProductCard product={p as SupabaseProduct} locale={locale} installFrom={installFrom} />
+              <ProductCard product={toCard(p, locale)} locale={locale} installFrom={installFrom} />
             </div>
           ))}
         </div>

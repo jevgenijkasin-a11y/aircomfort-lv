@@ -13,10 +13,14 @@ import { localizedAlternates, BASE_URL } from '@/lib/seo';
 import {
   productTitle, productMetaDescription, productParagraphs, similarProducts,
   productJsonLd, breadcrumbJsonLd, jsonLdString, absUrl, brandSlug, categoryNoun, asLoc, areaLabel, roomCount, fullName,
+  productHeading, seriesSiblings, nameParts,
 } from '@/lib/productSeo';
+import { articlesForProduct } from '@/lib/blogData';
+import { ArticleCover } from '@/components/BlogList';
 import ProductImageViewer from '@/components/ProductImageViewer';
 import BackLink from '@/components/BackLink';
-import { ProductGrid } from '@/components/CatalogClient';
+import { ProductGrid } from '@/components/ProductGrid';
+import { toCards } from '@/lib/productCard';
 import { starred } from '@/components/FootnoteStar';
 import OrderLink from '@/components/OrderLink';
 
@@ -47,8 +51,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [{ url: image ? absUrl(image) : `${BASE_URL}/${locale}/opengraph-image`, alt: productName(data, locale) }],
     },
     twitter: { card: 'summary_large_image', title: `${title} | AirComfort`, description },
-    // Products in a category hidden in the admin stay reachable but unindexed
-    ...(hiddenCategoryKeys().has(data.category) ? { robots: { index: false, follow: true } } : {}),
+    // Out-of-stock products and products in a category hidden in the admin
+    // stay reachable but unindexed (links on the page are still followed)
+    ...(!data.in_stock || hiddenCategoryKeys().has(data.category) ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -151,21 +156,26 @@ export default async function ProductPage({ params }: Props) {
   const p = product as SupabaseProduct;
   const l = asLoc(locale);
   const name = productName(p, locale);
+  // H1 / title / JSON-LD name: "Brand Series Model 3.5 kW"
+  const heading = productHeading(p, locale);
   const features = productFeatures(p, locale);
   const images = productImages(p);
   const energyCls = energyColors[p.energy_class] ?? 'text-muted border-line bg-fg/5';
 
   const contactMessage = buildContactMessage(p, name, locale, installFrom);
   const paragraphs = productParagraphs(p, locale, installFrom);
-  const metaDescription = productMetaDescription(p, locale, installFrom);
   const cats = listCategories();
   const publicAll = visibleProducts(all, hiddenKeys(cats));
   const fanCoil = isFanCoil(cats, p.category);
   const cat = cats.find((c) => c.key === p.category);
   const fan = (k: string) => fanSpec(p, k);
   const byPrice = (target: number) => (a: SupabaseProduct, b: SupabaseProduct) => Math.abs(a.price - target) - Math.abs(b.price - target);
-  // Fan coils are compared with other fan coils only
-  const similar = similarProducts(fanCoil ? publicAll.filter((x) => isFanCoil(cats, x.category)) : publicAll, p, 6);
+  // "This series in other capacities" (in-stock models of the same series)
+  const series = seriesSiblings(publicAll, p);
+  const seriesIds = new Set(series.map((x) => x.id));
+  // Fan coils are compared with other fan coils only; the series block already lists its models
+  const similar = similarProducts((fanCoil ? publicAll.filter((x) => isFanCoil(cats, x.category)) : publicAll).filter((x) => !seriesIds.has(x.id)), p, 6);
+  const articles = articlesForProduct(p, locale, 2);
 
   // Fan coil → "Works with a heat pump": products picked in the admin, else
   // 3–4 air-to-water heat pumps (Midea Huggy / Mitsubishi Ecodan first) by price.
@@ -241,13 +251,16 @@ export default async function ProductPage({ params }: Props) {
     { name: tn('home'), href: '/', url: `${BASE_URL}/${locale}` },
     { name: tn('catalog'), href: '/catalog', url: `${BASE_URL}/${locale}/catalog` },
     { name: p.brand, href: brandHref, url: `${BASE_URL}/${locale}${brandHref}` },
-    { name, href: null, url: pageUrl },
+    { name: heading, href: null, url: pageUrl },
   ];
+  const productLd = productJsonLd(p, locale, pageUrl, paragraphs.join(' '));
   const installDesc = settings[`svc_install_desc_${locale}`];
   const TX = {
     about: { lv: 'Apraksts', ru: 'Описание', en: 'Description' },
     install: { lv: 'Montāža un konsultācija', ru: 'Монтаж и консультация', en: 'Installation and advice' },
     similar: { lv: 'Līdzīgi modeļi', ru: 'Похожие модели', en: 'Similar models' },
+    series: { lv: 'Šī sērija citās jaudās', ru: 'Эта серия в других мощностях', en: 'This series in other capacities' },
+    articles: { lv: 'Noderīgi raksti', ru: 'Полезные статьи', en: 'Useful articles' },
     installFrom: { lv: `Montāža no ${installFrom} €*`, ru: `Монтаж от ${installFrom} €*`, en: `Installation from €${installFrom}*` },
     total: {
       lv: (v: string) => `Kopā ar montāžu no ${v} €*`,
@@ -258,7 +271,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(productJsonLd(p, locale, pageUrl, metaDescription)) }} />
+      {productLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(productLd) }} />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumbJsonLd(crumbs.map(({ name: n, url }) => ({ name: n, url })))) }} />
       {/* Header */}
       <div className="pt-36 pb-6 bg-gradient-to-b from-surface to-page relative overflow-hidden">
@@ -280,7 +293,7 @@ export default async function ProductPage({ params }: Props) {
             </ol>
           </nav>
           <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-1">{p.brand}</p>
-          <h1 className="font-heading font-bold text-3xl sm:text-4xl mb-3">{name}</h1>
+          <h1 className="font-heading font-bold text-3xl sm:text-4xl mb-3">{heading}</h1>
           {(p.is_hit || p.is_promo || !!p.discount_percent) && (
             <div className="flex flex-wrap gap-2">
               {p.is_hit && <span className="text-sm font-bold px-3 py-1 rounded-full bg-hit text-white shadow-md">{tp('badgeHit')}</span>}
@@ -463,12 +476,40 @@ export default async function ProductPage({ params }: Props) {
           </div>
         )}
 
+        {/* Same series, other capacities — compact links */}
+        {series.length > 0 && (
+          <section className="mt-12" aria-labelledby="series-title">
+            <h2 id="series-title" className="font-heading font-bold text-2xl mb-5">{TX.series[l]}</h2>
+            <ul className="flex flex-wrap gap-2.5">
+              {[p, ...series].sort((a, b) => a.power_kw - b.power_kw || a.price - b.price).map((x) => {
+                const current = x.id === p.id;
+                const { model, extras } = nameParts(x, l);
+                const label = (
+                  <>
+                    <span className="font-heading font-bold text-base">{x.power_kw} {l === 'ru' ? 'кВт' : 'kW'}</span>
+                    {(model || extras.length > 0) && <span className="block text-xs text-muted mt-0.5">{[model, ...extras].filter(Boolean).join(' ')}</span>}
+                  </>
+                );
+                return (
+                  <li key={x.id}>
+                    {current ? (
+                      <span aria-current="page" className="block min-w-[96px] px-4 py-2.5 rounded-xl border-2 border-primary bg-accent/10 text-fg">{label}</span>
+                    ) : (
+                      <Link href={`/catalog/${x.id}` as any} className="block min-w-[96px] px-4 py-2.5 rounded-xl border border-line bg-surface text-fg hover:border-accent/60 hover:text-primary transition-colors">{label}</Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
         {/* Fan coil → compatible air-to-water heat pumps */}
         {worksWith.length > 0 && (
           <section className="mt-12">
             <h2 className="font-heading font-bold text-2xl mb-2">{t('worksWithHeatPump')}</h2>
             <p className="text-muted text-sm mb-6">{t('worksWithHint')}</p>
-            <ProductGrid products={worksWith} locale={locale} installFrom={installFrom} />
+            <ProductGrid products={toCards(worksWith, locale)} locale={locale} installFrom={installFrom} />
           </section>
         )}
 
@@ -476,7 +517,7 @@ export default async function ProductPage({ params }: Props) {
         {matchingFanCoils.length > 0 && (
           <section className="mt-12">
             <h2 className="font-heading font-bold text-2xl mb-6">{t('matchingFanCoils')}</h2>
-            <ProductGrid products={matchingFanCoils} locale={locale} installFrom={installFrom} />
+            <ProductGrid products={toCards(matchingFanCoils, locale)} locale={locale} installFrom={installFrom} />
           </section>
         )}
 
@@ -484,7 +525,26 @@ export default async function ProductPage({ params }: Props) {
         {similar.length > 0 && (
           <section className="mt-12">
             <h2 className="font-heading font-bold text-2xl mb-6">{TX.similar[l]}</h2>
-            <ProductGrid products={similar} locale={locale} installFrom={installFrom} />
+            <ProductGrid products={toCards(similar, locale)} locale={locale} installFrom={installFrom} />
+          </section>
+        )}
+
+        {/* Useful articles from the blog, matched to the product category */}
+        {articles.length > 0 && (
+          <section className="mt-12" aria-labelledby="articles-title">
+            <h2 id="articles-title" className="font-heading font-bold text-2xl mb-6">{TX.articles[l]}</h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {articles.map((a) => (
+                <li key={a.slug}>
+                  <Link href={`/blog/${a.slug}` as any} className="group flex gap-4 items-center bg-card border border-line rounded-2xl p-3 hover:border-accent/50 transition-colors h-full">
+                    <span className="relative w-32 sm:w-40 aspect-[16/9] flex-shrink-0 rounded-xl overflow-hidden bg-surface">
+                      <ArticleCover cover={a.cover_url} category={a.category} alt="" sizes="160px" />
+                    </span>
+                    <span className="font-heading font-semibold text-base leading-snug group-hover:text-primary transition-colors">{a[`title_${l}`]}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
       </div>
