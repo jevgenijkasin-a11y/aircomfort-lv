@@ -1,1 +1,5 @@
-{"headers":{"x-next-cache-tags":"_N_T_/layout,_N_T_/admin-old/layout,_N_T_/admin-old/page,_N_T_/admin-old"},"status":200}
+{
+  "headers": {
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/admin-old/layout,_N_T_/admin-old/page,_N_T_/admin-old"
+  }
+}
