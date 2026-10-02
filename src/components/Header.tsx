@@ -4,13 +4,18 @@ import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+import { usePageLocales } from '@/lib/pageLocales';
 
 const locales = ['lv', 'ru', 'en'] as const;
 
-export default function Header() {
+/** showBlog: the current language has published articles (menu item "Guides"). */
+export default function Header({ showBlog = false }: { showBlog?: boolean }) {
   const t = useTranslations('nav');
   const locale = useLocale();
   const pathname = usePathname();
+  // A page missing in some language (blog article) → switch to the article list there
+  const pageLocales = usePageLocales();
+  const langHref = (lang: string) => (pageLocales && !pageLocales.includes(lang) ? '/blog' : pathname);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -24,6 +29,7 @@ export default function Header() {
     { href: '/' as const, label: t('home') },
     { href: '/catalog' as const, label: t('catalog') },
     { href: '/calculator' as const, label: t('calculator') },
+    ...(showBlog ? [{ href: '/blog' as const, label: t('blog') }] : []),
     { href: '/contacts' as const, label: t('contacts') },
   ];
 
@@ -48,13 +54,13 @@ export default function Header() {
                 <circle cx="12" cy="12" r="2.5" fill="white" stroke="none" />
               </svg>
             </div>
-            <span className="font-heading font-bold text-lg sm:text-2xl lg:text-3xl tracking-tight">
+            <span className="font-heading font-bold text-lg sm:text-2xl xl:text-3xl tracking-tight">
               Air<span className="text-primary">Comfort</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
@@ -73,7 +79,7 @@ export default function Header() {
               {locales.map((lang) => (
                 <Link
                   key={lang}
-                  href={pathname}
+                  href={langHref(lang)}
                   locale={lang}
                   className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all duration-200 ${
                     locale === lang
@@ -88,7 +94,7 @@ export default function Header() {
 
             <Link
               href="/contacts"
-              className="magnetic hidden sm:flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-on-primary font-semibold text-base px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-glow/20 hover:shadow-glow/30"
+              className="magnetic hidden sm:flex lg:hidden xl:flex whitespace-nowrap items-center gap-1.5 bg-primary hover:bg-primary-hover text-on-primary font-semibold text-base px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-glow/20 hover:shadow-glow/30"
             >
               {t('getQuote')}
             </Link>
@@ -134,7 +140,7 @@ export default function Header() {
                 {locales.map((lang) => (
                   <Link
                     key={lang}
-                    href={pathname}
+                    href={langHref(lang)}
                     locale={lang}
                     onClick={() => setMenuOpen(false)}
                     className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${

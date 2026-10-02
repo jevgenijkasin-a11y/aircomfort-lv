@@ -8,7 +8,7 @@ import { DICT, type Lang } from './i18n';
 import { Ctx, type Section, type AdminCtx } from './context';
 import { Spinner, useToast, Dropdown } from './ui';
 import {
-  Logo, IconGrid, IconInbox, IconBox, IconTree, IconImage, IconUser, IconChat, IconText, IconCog, IconKey,
+  Logo, IconGrid, IconInbox, IconBox, IconTree, IconImage, IconUser, IconChat, IconDoc, IconText, IconCog, IconKey,
   IconBack, IconLogout, IconSearch, IconMoon, IconSun, IconMenu, IconX, IconExternal,
 } from './icons';
 import Dashboard from './sections/Dashboard';
@@ -18,6 +18,7 @@ import Categories from './sections/Categories';
 import Slider from './sections/Slider';
 import Cards from './sections/Cards';
 import Reviews from './sections/Reviews';
+import Articles from './sections/Articles';
 import Texts from './sections/Texts';
 import Settings from './sections/Settings';
 import Password from './sections/Password';
@@ -30,6 +31,7 @@ const NAV: { id: Section; icon: (p: { className?: string }) => JSX.Element; key:
   { id: 'slider', icon: IconImage, key: 'navSlider' },
   { id: 'cards', icon: IconUser, key: 'navCards' },
   { id: 'reviews', icon: IconChat, key: 'navReviews' },
+  { id: 'articles', icon: IconDoc, key: 'navArticles' },
   { id: 'texts', icon: IconText, key: 'navTexts' },
   { id: 'settings', icon: IconCog, key: 'navSettings' },
   { id: 'password', icon: IconKey, key: 'navPassword' },
@@ -101,7 +103,7 @@ export default function AdminV2App() {
 
   const body: Record<Section, ReactNode> = {
     dashboard: <Dashboard />, requests: <Requests />, products: <Products />, categories: <Categories />,
-    slider: <Slider />, cards: <Cards />, reviews: <Reviews />, texts: <Texts />, settings: <Settings />, password: <Password />,
+    slider: <Slider />, cards: <Cards />, reviews: <Reviews />, articles: <Articles />, texts: <Texts />, settings: <Settings />, password: <Password />,
   };
 
   return (

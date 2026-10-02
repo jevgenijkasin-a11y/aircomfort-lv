@@ -3,6 +3,7 @@ import { descendantKeys, hiddenKeys } from './categories';
 import { visibleProducts } from './catalogData';
 import { BASE_URL } from './seo';
 import { brandSlug, CATEGORY_SLUGS } from './productSeo';
+import { publishedArticles } from './blogData';
 
 export const SITEMAP_LOCALES = ['lv', 'ru', 'en'] as const;
 
@@ -56,6 +57,14 @@ export async function sitemapEntries(locale: string): Promise<Entry[]> {
   // Products
   for (const p of products) {
     out.push({ loc: `${base}/catalog/${p.id}`, lastmod: pDate(p), priority: 0.6, changefreq: 'monthly' });
+  }
+  // Blog: published articles that exist in this language (drafts never listed)
+  const articles = publishedArticles(locale);
+  if (articles.length) {
+    out.push({ loc: `${base}/blog`, lastmod: maxDate(articles.map((a) => day(a.updated_at))), priority: 0.6, changefreq: 'weekly' });
+    for (const a of articles) {
+      out.push({ loc: `${base}/blog/${a.slug}`, lastmod: day(a.updated_at)!, priority: 0.7, changefreq: 'monthly' });
+    }
   }
   return out;
 }

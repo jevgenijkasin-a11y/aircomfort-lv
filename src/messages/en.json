@@ -5,7 +5,8 @@
     "calculator": "Calculator",
     "contacts": "Contacts",
     "getQuote": "Get a Quote",
-    "themeToggle": "Switch light/dark theme"
+    "themeToggle": "Switch light/dark theme",
+    "blog": "Guides"
   },
   "hero": {
     "badge": "Professional installation with warranty",
@@ -223,6 +224,30 @@
     "title": "We'll prepare a custom",
     "titleAccent": "proposal for your space",
     "subtitle": "Free consultation and preliminary cost estimate"
+  },
+  "blog": {
+    "title": "Guides to air conditioners and heat pumps",
+    "metaTitle": "Guides: air conditioners, heat pumps and state support",
+    "metaDescription": "Articles on choosing an air conditioner or heat pump, sizing, installation and state support in Latvia. Clear and to the point.",
+    "subtitle": "How to choose, install and save: clear explanations from the AirComfort team.",
+    "all": "All",
+    "cooling": "Cooling",
+    "heating": "Heating",
+    "subsidy": "Subsidies",
+    "filterLabel": "Article topics",
+    "readMore": "Read the article",
+    "published": "Published",
+    "updated": "Updated",
+    "empty": "No articles in this section yet.",
+    "emptyLocale": "Articles in English are on the way. They are already available in Latvian and Russian.",
+    "readIn": "Read in",
+    "related": "Suitable equipment",
+    "seeAll": "See the whole section",
+    "ctaTitle": "Free consultation",
+    "ctaText": "We will help you choose equipment for your home and work out the capacity and installation cost.",
+    "ctaButton": "Free consultation",
+    "ctaMessage": "I would like a consultation. Article: {title}",
+    "back": "All articles"
   },
   "cookies": {
     "text": "We use cookies to ensure proper website functionality and to improve your experience. By continuing to use the site, you agree to the use of cookies.",

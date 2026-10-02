@@ -5,7 +5,7 @@ import type { Dict, Lang } from './i18n';
 
 export type Section =
   | 'dashboard' | 'requests' | 'products' | 'categories' | 'slider'
-  | 'cards' | 'reviews' | 'texts' | 'settings' | 'password';
+  | 'cards' | 'reviews' | 'articles' | 'texts' | 'settings' | 'password';
 
 export type AdminCtx = {
   t: Dict;

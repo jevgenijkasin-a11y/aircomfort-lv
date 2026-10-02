@@ -1,6 +1,6 @@
 ﻿import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { getSettings } from '@/lib/db';
+import { getSettings, blogLocales } from '@/lib/db';
 import { getCompany } from '@/lib/company';
 import GoogleIcon from '@/components/GoogleIcon';
 
@@ -17,6 +17,8 @@ export default async function Footer() {
     { href: '/' as const, label: t('nav.home') },
     { href: '/catalog' as const, label: t('nav.catalog') },
     { href: '/calculator' as const, label: t('nav.calculator') },
+    // "Guides" only once this language has published articles
+    ...(blogLocales().has(locale) ? [{ href: '/blog' as const, label: t('nav.blog') }] : []),
     { href: '/contacts' as const, label: t('nav.contacts') },
   ];
 

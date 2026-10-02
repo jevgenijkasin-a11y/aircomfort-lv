@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/adminAuth';
 import { updateProduct, deleteProduct } from '@/lib/db';
 import { validateProductPayload } from '@/lib/productValidation';
+import { notifyProductSaved } from '@/lib/productIndexNow';
+import { requestHost } from '@/lib/indexNow';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -18,6 +20,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
   if (errors.length) return NextResponse.json({ error: errors.join(' '), errors }, { status: 400 });
   const product = await updateProduct(id, payload);
   if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  notifyProductSaved(product, requestHost(req));
   return NextResponse.json(product);
 }
 

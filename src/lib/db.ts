@@ -8,6 +8,7 @@ import fs from 'fs';
 import { randomUUID } from 'crypto';
 import type { SupabaseProduct, SupabaseContact, SupabaseReview, SupabaseHeroSlide, EmployeeCard } from './types';
 import { type Category, hiddenKeys } from './categories';
+import { type Article, type ArticleInput, ARTICLE_FIELDS, articleLocales } from './articles';
 
 export const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
 export const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
@@ -103,6 +104,8 @@ export function db(): DatabaseSync {
   return g.__aircomfortDb;
 }
 
+const DB_VERSION = 2;
+
 // Additive, idempotent schema migrations for databases created by older code
 // (the live DB on the server). Never drops or rewrites existing data.
 function migrate(instance: DatabaseSync) {
@@ -115,12 +118,13 @@ function migrate(instance: DatabaseSync) {
   // Versioned migrations (PRAGMA user_version). A full copy of the database is
   // written next to it before the first pending migration runs.
   const version = Number(instance.prepare('PRAGMA user_version').get()?.user_version ?? 0);
-  if (version < 1) {
+  if (version < DB_VERSION) {
     backupBeforeMigration(instance, version);
     instance.exec('BEGIN');
     try {
-      migrateV1(instance, cols);
-      instance.exec('PRAGMA user_version = 1');
+      if (version < 1) migrateV1(instance, cols);
+      if (version < 2) migrateV2(instance);
+      instance.exec(`PRAGMA user_version = ${DB_VERSION}`);
       instance.exec('COMMIT');
     } catch (e) {
       instance.exec('ROLLBACK');
@@ -179,6 +183,29 @@ CREATE TABLE IF NOT EXISTS categories (
       c.seo?.intro.lv ?? '', c.seo?.intro.ru ?? '', c.seo?.intro.en ?? '',
     );
   }
+}
+
+/**
+ * v2: blog articles (one row per article, all languages in it).
+ * Rollback: DROP TABLE articles; PRAGMA user_version = 1;
+ */
+function migrateV2(instance: DatabaseSync) {
+  const loc = (col: string) => ['lv', 'ru', 'en'].map((l) => `${col}_${l} TEXT NOT NULL DEFAULT ''`).join(', ');
+  instance.exec(`
+CREATE TABLE IF NOT EXISTS articles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL UNIQUE,
+  category TEXT NOT NULL DEFAULT 'cooling',
+  ${loc('title')}, ${loc('meta_title')}, ${loc('meta_description')}, ${loc('body')},
+  cover_url TEXT NOT NULL DEFAULT '',
+  cover_idea TEXT NOT NULL DEFAULT '',
+  related_catalog TEXT NOT NULL DEFAULT '',
+  related_product_ids TEXT NOT NULL DEFAULT '[]',
+  is_published INTEGER NOT NULL DEFAULT 0,
+  published_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);`);
 }
 
 type L3 = { lv: string; ru: string; en: string };
@@ -539,6 +566,77 @@ export async function updateCard(id: string, patch: Record<string, unknown>): Pr
 
 export async function deleteCard(id: string): Promise<void> {
   db().prepare('DELETE FROM employees_cards WHERE id = ?').run(id);
+}
+
+// ---------- blog articles ----------
+
+function mapArticle(r: any): Article {
+  let related_product_ids: string[] = [];
+  try { related_product_ids = JSON.parse(r.related_product_ids || '[]'); } catch { /* ignore */ }
+  return { ...r, related_product_ids, is_published: bool(r.is_published) };
+}
+
+export function listArticles(opts: { publishedOnly?: boolean } = {}): Article[] {
+  const where = opts.publishedOnly ? 'WHERE is_published = 1' : '';
+  return db().prepare(`SELECT * FROM articles ${where} ORDER BY COALESCE(published_at, created_at) DESC, id DESC`).all().map(mapArticle);
+}
+
+export function getArticle(id: number): Article | null {
+  const row = db().prepare('SELECT * FROM articles WHERE id = ?').get(id);
+  return row ? mapArticle(row) : null;
+}
+
+export function getArticleBySlug(slug: string): Article | null {
+  const row = db().prepare('SELECT * FROM articles WHERE slug = ?').get(slug);
+  return row ? mapArticle(row) : null;
+}
+
+function articleValues(data: Partial<ArticleInput>) {
+  const out: Record<string, string | number> = {};
+  for (const k of ARTICLE_FIELDS) {
+    if (!(k in data)) continue;
+    const v = data[k];
+    if (k === 'related_product_ids') out[k] = JSON.stringify(Array.isArray(v) ? v : []);
+    else if (k === 'is_published') out[k] = v ? 1 : 0;
+    else out[k] = String(v ?? '');
+  }
+  return out;
+}
+
+export function createArticle(data: Partial<ArticleInput>): Article {
+  const vals = articleValues(data);
+  const now = new Date().toISOString();
+  vals.created_at = now;
+  vals.updated_at = now;
+  if (vals.is_published) vals.published_at = now;
+  const cols = Object.keys(vals);
+  const r = db().prepare(`INSERT INTO articles (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`)
+    .run(...cols.map((c) => vals[c]));
+  return getArticle(Number(r.lastInsertRowid))!;
+}
+
+/** published_at is set the first time an article is published and kept afterwards. */
+export function updateArticle(id: number, data: Partial<ArticleInput>): Article | null {
+  const before = getArticle(id);
+  if (!before) return null;
+  const vals = articleValues(data);
+  if (!Object.keys(vals).length) return before;
+  vals.updated_at = new Date().toISOString();
+  if (vals.is_published && !before.published_at) vals.published_at = vals.updated_at;
+  const cols = Object.keys(vals);
+  db().prepare(`UPDATE articles SET ${cols.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`).run(...cols.map((c) => vals[c]), id);
+  return getArticle(id);
+}
+
+export function deleteArticle(id: number): void {
+  db().prepare('DELETE FROM articles WHERE id = ?').run(id);
+}
+
+/** Locales that have at least one published article (for the menu item). */
+export function blogLocales(): Set<string> {
+  const out = new Set<string>();
+  for (const a of listArticles({ publishedOnly: true })) for (const l of articleLocales(a)) out.add(l);
+  return out;
 }
 
 // ---------- auth secrets (separate from public settings) ----------

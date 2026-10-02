@@ -32,6 +32,25 @@
 
   .card { @apply rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]; }
   .card-title { @apply text-lg font-semibold text-gray-800 dark:text-white/90; }
+
+  /* Article markdown preview (close to the public .article-body) */
+  .md-preview { @apply text-[15px] leading-relaxed text-gray-700 dark:text-gray-300; overflow-wrap: break-word; }
+  .md-preview > * + * { @apply mt-3; }
+  .md-preview h2 { @apply mt-7 text-xl font-bold text-gray-900 dark:text-white; }
+  .md-preview h3 { @apply mt-5 text-lg font-semibold text-gray-900 dark:text-white; }
+  .md-preview h4 { @apply mt-4 font-semibold text-gray-900 dark:text-white; }
+  .md-preview strong { @apply font-semibold text-gray-900 dark:text-white; }
+  .md-preview a { @apply text-brand-600 underline underline-offset-2 dark:text-accent; }
+  .md-preview ul { @apply list-disc pl-5; }
+  .md-preview ol { @apply list-decimal pl-5; }
+  .md-preview li + li { @apply mt-1; }
+  .md-preview blockquote { @apply border-l-4 border-accent bg-gray-50 px-4 py-2 dark:bg-white/5; }
+  .md-preview .table-wrap { @apply overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800; }
+  .md-preview table { @apply w-full border-collapse text-sm; }
+  .md-preview th, .md-preview td { @apply border-b border-gray-200 px-3 py-2 text-left align-top dark:border-gray-800; }
+  .md-preview th { @apply bg-gray-50 font-semibold dark:bg-white/5; }
+  .md-preview code { @apply rounded bg-gray-100 px-1 text-[0.9em] dark:bg-white/10; }
+  .md-preview img { @apply max-w-full rounded-lg; }
 }
 
 @layer utilities {

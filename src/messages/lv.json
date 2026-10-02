@@ -5,7 +5,8 @@
     "calculator": "Kalkulators",
     "contacts": "Kontakti",
     "getQuote": "Saņemt piedāvājumu",
-    "themeToggle": "Pārslēgt gaišo/tumšo tēmu"
+    "themeToggle": "Pārslēgt gaišo/tumšo tēmu",
+    "blog": "Padomi"
   },
   "hero": {
     "badge": "Profesionāla uzstādīšana ar garantiju",
@@ -223,6 +224,30 @@
     "title": "Sagatavosim individuālu",
     "titleAccent": "piedāvājumu jūsu telpām",
     "subtitle": "Bezmaksas konsultācija un provizoriskais izmaksu aprēķins"
+  },
+  "blog": {
+    "title": "Padomi par kondicionieriem un siltumsūkņiem",
+    "metaTitle": "Padomi: kondicionieri, siltumsūkņi un valsts atbalsts",
+    "metaDescription": "Noderīgi raksti par kondicioniera un siltumsūkņa izvēli, jaudu, uzstādīšanu un valsts atbalstu Latvijā. Skaidri un bez liekas reklāmas.",
+    "subtitle": "Kā izvēlēties, uzstādīt un ietaupīt: skaidri skaidrojumi no AirComfort speciālistiem.",
+    "all": "Visi",
+    "cooling": "Dzesēšana",
+    "heating": "Apkure",
+    "subsidy": "Valsts atbalsts",
+    "filterLabel": "Rakstu tēmas",
+    "readMore": "Lasīt rakstu",
+    "published": "Publicēts",
+    "updated": "Atjaunināts",
+    "empty": "Šajā sadaļā rakstu vēl nav.",
+    "emptyLocale": "Raksti šajā valodā vēl tiek gatavoti. Tie jau ir pieejami latviski un krieviski.",
+    "readIn": "Lasīt",
+    "related": "Piemērotas iekārtas",
+    "seeAll": "Skatīt visu sadaļu",
+    "ctaTitle": "Bezmaksas konsultācija",
+    "ctaText": "Palīdzēsim izvēlēties iekārtu jūsu mājai, aprēķināsim jaudu un uzstādīšanas izmaksas.",
+    "ctaButton": "Bezmaksas konsultācija",
+    "ctaMessage": "Vēlos konsultāciju. Raksts: {title}",
+    "back": "Visi raksti"
   },
   "cookies": {
     "text": "Mēs izmantojam sīkdatnes, lai nodrošinātu vietnes pareizu darbību un uzlabotu jūsu pieredzi. Turpinot lietot vietni, jūs piekrītat sīkdatņu izmantošanai.",

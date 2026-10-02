@@ -12,6 +12,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import CookieBanner from '@/components/CookieBanner';
 import SiteAnimations from '@/components/SiteAnimations';
 import { localizedAlternates } from '@/lib/seo';
+import { blogLocales } from '@/lib/db';
 import { THEME_COLOR, THEME_SCRIPT } from '@/lib/theme';
 import '../globals.css';
 
@@ -117,7 +118,7 @@ export default async function LocaleLayout({
       <body className={`${inter.className} bg-page text-fg font-sans antialiased`}>
         <div id="scroll-progress-bar" aria-hidden="true" />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Header />
+          <Header showBlog={blogLocales().has(locale)} />
           <TrustBar />
           <main className="min-h-screen">{children}</main>
           <Footer />
