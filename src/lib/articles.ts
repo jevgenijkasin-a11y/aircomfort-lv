@@ -129,7 +129,16 @@ const marked = new Marked({
     },
     image({ href, title, text }) {
       const safe = /^(https?:|\/)/i.test(href) ? href : '';
-      return safe ? `<img src="${esc(safe)}" alt="${esc(text)}"${title ? ` title="${esc(title)}"` : ''} loading="lazy">` : '';
+      return safe ? `<img src="${esc(safe)}" alt="${esc(text)}"${title ? ` title="${esc(title)}"` : ''} loading="lazy" decoding="async">` : '';
+    },
+    // A paragraph with only a picture → figure with the alt text as caption
+    paragraph({ tokens }) {
+      const only = tokens.filter((t) => !(t.type === 'text' && !t.raw.trim()));
+      if (only.length === 1 && only[0].type === 'image') {
+        const img = only[0] as Tokens.Image;
+        return `<figure>${this.parser.parseInline(tokens)}${img.text ? `<figcaption>${esc(img.text)}</figcaption>` : ''}</figure>\n`;
+      }
+      return `<p>${this.parser.parseInline(tokens)}</p>\n`;
     },
     // Wide tables scroll inside their own box on phones
     table(token) {

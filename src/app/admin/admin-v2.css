@@ -51,6 +51,8 @@
   .md-preview th { @apply bg-gray-50 font-semibold dark:bg-white/5; }
   .md-preview code { @apply rounded bg-gray-100 px-1 text-[0.9em] dark:bg-white/10; }
   .md-preview img { @apply max-w-full rounded-lg; }
+  .md-preview figure img { @apply w-full; }
+  .md-preview figcaption { @apply mt-1.5 text-center text-xs text-gray-500 dark:text-gray-400; }
 }
 
 @layer utilities {
