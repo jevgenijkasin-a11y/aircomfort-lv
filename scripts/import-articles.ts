@@ -9,6 +9,7 @@
 //   category: subsidy            (cooling | heating | subsidy)
 //   related_catalog: /lv/catalog/type/air-to-water-heat-pumps
 //   cover_idea: …
+//   cover: /images/blog/<slug>-cover.webp   (optional, file in public/images/blog)
 //   ---
 //   # Title (dropped: the page H1 comes from `title`)
 //   Markdown text…
@@ -82,6 +83,8 @@ for (const f of files) {
   if (d.category && d.category !== front.category) problems.push(`${f}: category "${front.category}" differs from the other language ("${d.category}")`);
   d.category = front.category;
   if (front.related_catalog) d.related_catalog = front.related_catalog;
+  // Optional cover: a site path such as /images/blog/<slug>-cover.webp
+  if (front.cover) d.cover_url = front.cover;
   // Cover idea: the Russian one (admin language) wins, else the first found
   if (front.cover_idea && (lang === 'ru' || !d.cover_idea)) d.cover_idea = front.cover_idea;
   d[`title_${lang}`] = front.title;
