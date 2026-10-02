@@ -104,7 +104,7 @@ export function db(): DatabaseSync {
   return g.__aircomfortDb;
 }
 
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 // Additive, idempotent schema migrations for databases created by older code
 // (the live DB on the server). Never drops or rewrites existing data.
@@ -124,6 +124,7 @@ function migrate(instance: DatabaseSync) {
     try {
       if (version < 1) migrateV1(instance, cols);
       if (version < 2) migrateV2(instance);
+      if (version < 3) migrateV3(instance);
       instance.exec(`PRAGMA user_version = ${DB_VERSION}`);
       instance.exec('COMMIT');
     } catch (e) {
@@ -206,6 +207,18 @@ CREATE TABLE IF NOT EXISTS articles (
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );`);
+}
+
+/**
+ * v3: manual order of blog articles (admin drag & drop). Existing articles keep
+ * the order they were shown in (newest first).
+ * Rollback: ALTER TABLE articles DROP COLUMN sort_order; PRAGMA user_version = 2;
+ */
+function migrateV3(instance: DatabaseSync) {
+  instance.exec('ALTER TABLE articles ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0');
+  const rows = instance.prepare('SELECT id FROM articles ORDER BY COALESCE(published_at, created_at) DESC, id DESC').all();
+  const set = instance.prepare('UPDATE articles SET sort_order = ? WHERE id = ?');
+  rows.forEach((r, i) => set.run(i, r.id as number));
 }
 
 type L3 = { lv: string; ru: string; en: string };
@@ -578,7 +591,7 @@ function mapArticle(r: any): Article {
 
 export function listArticles(opts: { publishedOnly?: boolean } = {}): Article[] {
   const where = opts.publishedOnly ? 'WHERE is_published = 1' : '';
-  return db().prepare(`SELECT * FROM articles ${where} ORDER BY COALESCE(published_at, created_at) DESC, id DESC`).all().map(mapArticle);
+  return db().prepare(`SELECT * FROM articles ${where} ORDER BY sort_order, COALESCE(published_at, created_at) DESC, id DESC`).all().map(mapArticle);
 }
 
 export function getArticle(id: number): Article | null {
@@ -609,6 +622,8 @@ export function createArticle(data: Partial<ArticleInput>): Article {
   vals.created_at = now;
   vals.updated_at = now;
   if (vals.is_published) vals.published_at = now;
+  // New articles go to the top of the list
+  vals.sort_order = Number(db().prepare('SELECT COALESCE(MIN(sort_order), 0) - 1 AS n FROM articles').get()?.n ?? 0);
   const cols = Object.keys(vals);
   const r = db().prepare(`INSERT INTO articles (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`)
     .run(...cols.map((c) => vals[c]));
@@ -630,6 +645,20 @@ export function updateArticle(id: number, data: Partial<ArticleInput>): Article 
 
 export function deleteArticle(id: number): void {
   db().prepare('DELETE FROM articles WHERE id = ?').run(id);
+}
+
+/** Saves the manual order: ids[0] is shown first. Unknown ids are ignored. */
+export function reorderArticles(ids: number[]): void {
+  const d = db();
+  const set = d.prepare('UPDATE articles SET sort_order = ? WHERE id = ?');
+  d.exec('BEGIN');
+  try {
+    ids.forEach((id, i) => set.run(i, id));
+    d.exec('COMMIT');
+  } catch (e) {
+    d.exec('ROLLBACK');
+    throw e;
+  }
 }
 
 /** Locales that have at least one published article (for the menu item). */

@@ -4,7 +4,7 @@
 // drag & drop photo upload/reordering and a live card preview. Payload,
 // validation and API calls are the same as the old admin (lib/adminShared).
 import { useMemo, useRef, useState, type DragEvent, type ReactNode } from 'react';
-import type { AdminProduct, ProductSpecs } from '@/components/admin/adminStrings';
+import type { AdminProduct, ProductSpecs } from '@/lib/adminTypes';
 import { type Category, categoryTree, descendantKeys, isFanCoil, isWithin, FAN_COILS_DUCTED_KEY, AIR_WATER_KEY } from '@/lib/categories';
 import { validateFanCoilSpecs, PIPE_SYSTEMS, FAN_MOTORS } from '@/lib/fanCoil';
 import {

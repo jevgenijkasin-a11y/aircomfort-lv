@@ -36,6 +36,8 @@ const nextConfig = {
       },
       // The new admin moved from /admin-v2 to /admin
       { source: '/admin-v2', destination: '/admin', permanent: true },
+      // The old admin panel was removed
+      { source: '/admin-old', destination: '/admin', permanent: true },
     ];
   },
 

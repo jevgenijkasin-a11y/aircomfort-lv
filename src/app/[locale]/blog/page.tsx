@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { localizedAlternates, BASE_URL } from '@/lib/seo';
 import { breadcrumbJsonLd, jsonLdString } from '@/lib/productSeo';
 import { excerpt } from '@/lib/articles';
-import { asLoc, formatDate, publishedArticles, publishedDate } from '@/lib/blogData';
+import { asLoc, publishedArticles } from '@/lib/blogData';
 import { blogLocales } from '@/lib/db';
 import BlogList, { type BlogCard } from '@/components/BlogList';
 
@@ -36,8 +36,6 @@ export default async function BlogPage({ params }: Props) {
     category: a.category,
     title: a[`title_${l}`],
     description: a[`meta_description_${l}`] || excerpt(a[`body_${l}`]),
-    date: formatDate(publishedDate(a), locale),
-    dateIso: publishedDate(a),
     cover: a.cover_url,
   }));
   const otherLocales = cards.length ? [] : Array.from(blogLocales()).filter((x) => x !== locale);

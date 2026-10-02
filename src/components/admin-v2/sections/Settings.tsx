@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { SiteSettings } from '@/components/admin/adminStrings';
+import type { SiteSettings } from '@/lib/adminTypes';
 import { SETTINGS_DEFAULTS, settingsMap } from '@/lib/adminShared';
 import { useAdmin, api, revalidate } from '../context';
 import { Button, Card, Field, PageHeader, Spinner } from '../ui';

@@ -24,12 +24,14 @@ export interface Article {
   related_catalog: string;
   related_product_ids: string[];
   is_published: boolean;
+  /** Manual position in lists (admin drag & drop), lower first. */
+  sort_order: number;
   published_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export type ArticleInput = Omit<Article, 'id' | 'published_at' | 'created_at' | 'updated_at'>;
+export type ArticleInput = Omit<Article, 'id' | 'sort_order' | 'published_at' | 'created_at' | 'updated_at'>;
 
 /** Columns the admin / import may write (everything except ids and dates). */
 export const ARTICLE_FIELDS = [

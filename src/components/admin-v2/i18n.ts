@@ -1,4 +1,4 @@
-// UI strings for /admin-v2 (RU / LV / EN). LV and EN must have every RU key.
+// Admin UI strings (RU / LV / EN). LV and EN must have every RU key.
 export type Lang = 'ru' | 'lv' | 'en';
 
 const RU = {
@@ -6,11 +6,11 @@ const RU = {
   appTitle: 'AirComfort Admin',
   navDashboard: 'Дашборд', navRequests: 'Заявки', navProducts: 'Товары', navCategories: 'Категории',
   navSlider: 'Слайдер', navCards: 'Визитки', navReviews: 'Отзывы', navTexts: 'Тексты сайта',
-  navSettings: 'Настройки', navPassword: 'Сменить пароль', navOldAdmin: 'Старая админка', navArticles: 'Статьи',
+  navSettings: 'Настройки', navPassword: 'Сменить пароль', navArticles: 'Статьи',
   logout: 'Выйти', search: 'Поиск по товарам и заявкам…', themeLight: 'Светлая тема', themeDark: 'Тёмная тема',
   menu: 'Меню', openSite: 'Открыть сайт',
   // login
-  loginTitle: 'Вход в панель', loginDesc: 'Тот же пароль, что и в старой админке', password: 'Пароль',
+  loginTitle: 'Вход в панель', loginDesc: 'Панель управления сайтом aircomfort.lv', password: 'Пароль',
   loginBtn: 'Войти', loginLoading: 'Вход…', loginError: 'Неверный пароль',
   // common
   loading: 'Загрузка…', save: 'Сохранить', saving: 'Сохранение…', saved: 'Сохранено', cancel: 'Отмена',
@@ -110,6 +110,7 @@ const RU = {
   artLangs: 'Языки', artChanged: 'Изменено', artOpen: 'Открыть на сайте', artChars: 'симв.',
   artMdHelp: '## Подзаголовок · **жирный** · - список · | таблица | · [ссылка](/lv/catalog)',
   artUnsaved: 'Есть несохранённые изменения. Закрыть без сохранения?',
+  artOrderHint: 'Перетащите статью за значок ⋮⋮ или нажмите стрелки — в этом порядке статьи показываются на сайте.', artOrderSaved: 'Порядок сохранён', artDrag: 'Перетащить',
 };
 
 export type Dict = typeof RU;
@@ -118,10 +119,10 @@ const LV: Dict = {
   appTitle: 'AirComfort Admin',
   navDashboard: 'Pārskats', navRequests: 'Pieteikumi', navProducts: 'Preces', navCategories: 'Kategorijas',
   navSlider: 'Slīdrāde', navCards: 'Vizītkartes', navReviews: 'Atsauksmes', navTexts: 'Vietnes teksti',
-  navSettings: 'Iestatījumi', navPassword: 'Mainīt paroli', navOldAdmin: 'Vecā administrācija', navArticles: 'Raksti',
+  navSettings: 'Iestatījumi', navPassword: 'Mainīt paroli', navArticles: 'Raksti',
   logout: 'Iziet', search: 'Meklēt preces un pieteikumus…', themeLight: 'Gaišā tēma', themeDark: 'Tumšā tēma',
   menu: 'Izvēlne', openSite: 'Atvērt vietni',
-  loginTitle: 'Pieslēgšanās', loginDesc: 'Tā pati parole kā vecajā administrācijā', password: 'Parole',
+  loginTitle: 'Pieslēgšanās', loginDesc: 'Vietnes aircomfort.lv pārvaldības panelis', password: 'Parole',
   loginBtn: 'Ieiet', loginLoading: 'Pieslēdzas…', loginError: 'Nepareiza parole',
   loading: 'Ielādē…', save: 'Saglabāt', saving: 'Saglabā…', saved: 'Saglabāts', cancel: 'Atcelt',
   close: 'Aizvērt', edit: 'Rediģēt', copy: 'Kopēt', del: 'Dzēst', add: 'Pievienot',
@@ -210,16 +211,17 @@ const LV: Dict = {
   artLangs: 'Valodas', artChanged: 'Mainīts', artOpen: 'Atvērt vietnē', artChars: 'zīm.',
   artMdHelp: '## Apakšvirsraksts · **trekns** · - saraksts · | tabula | · [saite](/lv/catalog)',
   artUnsaved: 'Ir nesaglabātas izmaiņas. Aizvērt bez saglabāšanas?',
+  artOrderHint: 'Velciet rakstu aiz ikonas ⋮⋮ vai spiediet bultiņas — šādā secībā raksti tiek rādīti vietnē.', artOrderSaved: 'Secība saglabāta', artDrag: 'Pārvilkt',
 };
 
 const EN: Dict = {
   appTitle: 'AirComfort Admin',
   navDashboard: 'Dashboard', navRequests: 'Requests', navProducts: 'Products', navCategories: 'Categories',
   navSlider: 'Slider', navCards: 'Business cards', navReviews: 'Reviews', navTexts: 'Site texts',
-  navSettings: 'Settings', navPassword: 'Change password', navOldAdmin: 'Old admin', navArticles: 'Articles',
+  navSettings: 'Settings', navPassword: 'Change password', navArticles: 'Articles',
   logout: 'Log out', search: 'Search products and requests…', themeLight: 'Light theme', themeDark: 'Dark theme',
   menu: 'Menu', openSite: 'Open site',
-  loginTitle: 'Sign in', loginDesc: 'Same password as the old admin', password: 'Password',
+  loginTitle: 'Sign in', loginDesc: 'Control panel for aircomfort.lv', password: 'Password',
   loginBtn: 'Sign in', loginLoading: 'Signing in…', loginError: 'Invalid password',
   loading: 'Loading…', save: 'Save', saving: 'Saving…', saved: 'Saved', cancel: 'Cancel',
   close: 'Close', edit: 'Edit', copy: 'Copy', del: 'Delete', add: 'Add',
@@ -308,6 +310,7 @@ const EN: Dict = {
   artLangs: 'Languages', artChanged: 'Changed', artOpen: 'Open on site', artChars: 'chars',
   artMdHelp: '## Subheading · **bold** · - list · | table | · [link](/lv/catalog)',
   artUnsaved: 'There are unsaved changes. Close without saving?',
+  artOrderHint: 'Drag an article by the ⋮⋮ handle or use the arrows — the site shows articles in this order.', artOrderSaved: 'Order saved', artDrag: 'Drag',
 };
 
 export const DICT: Record<Lang, Dict> = { ru: RU, lv: LV, en: EN };

@@ -1,7 +1,6 @@
-// Logic shared by both admin panels (/admin and /admin-old): product form
-// <-> API payload conversion, site-text keys and settings defaults.
-// Moved here unchanged from AdminProducts / AdminTexts / AdminSettings.
-import type { AdminProduct, ProductSpecs, SiteSettings } from '@/components/admin/adminStrings';
+// Admin panel logic: product form <-> API payload conversion, site-text keys
+// and settings defaults.
+import type { AdminProduct, ProductSpecs, SiteSettings } from '@/lib/adminTypes';
 
 // ── products ──────────────────────────────────────────────────────────
 
@@ -140,7 +139,7 @@ export function buildProductPayload(fields: Omit<AdminProduct, 'id'>, fanCoil: b
   };
 }
 
-// ── site texts (AdminTexts) ───────────────────────────────────────────
+// ── site texts ───────────────────────────────────────────────────
 
 export const TEXT_KEYS = [
   // Hero
@@ -170,7 +169,7 @@ export const TEXT_KEYS = [
   'cat_ihp_desc_lv', 'cat_ihp_desc_ru', 'cat_ihp_desc_en',
 ];
 
-// ── settings (AdminSettings) ──────────────────────────────────────────
+// ── settings ────────────────────────────────────────────────────────
 
 export const SETTINGS_DEFAULTS: SiteSettings = {
   phone: '', email: '', address: '', hours: '',

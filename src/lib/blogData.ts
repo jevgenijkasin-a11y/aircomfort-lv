@@ -63,9 +63,5 @@ export function articleAlternates(a: Article, locale: string): NonNullable<Metad
   return { canonical: url(locale), languages };
 }
 
-const DATE_LOCALE: Record<Loc, string> = { lv: 'lv-LV', ru: 'ru-RU', en: 'en-GB' };
-export const formatDate = (iso: string | null | undefined, locale: string) =>
-  iso ? new Intl.DateTimeFormat(DATE_LOCALE[asLoc(locale)], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Riga' }).format(new Date(iso)) : '';
-
-/** Article date shown and used in JSON-LD: first publication, else creation. */
+/** Article date for JSON-LD and Open Graph (not shown to visitors): first publication, else creation. */
 export const publishedDate = (a: Article) => a.published_at ?? a.created_at;

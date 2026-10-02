@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { AdminRequest } from '@/components/admin/adminStrings';
+import type { AdminRequest } from '@/lib/adminTypes';
 import { useAdmin, api, fmtDate } from '../context';
 import { Badge, Button, Confirm, Drawer, EmptyState, IconButton, PageHeader, Pagination, Spinner } from '../ui';
 import { IconCheck, IconEye, IconInbox, IconMail, IconPhone, IconSearch, IconTrash } from '../icons';

@@ -8,7 +8,7 @@ import { getSettings } from '@/lib/db';
 import { BASE_URL } from '@/lib/seo';
 import { breadcrumbJsonLd, jsonLdString, absUrl } from '@/lib/productSeo';
 import { renderMarkdown, extractFaq, excerpt, articleLocales, type Article, type Loc } from '@/lib/articles';
-import { asLoc, articleAlternates, formatDate, publicArticle, publishedDate, relatedProducts } from '@/lib/blogData';
+import { asLoc, articleAlternates, publicArticle, publishedDate, relatedProducts } from '@/lib/blogData';
 import { organizationNode, ORG_ID, WEBSITE_ID } from '@/lib/company';
 import { siteConfig } from '@/config/site';
 import { ProductGrid } from '@/components/CatalogClient';
@@ -94,8 +94,6 @@ export default async function ArticlePage({ params }: Props) {
   ]);
   const url = `${BASE_URL}/${locale}/blog/${a.slug}`;
   const title = a[`title_${l}`];
-  const published = publishedDate(a);
-  const updatedLater = a.updated_at.slice(0, 10) > published.slice(0, 10);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
 
   return (
@@ -122,11 +120,8 @@ export default async function ArticlePage({ params }: Props) {
             <span className="inline-flex items-center gap-1.5 bg-accent/10 border border-accent/25 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-4">
               <CategoryIcon category={a.category} className="w-3.5 h-3.5" />{t(a.category)}
             </span>
-            <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-[2.75rem] leading-tight mb-4">{title}</h1>
-            <p className="text-sm text-muted">
-              {t('published')} <time dateTime={published}>{formatDate(published, locale)}</time>
-              {updatedLater && <> · {t('updated')} <time dateTime={a.updated_at}>{formatDate(a.updated_at, locale)}</time></>}
-            </p>
+            {/* Dates are not shown to visitors; search engines get them from JSON-LD and the sitemap */}
+            <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-[2.75rem] leading-tight">{title}</h1>
           </div>
         </header>
 

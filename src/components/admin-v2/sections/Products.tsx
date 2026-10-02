@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { AdminProduct } from '@/components/admin/adminStrings';
+import type { AdminProduct } from '@/lib/adminTypes';
 import { type Category, categoryTree, descendantKeys } from '@/lib/categories';
 import { EMPTY_PRODUCT, EMPTY_SPECS, productToForm, productCopyForm, firstImage, type ProductForm } from '@/lib/adminShared';
 import { useAdmin, api, revalidate, fmtDate } from '../context';

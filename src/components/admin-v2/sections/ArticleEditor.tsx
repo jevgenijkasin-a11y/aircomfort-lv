@@ -3,7 +3,7 @@
 // Article form: language tabs (LV/RU/EN) with title, SEO fields and markdown
 // text with a live preview rendered by the same code as the public page.
 import { useMemo, useRef, useState, type ReactNode } from 'react';
-import type { AdminProduct } from '@/components/admin/adminStrings';
+import type { AdminProduct } from '@/lib/adminTypes';
 import { type Category, slugify } from '@/lib/categories';
 import { type Article, type Loc, ARTICLE_CATEGORIES, ARTICLE_LOCALES, hasLocale, renderMarkdown, extractFaq } from '@/lib/articles';
 import { firstImage } from '@/lib/adminShared';
@@ -11,7 +11,7 @@ import { useAdmin, api, revalidate, uploadImage } from '../context';
 import { Badge, Button, Field, Modal, Spinner, Toggle } from '../ui';
 import { IconUpload, IconX } from '../icons';
 
-export type ArticleForm = Omit<Article, 'id' | 'published_at' | 'created_at' | 'updated_at'> & { id?: number };
+export type ArticleForm = Omit<Article, 'id' | 'sort_order' | 'published_at' | 'created_at' | 'updated_at'> & { id?: number };
 
 export const emptyArticle = (): ArticleForm => ({
   slug: '', category: 'heating',
@@ -23,7 +23,7 @@ export const emptyArticle = (): ArticleForm => ({
 });
 
 export const articleToForm = (a: Article): ArticleForm => {
-  const { published_at: _p, created_at: _c, updated_at: _u, ...rest } = a;
+  const { published_at: _p, created_at: _c, updated_at: _u, sort_order: _s, ...rest } = a;
   return rest;
 };
 

@@ -1,15 +1,14 @@
 'use client';
 
-// /admin-v2 shell: login, sidebar, header, section switching (#hash).
-// Layout ported from TailAdmin (MIT). Uses the same /api/admin/* endpoints and
-// the same session cookie as the old /admin.
+// Admin shell (/admin): login, sidebar, header, section switching (#hash).
+// Layout ported from TailAdmin (MIT). Talks to the /api/admin/* endpoints.
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { DICT, type Lang } from './i18n';
 import { Ctx, type Section, type AdminCtx } from './context';
 import { Spinner, useToast, Dropdown } from './ui';
 import {
   Logo, IconGrid, IconInbox, IconBox, IconTree, IconImage, IconUser, IconChat, IconDoc, IconText, IconCog, IconKey,
-  IconBack, IconLogout, IconSearch, IconMoon, IconSun, IconMenu, IconX, IconExternal,
+  IconLogout, IconSearch, IconMoon, IconSun, IconMenu, IconX, IconExternal,
 } from './icons';
 import Dashboard from './sections/Dashboard';
 import Requests from './sections/Requests';
@@ -136,10 +135,6 @@ export default function AdminV2App() {
               })}
             </ul>
             <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-800">
-              <a href="/admin-old" className="group menu-item menu-item-inactive">
-                <IconBack className="h-5 w-5 menu-item-icon-inactive" />
-                {t.navOldAdmin}
-              </a>
               <a href="/" target="_blank" rel="noopener" className="group menu-item menu-item-inactive">
                 <IconExternal className="h-5 w-5 menu-item-icon-inactive" />
                 {t.openSite}

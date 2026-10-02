@@ -12,8 +12,6 @@ export type BlogCard = {
   category: ArticleCategory;
   title: string;
   description: string;
-  date: string;
-  dateIso: string;
   cover: string;
 };
 
@@ -84,13 +82,9 @@ export default function BlogList({ cards, labels }: {
                   <ArticleCover cover={a.cover} category={a.category} alt="" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" priority={i < 3} />
                 </div>
                 <div className="flex flex-col flex-1 p-5">
-                  <div className="flex items-center gap-2 text-xs text-muted mb-3">
-                    <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
-                      <CategoryIcon category={a.category} className="w-3.5 h-3.5" />{labels[a.category]}
-                    </span>
-                    <span aria-hidden="true">·</span>
-                    <time dateTime={a.dateIso}>{a.date}</time>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mb-3">
+                    <CategoryIcon category={a.category} className="w-3.5 h-3.5" />{labels[a.category]}
+                  </span>
                   <h2 className="font-heading font-bold text-lg leading-snug mb-2 group-hover:text-primary transition-colors">{a.title}</h2>
                   <p className="text-sm text-muted leading-relaxed line-clamp-2 mb-4">{a.description}</p>
                   <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
