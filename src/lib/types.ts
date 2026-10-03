@@ -31,6 +31,9 @@ export interface SupabaseProduct {
   compatible_ids?: string[];
 }
 
+/** Product attached to a request (catalog order / favorites selection), snapshot at send time. */
+export interface ContactProduct { id: string; name: string; price: number }
+
 export interface SupabaseContact {
   id: number;
   name: string;
@@ -40,6 +43,9 @@ export interface SupabaseContact {
   message: string;
   status: string;
   created_at: string;
+  products: ContactProduct[];
+  /** Installation needed: true / false, null when not asked */
+  install: boolean | null;
 }
 
 export interface SupabaseSetting {

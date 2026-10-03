@@ -2,7 +2,7 @@
 // components (catalog, calculator) never receive full product objects with
 // descriptions, features and specs.
 import { type SupabaseProduct, productName, productImages } from './types';
-import { areaLabel, roomCount, asLoc } from './productSeo';
+import { areaLabel, areaMax, roomCount, asLoc } from './productSeo';
 import { fanSpec } from './fanCoil';
 
 export type CardProduct = {
@@ -21,6 +21,8 @@ export type CardProduct = {
   image: string | null;
   /** Localized served area without unit ("20–30"), or null */
   area: string | null;
+  /** Upper bound of the served area in m² ("up to 30 m²" chip), or null */
+  areaMax: number | null;
   /** Multi-split: number of rooms, or null */
   rooms: number | null;
   /** Fan coils: "2" / "4" pipes and AC / EC motor ('' otherwise) */
@@ -42,6 +44,7 @@ export function toCard(p: SupabaseProduct, locale: string): CardProduct {
     is_promo: !!p.is_promo,
     image: productImages(p)[0] ?? null,
     area: areaLabel(p, asLoc(locale)),
+    areaMax: areaMax(p),
     rooms: roomCount(p),
     pipes: fanSpec(p, 'pipe_system'),
     motor: fanSpec(p, 'fan_motor'),
@@ -49,3 +52,7 @@ export function toCard(p: SupabaseProduct, locale: string): CardProduct {
 }
 
 export const toCards = (list: SupabaseProduct[], locale: string) => list.map((p) => toCard(p, locale));
+
+/** Price after discount (0 = price on request). Plain function: usable on the server and in the browser. */
+export const finalCardPrice = (p: Pick<CardProduct, 'price' | 'discount_percent'>) =>
+  p.price ? (p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price) : 0;

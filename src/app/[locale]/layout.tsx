@@ -13,7 +13,9 @@ import CookieBanner from '@/components/CookieBanner';
 import SiteAnimations from '@/components/SiteAnimations';
 import { localizedAlternates } from '@/lib/seo';
 import { blogLocales } from '@/lib/db';
-import { THEME_COLOR, THEME_SCRIPT } from '@/lib/theme';
+import { THEME_COLOR, THEME_SCRIPT, VIEW_SCRIPT } from '@/lib/theme';
+import CompareBar from '@/components/CompareBar';
+import IconSprite from '@/components/IconSprite';
 import '../globals.css';
 
 // Headings: Manrope (`font-heading`), bold headings render at 800 (globals.css).
@@ -114,9 +116,11 @@ export default async function LocaleLayout({
       <head>
         <meta name="theme-color" content={THEME_COLOR.light} suppressHydrationWarning />
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: VIEW_SCRIPT }} />
       </head>
       <body className={`${inter.className} bg-page text-fg font-sans antialiased`}>
         <div id="scroll-progress-bar" aria-hidden="true" />
+        <IconSprite />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header showBlog={blogLocales().has(locale)} />
           <TrustBar />
@@ -124,6 +128,7 @@ export default async function LocaleLayout({
           <Footer />
           <FloatingButtons />
           <ScrollToTop />
+          <CompareBar />
           <CookieBanner />
           <SiteAnimations />
         </NextIntlClientProvider>

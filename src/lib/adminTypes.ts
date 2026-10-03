@@ -9,6 +9,8 @@ export interface AdminRequest {
   message: string;
   status: string;
   created_at: string;
+  products?: { id: string; name: string; price: number }[];
+  install?: boolean | null;
 }
 
 export interface ProductSpecs {

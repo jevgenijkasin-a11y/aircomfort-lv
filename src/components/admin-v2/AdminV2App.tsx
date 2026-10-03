@@ -22,7 +22,9 @@ import Texts from './sections/Texts';
 import Settings from './sections/Settings';
 import Password from './sections/Password';
 
-const NAV: { id: Section; icon: (p: { className?: string }) => JSX.Element; key: keyof typeof DICT.ru }[] = [
+// Dictionary keys whose value is a plain string (labels)
+type TextKey = { [K in keyof typeof DICT.ru]: (typeof DICT.ru)[K] extends string ? K : never }[keyof typeof DICT.ru];
+const NAV: { id: Section; icon: (p: { className?: string }) => JSX.Element; key: TextKey }[] = [
   { id: 'dashboard', icon: IconGrid, key: 'navDashboard' },
   { id: 'requests', icon: IconInbox, key: 'navRequests' },
   { id: 'products', icon: IconBox, key: 'navProducts' },

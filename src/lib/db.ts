@@ -6,7 +6,7 @@ import { DatabaseSync } from 'node:sqlite';
 import path from 'path';
 import fs from 'fs';
 import { randomUUID } from 'crypto';
-import type { SupabaseProduct, SupabaseContact, SupabaseReview, SupabaseHeroSlide, EmployeeCard } from './types';
+import type { SupabaseProduct, SupabaseContact, ContactProduct, SupabaseReview, SupabaseHeroSlide, EmployeeCard } from './types';
 import { type Category, hiddenKeys } from './categories';
 import { type Article, type ArticleInput, ARTICLE_FIELDS, articleLocales } from './articles';
 
@@ -104,7 +104,7 @@ export function db(): DatabaseSync {
   return g.__aircomfortDb;
 }
 
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 // Additive, idempotent schema migrations for databases created by older code
 // (the live DB on the server). Never drops or rewrites existing data.
@@ -125,6 +125,7 @@ function migrate(instance: DatabaseSync) {
       if (version < 1) migrateV1(instance, cols);
       if (version < 2) migrateV2(instance);
       if (version < 3) migrateV3(instance);
+      if (version < 4) migrateV4(instance);
       instance.exec(`PRAGMA user_version = ${DB_VERSION}`);
       instance.exec('COMMIT');
     } catch (e) {
@@ -214,6 +215,17 @@ CREATE TABLE IF NOT EXISTS articles (
  * the order they were shown in (newest first).
  * Rollback: ALTER TABLE articles DROP COLUMN sort_order; PRAGMA user_version = 2;
  */
+/**
+ * v4: catalog orders / favorites selections in requests — the products
+ * ([{ id, name, price }]) and whether installation is needed (1 / 0 / NULL).
+ * Rollback: ALTER TABLE contacts DROP COLUMN products; … DROP COLUMN install; PRAGMA user_version = 3;
+ */
+function migrateV4(instance: DatabaseSync) {
+  const cols = instance.prepare('PRAGMA table_info(contacts)').all().map((c) => c.name as string);
+  if (!cols.includes('products')) instance.exec("ALTER TABLE contacts ADD COLUMN products TEXT NOT NULL DEFAULT '[]'");
+  if (!cols.includes('install')) instance.exec('ALTER TABLE contacts ADD COLUMN install INTEGER');
+}
+
 function migrateV3(instance: DatabaseSync) {
   instance.exec('ALTER TABLE articles ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0');
   const rows = instance.prepare('SELECT id FROM articles ORDER BY COALESCE(published_at, created_at) DESC, id DESC').all();
@@ -512,13 +524,23 @@ export async function deleteReview(id: number): Promise<void> {
 
 // ---------- contacts ----------
 
+const mapContact = (r: any): SupabaseContact => {
+  let products: ContactProduct[] = [];
+  try { products = JSON.parse(r.products || '[]'); } catch { /* ignore */ }
+  return { ...r, products, install: r.install === null || r.install === undefined ? null : bool(r.install) };
+};
+
 export async function listContacts(): Promise<SupabaseContact[]> {
-  return db().prepare('SELECT * FROM contacts ORDER BY created_at DESC').all() as unknown as SupabaseContact[];
+  return db().prepare('SELECT * FROM contacts ORDER BY created_at DESC').all().map(mapContact);
 }
 
-export async function createContact(c: { name: string; phone: string; email: string; service: string; message: string }): Promise<void> {
-  db().prepare("INSERT INTO contacts (name, phone, email, service, message, status) VALUES (?, ?, ?, ?, ?, 'new')")
-    .run(c.name, c.phone, c.email ?? '', c.service ?? '', c.message ?? '');
+export async function createContact(c: {
+  name: string; phone: string; email: string; service: string; message: string;
+  products?: ContactProduct[]; install?: boolean | null;
+}): Promise<void> {
+  db().prepare("INSERT INTO contacts (name, phone, email, service, message, status, products, install) VALUES (?, ?, ?, ?, ?, 'new', ?, ?)")
+    .run(c.name, c.phone, c.email ?? '', c.service ?? '', c.message ?? '', JSON.stringify(c.products ?? []),
+      c.install === undefined || c.install === null ? null : c.install ? 1 : 0);
 }
 
 export async function setContactStatus(id: number, status: string): Promise<void> {

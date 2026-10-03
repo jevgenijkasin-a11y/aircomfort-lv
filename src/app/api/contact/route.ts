@@ -1,7 +1,10 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createContact } from '@/lib/db';
+import { createContact, getProduct, hiddenCategoryKeys } from '@/lib/db';
+import { fullName, finalPrice } from '@/lib/productSeo';
+import { BASE_URL } from '@/lib/seo';
+import type { ContactProduct } from '@/lib/types';
 import nodemailer from 'nodemailer';
 
 interface RequestEntry {
@@ -17,7 +20,12 @@ const SERVICE_LABELS: Record<string, string> = {
   maintenance: 'Apkope / Обслуживание',
   consultation: 'Konsultācija / Консультация',
   other: 'Cits / Другое',
+  catalog_order: 'Pasūtījums no kataloga / Заказ из каталога',
+  favorites: 'Izlase / Подборка из избранного',
 };
+
+/** Values from the form go into the notification e-mail as text, not HTML. */
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 async function createTransport(forExternal = false) {
   const host = process.env.SMTP_HOST;
@@ -75,11 +83,11 @@ async function sendNotification(entry: RequestEntry) {
     html: `
       <h2>Jauns pieprasījums / Новая заявка</h2>
       <table style="font-family:Arial,sans-serif;font-size:14px;">
-        <tr><td style="color:#666;padding:4px 12px 4px 0">Vārds / Имя:</td><td><b>${entry.name}</b></td></tr>
-        <tr><td style="color:#666;padding:4px 12px 4px 0">Telefons / Телефон:</td><td><b>${entry.phone}</b></td></tr>
-        ${entry.email ? `<tr><td style="color:#666;padding:4px 12px 4px 0">E-pasts / Email:</td><td>${entry.email}</td></tr>` : ''}
-        ${entry.service ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Pakalpojums / Услуга:</td><td>${SERVICE_LABELS[entry.service] ?? entry.service}</td></tr>` : ''}
-        ${entry.message ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Ziņojums / Сообщение:</td><td>${entry.message}</td></tr>` : ''}
+        <tr><td style="color:#666;padding:4px 12px 4px 0">Vārds / Имя:</td><td><b>${esc(entry.name)}</b></td></tr>
+        <tr><td style="color:#666;padding:4px 12px 4px 0">Telefons / Телефон:</td><td><b>${esc(entry.phone)}</b></td></tr>
+        ${entry.email ? `<tr><td style="color:#666;padding:4px 12px 4px 0">E-pasts / Email:</td><td>${esc(entry.email)}</td></tr>` : ''}
+        ${entry.service ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Pakalpojums / Услуга:</td><td>${esc(SERVICE_LABELS[entry.service] ?? entry.service)}</td></tr>` : ''}
+        ${entry.message ? `<tr><td style="color:#666;padding:4px 12px 4px 0">Ziņojums / Сообщение:</td><td style="white-space:pre-wrap">${esc(entry.message)}</td></tr>` : ''}
         <tr><td style="color:#666;padding:4px 12px 4px 0">Laiks / Время:</td><td>${new Date().toLocaleString('lv-LV')}</td></tr>
       </table>
       <p style="margin-top:16px;color:#888;font-size:12px;">AirComfort.lv</p>
@@ -138,15 +146,58 @@ async function sendAutoReply(entry: RequestEntry) {
   console.log('[SMTP] auto-reply sent to', entry.email);
 }
 
+const str = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
+
+/**
+ * Catalog order / favorites selection: product names and prices are taken
+ * from the database (never from the browser); only public, in-stock
+ * products are accepted.
+ */
+async function requestProducts(ids: unknown): Promise<ContactProduct[]> {
+  if (!Array.isArray(ids)) return [];
+  const unique = Array.from(new Set(ids.map(String))).slice(0, 50);
+  const hidden = hiddenCategoryKeys();
+  const out: ContactProduct[] = [];
+  for (const id of unique) {
+    const p = await getProduct(id);
+    if (!p || !p.in_stock || hidden.has(p.category)) continue;
+    out.push({ id: p.id, name: fullName(p, 'ru'), price: finalPrice(p) ?? 0 });
+  }
+  return out;
+}
+
+function orderMessage(service: string, products: ContactProduct[], install: boolean | null, comment: string, locale: string): string {
+  const lines: string[] = [];
+  lines.push(service === 'catalog_order' ? 'Заказ из каталога' : 'Подборка из избранного');
+  for (const p of products) lines.push(`• ${p.name} — ${p.price ? `${p.price} €` : 'цена по запросу'}\n  ${BASE_URL}/${locale}/catalog/${p.id}`);
+  if (install !== null) lines.push(`Монтаж: ${install ? 'нужен' : 'не нужен'}`);
+  if (comment) lines.push('', `Комментарий: ${comment}`);
+  return lines.join('\n');
+}
+
 export async function POST(req: NextRequest) {
-  const { name, phone, email, service, message } = await req.json();
-  if (!name || !phone) {
+  const body = await req.json().catch(() => ({}));
+  const name = str(body.name, 120);
+  const phone = str(body.phone, 40);
+  // "+371 " alone is the prefilled prefix, not a number
+  if (!name || phone.replace(/\D/g, '').length < 6) {
     return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
   }
-  const entry: RequestEntry = { name, phone, email: email || '', service: service || '', message: message || '' };
+  const service = str(body.service, 40);
+  let message = str(body.message, 4000);
+  let products: ContactProduct[] = [];
+  let install: boolean | null = null;
+  if (service === 'catalog_order' || service === 'favorites') {
+    products = await requestProducts(body.product_ids);
+    if (!products.length) return NextResponse.json({ error: 'No products' }, { status: 400 });
+    install = service === 'catalog_order' ? body.install !== false : null;
+    const locale = ['lv', 'ru', 'en'].includes(body.locale) ? body.locale : 'lv';
+    message = orderMessage(service, products, install, message, locale);
+  }
+  const entry: RequestEntry = { name, phone, email: str(body.email, 200), service, message };
 
   // Save to contacts table (same as admin reads from)
-  await createContact(entry);
+  await createContact({ ...entry, products, install });
 
   // Send notification to admin + auto-reply to customer (non-blocking)
   sendNotification(entry).catch((err) => console.error('[SMTP notify]', err?.message || err));

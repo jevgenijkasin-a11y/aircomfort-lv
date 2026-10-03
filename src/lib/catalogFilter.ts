@@ -21,8 +21,12 @@ export const AREA_BUCKETS: { id: string; min: number; max: number; label: string
   { id: '50-70', min: 50, max: 70, label: '50–70 m²' },
   { id: '70plus', min: 70, max: Infinity, label: '70+ m²' },
 ];
+/** Extra bucket used by the phone area chips ("50+"); not in the desktop select. */
+export const AREA_EXTRA = [{ id: '50plus', min: 50, max: Infinity, label: '50+ m²' }];
+/** Area chips on phones: up to 25 · 25–35 · 35–50 · 50+ */
+export const AREA_CHIPS = ['lt25', '25-35', '35-50', '50plus'] as const;
 const inBucket = (p: SupabaseProduct, id: string) => {
-  const b = AREA_BUCKETS.find((x) => x.id === id);
+  const b = [...AREA_BUCKETS, ...AREA_EXTRA].find((x) => x.id === id);
   const a = areaMax(p);
   if (!b || a === null) return false;
   return b.id === 'lt25' ? a <= 25 : a > b.min && a <= b.max;

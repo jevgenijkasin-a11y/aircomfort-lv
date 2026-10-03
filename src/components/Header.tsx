@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+import FavoritesLink from '@/components/FavoritesLink';
 import { usePageLocales } from '@/lib/pageLocales';
 
 const locales = ['lv', 'ru', 'en'] as const;
@@ -60,7 +61,7 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-7">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
@@ -74,7 +75,7 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
           </nav>
 
           {/* Right: lang + CTA */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3 lg:gap-2 xl:gap-3">
             <div className="hidden sm:flex items-center bg-surface rounded-xl p-1 gap-0.5">
               {locales.map((lang) => (
                 <Link
@@ -99,6 +100,7 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
               {t('getQuote')}
             </Link>
 
+            <FavoritesLink />
             <ThemeToggle />
 
             <button

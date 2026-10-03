@@ -7,6 +7,8 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { CardProduct } from '@/lib/productCard';
 import { starred } from '@/components/FootnoteStar';
+import { CardToggles, OrderButton } from '@/components/ProductCardActions';
+import { finalCardPrice } from '@/lib/productCard';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-primary border-accent/40 bg-accent/10',
@@ -47,27 +49,33 @@ export default function ProductCard({ product, locale, installFrom }: { product:
   const tc = useTranslations('catalog');
   const l = (locale === 'ru' || locale === 'en' ? locale : 'lv') as 'lv' | 'ru' | 'en';
   // Fan coil parameters (pipes / motor) are only set for fan coils
-  const { name, image, area, rooms, pipes, motor } = product;
-  const price = product.price
-    ? product.discount_percent ? Math.round(product.price * (1 - product.discount_percent / 100)) : product.price
-    : 0;
+  const ts = useTranslations('shop');
+  const { name, image, rooms, pipes, motor, areaMax } = product;
+  const price = finalCardPrice(product);
+  // "2,7 kW" in LV/RU, "2.7 kW" in EN
+  const kw = `${product.power_kw.toLocaleString(l === 'en' ? 'en-GB' : l === 'ru' ? 'ru-RU' : 'lv-LV')} ${l === 'ru' ? 'кВт' : 'kW'}`;
+  const chips = [
+    product.power_kw > 0 ? kw : '',
+    areaMax ? ts('upTo', { n: areaMax }) : rooms ? roomsLabel(rooms, l) : '',
+    pipes ? tc(`pipes${pipes}`) : '',
+    motor,
+  ].filter(Boolean);
 
   return (
-    <Link
-      href={`/catalog/${product.id}` as any}
-      className="glass-card product-card-hover rounded-2xl overflow-hidden flex flex-col group h-full p-3"
-    >
+    // The title link is stretched over the whole card (after:inset-0); the
+    // favourite / compare / order buttons sit above it (z-10).
+    <article className="product-card">
       {/* Photo on a light plate in both themes (data-theme="light" keeps the
-          badges on it in the light palette) — same height on every card */}
-      <div data-theme="light" className="relative h-48 rounded-xl overflow-hidden bg-photo">
+          badges on it in the light palette). Square inside a phone grid (globals.css) */}
+      <div data-theme="light" className="pc-photo">
         {image ? (
           <Image
             src={image}
             alt={name}
             fill
-            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
+            sizes="(max-width: 767px) 46vw, (max-width: 1024px) 45vw, 300px"
             quality={75}
-            className="object-contain p-4 mix-blend-multiply"
+            className="pc-img"
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
@@ -76,31 +84,38 @@ export default function ProductCard({ product, locale, installFrom }: { product:
           </div>
         )}
         {product.energy_class && (
-          <div className={`absolute top-2.5 right-2.5 text-xs font-bold px-2 py-0.5 rounded-lg border ${energyColors[product.energy_class] ?? 'text-muted border-line-strong bg-card/70'}`}>
+          <div className={`pc-energy ${energyColors[product.energy_class] ?? 'text-muted border-line-strong bg-card/70'}`}>
             {product.energy_class}
           </div>
         )}
         {(product.is_hit || product.is_promo || !!product.discount_percent) && (
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
+          <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
             {product.is_hit && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-hit text-white">{t('badgeHit')}</span>}
             {product.is_promo && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-promo text-white">{t('badgePromo')}</span>}
             {!!product.discount_percent && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-sale text-black">-{product.discount_percent}%</span>}
           </div>
         )}
+        <CardToggles id={product.id} category={product.category} name={name} image={image} />
       </div>
 
-      <div className="px-2 pt-4 pb-1 flex flex-col flex-1">
-        <p className="text-primary text-xs font-semibold uppercase tracking-wider mb-1">{product.brand}</p>
-        <h3 className="font-heading font-semibold text-sm text-fg mb-2 leading-snug">{name}</h3>
-        <p className="text-xs text-muted mb-4">
-          {product.power_kw} kW
-          {area ? ` · ${area} m²` : rooms ? ` · ${roomsLabel(rooms, l)}` : ''}
-          {pipes ? ` · ${tc(`pipes${pipes}`)}` : ''}
-          {motor ? ` · ${motor}` : ''}
-        </p>
+      <div className="pc-body">
+        <p className="pc-brand">{product.brand}</p>
+        <h3 className="pc-title">
+          <Link href={`/catalog/${product.id}` as any}
+            className="pc-link">
+            {name}
+          </Link>
+        </h3>
+        {chips.length > 0 && (
+          <ul className="pc-chips">
+            {chips.map((c) => (
+              <li key={c} className="pc-chip">{c}</li>
+            ))}
+          </ul>
+        )}
 
-        <div className="mt-auto border-t border-line pt-3 flex items-end justify-between gap-2">
-          <div>
+        <div className="pc-foot">
+          <div className="min-w-0">
             {!price ? (
               <span className="font-heading font-semibold text-sm text-fg">{t('priceOnRequest')}</span>
             ) : (
@@ -108,15 +123,17 @@ export default function ProductCard({ product, locale, installFrom }: { product:
                 {!!product.discount_percent && (
                   <span className="block text-xs text-muted line-through">{product.price.toLocaleString('lv-LV')} €</span>
                 )}
-                <span className={`font-heading font-bold text-xl ${product.discount_percent ? 'text-primary' : 'text-fg'}`}>
+                <span className={product.discount_percent ? 'pc-price !text-primary' : 'pc-price'}>
                   {price.toLocaleString('lv-LV')} €
                 </span>
               </>
             )}
           </div>
-          <span className="text-xs text-muted text-right">{starred(t('installFrom', { price: installFrom }))}</span>
+          {/* Installation price: not on the compact phone card */}
+          <span className="pc-inst">{starred(t('installFrom', { price: installFrom }))}</span>
         </div>
+        <OrderButton product={{ id: product.id, name, price: product.price, discount_percent: product.discount_percent, image }} className="mt-2.5 md:mt-3" />
       </div>
-    </Link>
+    </article>
   );
 }

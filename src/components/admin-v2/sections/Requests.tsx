@@ -45,12 +45,13 @@ export default function Requests() {
     if (from) list = list.filter((r) => r.created_at.slice(0, 10) >= from);
     if (to) list = list.filter((r) => r.created_at.slice(0, 10) <= to);
     const n = q.trim().toLowerCase();
-    if (n) list = list.filter((r) => [r.name, r.phone, r.email, r.service, r.message].join(' ').toLowerCase().includes(n));
+    if (n) list = list.filter((r) => [r.name, r.phone, r.email, r.service, t.reqSvc[r.service] ?? '', r.message].join(' ').toLowerCase().includes(n));
     return list;
-  }, [rows, q, onlyNew, from, to]);
+  }, [rows, q, onlyNew, from, to, t]);
   const pages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const shown = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
   const newCount = (rows ?? []).filter((r) => r.status === 'new').length;
+  const svc = (k: string) => t.reqSvc[k] ?? k;
 
   return (
     <div>
@@ -96,7 +97,7 @@ export default function Requests() {
                     <td className="px-4 py-3 text-gray-800 dark:text-white/90">{r.name}</td>
                     <td className="whitespace-nowrap px-4 py-3"><a href={`tel:${r.phone}`} onClick={(e) => e.stopPropagation()} className="text-brand-600 hover:underline dark:text-accent">{r.phone}</a></td>
                     <td className="px-4 py-3">{r.email && <a href={`mailto:${r.email}`} onClick={(e) => e.stopPropagation()} className="text-gray-600 hover:underline dark:text-gray-300">{r.email}</a>}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{r.service}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{r.service && (r.service === 'catalog_order' || r.service === 'favorites' ? <Badge color="info">{svc(r.service)}</Badge> : svc(r.service))}</td>
                     <td className="px-4 py-3"><Badge color={r.status === 'new' ? 'brand' : 'gray'}>{r.status === 'new' ? t.reqNew : t.reqRead}</Badge></td>
                     <td className={`whitespace-nowrap px-2 py-2 text-right ${STICKY_COL}`} onClick={(e) => e.stopPropagation()}>
                       <IconButton label={t.details} onClick={() => setOpen(r)}><IconEye className="h-4 w-4" /></IconButton>
@@ -126,7 +127,19 @@ export default function Requests() {
             <div><dt className="text-gray-500">{t.reqDate}</dt><dd className="mt-1 text-gray-800 dark:text-white/90">{fmtDate(open.created_at, lang)}</dd></div>
             <div><dt className="text-gray-500">{t.reqPhone}</dt><dd className="mt-1"><a href={`tel:${open.phone}`} className="inline-flex items-center gap-2 text-brand-600 dark:text-accent"><IconPhone className="h-4 w-4" />{open.phone}</a></dd></div>
             {open.email && <div><dt className="text-gray-500">{t.reqEmail}</dt><dd className="mt-1"><a href={`mailto:${open.email}`} className="inline-flex items-center gap-2 text-brand-600 dark:text-accent"><IconMail className="h-4 w-4" />{open.email}</a></dd></div>}
-            {open.service && <div><dt className="text-gray-500">{t.reqService}</dt><dd className="mt-1 text-gray-800 dark:text-white/90">{open.service}</dd></div>}
+            {open.service && <div><dt className="text-gray-500">{t.reqService}</dt><dd className="mt-1 text-gray-800 dark:text-white/90">{svc(open.service)}</dd></div>}
+            {!!open.products?.length && (
+              <div><dt className="text-gray-500">{t.reqProducts} ({open.products.length})</dt>
+                <dd className="mt-1"><ul className="space-y-1.5">
+                  {open.products.map((p) => (
+                    <li key={p.id} className="flex justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2 dark:border-gray-800">
+                      <a href={`/ru/catalog/${p.id}`} target="_blank" rel="noopener" className="text-brand-600 hover:underline dark:text-accent">{p.name}</a>
+                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-300">{p.price ? `${p.price} €` : t.priceOnRequest}</span>
+                    </li>
+                  ))}
+                </ul></dd></div>
+            )}
+            {open.install !== null && open.install !== undefined && <div><dt className="text-gray-500">{t.reqInstall}</dt><dd className="mt-1"><Badge color={open.install ? 'success' : 'gray'}>{open.install ? t.reqInstallYes : t.reqInstallNo}</Badge></dd></div>}
             {open.message && <div><dt className="text-gray-500">{t.reqMessage}</dt><dd className="mt-1 whitespace-pre-wrap rounded-xl bg-gray-50 p-4 text-gray-800 dark:bg-white/[0.03] dark:text-white/90">{open.message}</dd></div>}
           </dl>
         )}

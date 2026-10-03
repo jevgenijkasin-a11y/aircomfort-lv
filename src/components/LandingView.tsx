@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import { ProductGrid } from '@/components/ProductGrid';
 import Pagination from '@/components/Pagination';
+import ViewToggle from '@/components/ViewToggle';
 import type { SupabaseProduct } from '@/lib/types';
 import { toCards } from '@/lib/productCard';
 import { breadcrumbJsonLd, jsonLdString } from '@/lib/productSeo';
@@ -68,7 +69,9 @@ export default function LandingView({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        {/* Phones: grid / list switch */}
+        {cards.length > 0 && <div className="md:hidden flex justify-end mb-3"><ViewToggle /></div>}
         {cards.length || !emptyText ? (
           <ProductGrid products={cards} locale={locale} installFrom={installFrom} />
         ) : (

@@ -14,3 +14,6 @@ apply(saved()||(mq&&mq.matches?'dark':'light'));
 if(mq){var f=function(e){if(!saved())apply(e.matches?'dark':'light')};mq.addEventListener?mq.addEventListener('change',f):mq.addListener&&mq.addListener(f);}
 window.__setTheme=function(t){try{localStorage.setItem(K,t)}catch(e){}d.classList.add('theme-switching');apply(t);setTimeout(function(){d.classList.remove('theme-switching')},50);};
 })();`;
+
+/** Phone product grids: grid / list choice (components/ViewToggle) applied before first paint. */
+export const VIEW_SCRIPT = "(function(){try{if(localStorage.getItem('catalogView')==='list')document.documentElement.setAttribute('data-catalog-view','list')}catch(e){}})()";

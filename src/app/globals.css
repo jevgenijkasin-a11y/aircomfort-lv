@@ -213,7 +213,7 @@ body {
    On mobile the FAB (56px + 48px gap) sits bottom-right; pad the page so
    the last content (footer, CTAs) can always scroll clear of it. */
 @media (max-width: 1023px) {
-  body { padding-bottom: calc(116px + env(safe-area-inset-bottom)); }
+  body { padding-bottom: calc(116px + var(--compare-bar-h, 0px) + env(safe-area-inset-bottom)); }
 }
 
 /* Headings font (Manrope): bold headings use the 800 weight */
@@ -258,4 +258,62 @@ body {
 @media (max-width: 639px) {
   .article-body { font-size: 1rem; }
   .article-body h2 { font-size: 1.35rem; }
+}
+
+
+/* ── Product grids on phones (< 768 px) ──────────────────────────────────
+   Compact two-column cards with a square photo; html[data-catalog-view=list]
+   (set before paint from localStorage) switches to a one-column list. */
+@media (max-width: 767px) {
+  .product-grid .pc-photo { height: auto; aspect-ratio: 1 / 1; }
+  html[data-catalog-view='list'] .product-grid { grid-template-columns: minmax(0, 1fr); }
+  html[data-catalog-view='list'] .product-grid .product-card { flex-direction: row; gap: 0.75rem; }
+  html[data-catalog-view='list'] .product-grid .pc-photo { width: 7.5rem; height: 7.5rem; aspect-ratio: auto; flex-shrink: 0; }
+  html[data-catalog-view='list'] .product-grid .pc-body { padding-top: 0.125rem; }
+}
+
+/* Bottom sheet / dialog entrance */
+@keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+.sheet-panel { animation: sheet-up 0.22s ease-out; }
+.sheet-fade { animation: sheet-fade 0.2s ease-out; }
+@media (prefers-reduced-motion: reduce) { .sheet-panel, .sheet-fade { animation: none; } }
+
+/* Horizontal chip rows scroll without a visible scrollbar */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+
+/* ── Product card controls (short class names keep the catalog HTML small) ── */
+@layer components {
+  /* favourite / compare: 44×44 touch area around a 36 px circle */
+  .pc-ib { @apply relative z-10 w-11 h-11 -m-1 flex items-center justify-center rounded-full focus-visible:outline-none; }
+  .pc-ic { @apply w-9 h-9 rounded-full flex items-center justify-center border shadow-sm transition-colors bg-white/90 border-black/10 text-[#0F1B2D]; }
+  .pc-ic svg { width: 18px; height: 18px; fill: none; }
+  .pc-ib:hover .pc-ic { @apply text-[#0B7A63] border-[#0B7A63]/40; }
+  .pc-ib:focus-visible .pc-ic { @apply ring-2 ring-accent; }
+  .pc-ib[aria-pressed='true'] .pc-ic { @apply bg-[#0B7A63] border-[#0B7A63] text-white; }
+  .pc-ib[aria-pressed='true'] .pc-ic .i-fill { fill: currentColor; }
+  .pc-order { @apply relative z-10 w-full min-h-[44px] rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-bold text-sm transition-colors; }
+  .pc-chip { @apply text-[11px] md:text-xs font-semibold leading-none px-2 py-1 rounded-md bg-tint text-primary whitespace-nowrap; }
+}
+
+@layer components {
+  /* Product card layout (components/ProductCard) */
+  .product-card { @apply glass-card product-card-hover relative rounded-2xl flex flex-col h-full p-2 md:p-3; }
+  .pc-photo { @apply relative h-48 rounded-xl overflow-hidden bg-photo; }
+  .pc-img { @apply object-contain p-3 md:p-4 mix-blend-multiply; }
+  .pc-energy { @apply absolute bottom-2 right-2 text-xs font-bold px-2 py-0.5 rounded-lg border; }
+  .pc-tg { @apply absolute top-1.5 right-1.5 flex flex-col gap-0.5; }
+  .pc-body { @apply px-1 md:px-2 pt-3 md:pt-4 pb-0.5 flex flex-col flex-1 min-w-0; }
+  .pc-brand { @apply text-primary text-[11px] md:text-xs font-semibold uppercase tracking-wider mb-1 truncate; }
+  .pc-title { @apply font-heading font-semibold text-sm text-fg mb-2 leading-snug line-clamp-2 md:line-clamp-none; }
+  /* the title link covers the whole card */
+  .pc-link::after { content: ''; @apply absolute inset-0 rounded-2xl; }
+  .pc-link:focus-visible { outline: none; }
+  .pc-link:focus-visible::after { @apply ring-2 ring-accent; }
+  .pc-chips { @apply flex flex-wrap gap-1 mb-3; }
+  .pc-foot { @apply mt-auto border-t border-line pt-2.5 md:pt-3 flex items-end justify-between gap-2; }
+  .pc-price { @apply font-heading font-bold text-lg md:text-xl text-fg; }
+  .pc-inst { @apply hidden md:inline text-xs text-muted text-right; }
 }

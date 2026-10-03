@@ -12,7 +12,9 @@ import ProductCard from '@/components/ProductCard';
 import type { CardProduct } from '@/lib/productCard';
 import { type Category, categoryTree, catName } from '@/lib/categories';
 import { KW_RANGES, PIPE_SYSTEMS, FAN_MOTORS } from '@/lib/fanCoil';
-import { type Filters, AREA_BUCKETS, FAN_FILTER_KEYS, filtersQuery, fanFiltersActive, hasFilters } from '@/lib/catalogFilter';
+import { type Filters, AREA_BUCKETS, AREA_EXTRA, AREA_CHIPS, FAN_FILTER_KEYS, filtersQuery, fanFiltersActive, hasFilters } from '@/lib/catalogFilter';
+import Sheet from '@/components/Sheet';
+import ViewToggle from '@/components/ViewToggle';
 import { starred } from '@/components/FootnoteStar';
 import { pageItems } from '@/lib/pagination';
 
@@ -105,6 +107,8 @@ function CatalogInner({
 }: Props) {
   const t = useTranslations('catalog');
   const tp = useTranslations('products');
+  const ts = useTranslations('shop');
+  const [sheet, setSheet] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -170,89 +174,146 @@ function CatalogInner({
     label: { lv: 'Lapas', ru: 'Страницы', en: 'Pages' },
   };
   const catLabel = (c: Category) => (SYSTEM_LABEL[c.key] ? t(SYSTEM_LABEL[c.key]) : catName(c, L));
+  // Active filters (sorting does not count) — "Filters (N)" on phones
+  const activeCount = (['brand', 'area', 'category', 'q', 'pipes', 'motor', 'cool', 'heat'] as const).filter((k) => !!filters[k]).length;
+  const chipLabel = (id: string) => (id === 'lt25' ? ts('upTo', { n: 25 }) : id === '50plus' ? '50+' : id.replace('-', '–'));
+  const sortSelect = (id: string, cls: string) => (
+    <select id={id} value={filters.sort ?? 'asc'} onChange={select('sort')} className={cls}>
+      <option value="asc" style={opt}>{t('sortAsc')}</option>
+      <option value="desc" style={opt}>{t('sortDesc')}</option>
+    </select>
+  );
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="glass-card rounded-2xl p-5 mb-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="col-span-2 sm:col-span-4 relative">
-          <label htmlFor="cat-search" className="sr-only">{TXT.search[L]}</label>
-          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          <input
-            id="cat-search"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={TXT.search[L]}
-            autoComplete="off"
-            className="w-full bg-surface border border-line text-fg text-sm pl-10 pr-3.5 py-2.5 rounded-xl focus:outline-none focus:border-accent/50 transition-colors placeholder-muted"
-          />
-        </div>
-
-        <Field id="cat-brand" label={t('brand')}>
-          <select id="cat-brand" value={filters.brand ?? ''} onChange={select('brand')} className={selectCls}>
-            <option value="">{t('allBrands')}</option>
-            {brands.map((b) => <option key={b} value={b} style={opt}>{b}</option>)}
-          </select>
-        </Field>
-
-        <Field id="cat-area" label={TXT.area[L]}>
-          <select id="cat-area" value={filters.area ?? ''} onChange={select('area')} className={selectCls}>
-            <option value="">{TXT.anyArea[L]}</option>
-            {AREA_BUCKETS.map((b) => <option key={b.id} value={b.id} style={opt}>{b.label}</option>)}
-          </select>
-        </Field>
-
-        <Field id="cat-category" label={t('category')}>
-          <select id="cat-category" value={filters.category ?? ''} onChange={select('category')} className={selectCls}>
-            <option value="">{t('allCategories')}</option>
-            {tree.map(({ cat, children }) => (
-              <Fragment key={cat.key}>
-                <option value={cat.key} style={opt}>{catLabel(cat)}</option>
-                {/* "Фанкоилы – Кассетные": the closed select shows the full path */}
-                {children.map((ch) => <option key={ch.key} value={ch.key} style={opt}>{`${catLabel(cat)} – ${catLabel(ch)}`}</option>)}
-              </Fragment>
-            ))}
-          </select>
-        </Field>
-
-        <Field id="cat-sort" label={t('sort')}>
-          <select id="cat-sort" value={filters.sort ?? 'asc'} onChange={select('sort')} className={selectCls}>
-            <option value="asc" style={opt}>{t('sortAsc')}</option>
-            <option value="desc" style={opt}>{t('sortDesc')}</option>
-          </select>
-        </Field>
-
-        {fan && (
-          <>
-            <Field id="cat-pipes" label={t('pipes')}>
-              <select id="cat-pipes" value={filters.pipes ?? ''} onChange={select('pipes')} className={selectCls}>
-                <option value="">{t('any')}</option>
-                {PIPE_SYSTEMS.map((v) => <option key={v} value={v} style={opt}>{t(`pipes${v}`)}</option>)}
-              </select>
-            </Field>
-            <Field id="cat-motor" label={t('motor')}>
-              <select id="cat-motor" value={filters.motor ?? ''} onChange={select('motor')} className={selectCls}>
-                <option value="">{t('any')}</option>
-                {FAN_MOTORS.map((v) => <option key={v} value={v} style={opt}>{v}</option>)}
-              </select>
-            </Field>
-            <Field id="cat-cool" label={t('cooling')}>
-              <select id="cat-cool" value={filters.cool ?? ''} onChange={select('cool')} className={selectCls}>
-                <option value="">{t('any')}</option>
-                {KW_RANGES.map((r) => <option key={r.id} value={r.id} style={opt}>{r.label}</option>)}
-              </select>
-            </Field>
-            <Field id="cat-heat" label={t('heating')}>
-              <select id="cat-heat" value={filters.heat ?? ''} onChange={select('heat')} className={selectCls}>
-                <option value="">{t('any')}</option>
-                {KW_RANGES.map((r) => <option key={r.id} value={r.id} style={opt}>{r.label}</option>)}
-              </select>
-            </Field>
-          </>
-        )}
+  /** Search + brand / area / category (+ fan coil fields). `p` keeps ids unique (desktop / sheet). */
+  const fields = (p: string) => (
+    <>
+      <div className="col-span-2 sm:col-span-4 relative">
+        <label htmlFor={`${p}search`} className="sr-only">{TXT.search[L]}</label>
+        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <input
+          id={`${p}search`}
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={TXT.search[L]}
+          autoComplete="off"
+          className="w-full bg-surface border border-line text-fg text-base md:text-sm pl-10 pr-3.5 py-2.5 rounded-xl focus:outline-none focus:border-accent/50 transition-colors placeholder-muted"
+        />
       </div>
 
-      <div className="flex items-center justify-between mb-6">
+      <Field id={`${p}brand`} label={t('brand')}>
+        <select id={`${p}brand`} value={filters.brand ?? ''} onChange={select('brand')} className={selectCls}>
+          <option value="">{t('allBrands')}</option>
+          {brands.map((b) => <option key={b} value={b} style={opt}>{b}</option>)}
+        </select>
+      </Field>
+
+      <Field id={`${p}area`} label={TXT.area[L]}>
+        <select id={`${p}area`} value={filters.area ?? ''} onChange={select('area')} className={selectCls}>
+          <option value="">{TXT.anyArea[L]}</option>
+          {AREA_BUCKETS.map((b) => <option key={b.id} value={b.id} style={opt}>{b.label}</option>)}
+          {/* "50+" comes from the phone chips */}
+          {AREA_EXTRA.filter((b) => b.id === filters.area).map((b) => <option key={b.id} value={b.id} style={opt}>{b.label}</option>)}
+        </select>
+      </Field>
+
+      <Field id={`${p}category`} label={t('category')}>
+        <select id={`${p}category`} value={filters.category ?? ''} onChange={select('category')} className={selectCls}>
+          <option value="">{t('allCategories')}</option>
+          {tree.map(({ cat, children }) => (
+            <Fragment key={cat.key}>
+              <option value={cat.key} style={opt}>{catLabel(cat)}</option>
+              {/* "Фанкоилы – Кассетные": the closed select shows the full path */}
+              {children.map((ch) => <option key={ch.key} value={ch.key} style={opt}>{`${catLabel(cat)} – ${catLabel(ch)}`}</option>)}
+            </Fragment>
+          ))}
+        </select>
+      </Field>
+
+      {fan && (
+        <>
+          <Field id={`${p}pipes`} label={t('pipes')}>
+            <select id={`${p}pipes`} value={filters.pipes ?? ''} onChange={select('pipes')} className={selectCls}>
+              <option value="">{t('any')}</option>
+              {PIPE_SYSTEMS.map((v) => <option key={v} value={v} style={opt}>{t(`pipes${v}`)}</option>)}
+            </select>
+          </Field>
+          <Field id={`${p}motor`} label={t('motor')}>
+            <select id={`${p}motor`} value={filters.motor ?? ''} onChange={select('motor')} className={selectCls}>
+              <option value="">{t('any')}</option>
+              {FAN_MOTORS.map((v) => <option key={v} value={v} style={opt}>{v}</option>)}
+            </select>
+          </Field>
+          <Field id={`${p}cool`} label={t('cooling')}>
+            <select id={`${p}cool`} value={filters.cool ?? ''} onChange={select('cool')} className={selectCls}>
+              <option value="">{t('any')}</option>
+              {KW_RANGES.map((r) => <option key={r.id} value={r.id} style={opt}>{r.label}</option>)}
+            </select>
+          </Field>
+          <Field id={`${p}heat`} label={t('heating')}>
+            <select id={`${p}heat`} value={filters.heat ?? ''} onChange={select('heat')} className={selectCls}>
+              <option value="">{t('any')}</option>
+              {KW_RANGES.map((r) => <option key={r.id} value={r.id} style={opt}>{r.label}</option>)}
+            </select>
+          </Field>
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+      {/* Desktop / tablet: the filter panel as before */}
+      <div className="hidden md:grid glass-card rounded-2xl p-5 mb-8 grid-cols-4 gap-4">
+        {fields('cat-')}
+        <Field id="cat-sort" label={t('sort')}>{sortSelect('cat-sort', selectCls)}</Field>
+      </div>
+
+      {/* Phones: "Filters (N)" + sorting + view switch, sticky under the header */}
+      <div className="md:hidden sticky top-20 z-30 -mx-4 px-4 py-2 bg-page/95 backdrop-blur-md border-b border-line">
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => setSheet(true)} aria-haspopup="dialog"
+            className={`flex-shrink-0 inline-flex items-center gap-2 min-h-[44px] px-3.5 rounded-xl border text-sm font-semibold transition-colors ${activeCount ? 'bg-primary text-on-primary border-primary' : 'bg-surface text-fg border-line'}`}>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" d="M4 6h16M7 12h10M10 18h4" /></svg>
+            {activeCount ? ts('filtersN', { n: activeCount }) : ts('filters')}
+          </button>
+          <div className="relative flex-1 min-w-0">
+            <label htmlFor="m-sort" className="sr-only">{ts('sort')}</label>
+            {sortSelect('m-sort', `${selectCls} min-h-[44px] pr-8`)}
+            <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/70 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
+          </div>
+          <ViewToggle />
+        </div>
+        {/* Area chips */}
+        <div role="group" aria-label={ts('areaChips')} className="no-scrollbar -mx-4 px-4 mt-2 flex gap-2 overflow-x-auto">
+          {AREA_CHIPS.map((id) => {
+            const on = filters.area === id;
+            return (
+              <button key={id} type="button" aria-pressed={on} onClick={() => update({ area: on ? '' : id })}
+                className={`flex-shrink-0 min-h-[36px] px-3.5 rounded-full border text-sm font-semibold whitespace-nowrap transition-colors ${on ? 'bg-primary text-on-primary border-primary' : 'bg-surface text-fg border-line'}`}>
+                {chipLabel(id)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <Sheet open={sheet} onClose={() => setSheet(false)} title={ts('filters')} closeLabel={ts('close')}
+        footer={
+          <div className="flex gap-3">
+            {activeCount > 0 && (
+              <button type="button" onClick={resetAll} className="min-h-[48px] px-4 rounded-xl border border-line text-sm font-semibold text-fg">{t('resetFilters')}</button>
+            )}
+            <button type="button" onClick={() => setSheet(false)} disabled={pending}
+              className="flex-1 min-h-[48px] rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-bold transition-colors disabled:opacity-70">
+              {ts('showN', { n: total })}
+            </button>
+          </div>
+        }>
+        <div className="flex flex-col gap-4">{fields('m-')}</div>
+      </Sheet>
+
+      <div className="flex items-center justify-between mt-4 md:mt-0 mb-4 md:mb-6">
         <p className="text-muted text-sm" aria-live="polite"><span className="text-fg font-semibold">{total}</span> {t('results')}</p>
         {(hasFilters(filters) || query) && (
           <button onClick={resetAll} className="text-primary text-sm hover:text-fg transition-colors flex items-center gap-1.5">
@@ -273,12 +334,12 @@ function CatalogInner({
             <button onClick={resetAll} className="mt-5 text-primary text-sm font-semibold hover:text-fg transition-colors">{t('resetFilters')}</button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="product-grid grid grid-cols-2 gap-3 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {cards.map((p) => <ProductCard key={p.id} product={p} locale={locale} installFrom={installFrom} />)}
           </div>
         )}
       </div>
-      {total > 0 && <p className="mt-4 text-xs text-muted">{starred(tp('installNote'))}</p>}
+      {total > 0 && <p className="hidden md:block mt-4 text-xs text-muted">{starred(tp('installNote'))}</p>}
 
       {/* Pagination — real <a href> links that keep the active filters */}
       {totalPages > 1 && (
