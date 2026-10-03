@@ -22,6 +22,24 @@ export function paginate<T>(list: T[], page: number) {
   return { items: list.slice(offset, offset + CATALOG_PAGE_SIZE), totalPages, offset };
 }
 
+export type PageItem = { n: number; compact: boolean } | { gap: true };
+
+/**
+ * Page numbers for the pager. All numbers stay in the HTML (crawlable); on
+ * phones only `compact` ones are shown — 1 2 3, the current page with its
+ * neighbours and the last page — with "…" (gap, phones only) between groups.
+ */
+export function pageItems(page: number, total: number): PageItem[] {
+  const keep = new Set([1, 2, 3, page - 1, page, page + 1, total].filter((n) => n >= 1 && n <= total));
+  const out: PageItem[] = [];
+  for (let n = 1; n <= total; n++) {
+    const compact = keep.has(n);
+    if (!compact && keep.has(n - 1)) out.push({ gap: true });
+    out.push({ n, compact });
+  }
+  return out;
+}
+
 /** "/catalog/type/x" + page → "/catalog/type/x?page=2" (page 1 = clean path). */
 export const pagePath = (base: string, page: number) => (page > 1 ? `${base}?page=${page}` : base);
 

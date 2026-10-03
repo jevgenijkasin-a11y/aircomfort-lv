@@ -77,7 +77,8 @@ export default function LandingView({
         <Pagination basePath={basePath} page={page} totalPages={totalPages} locale={locale} />
 
         {related.items.length > 0 && (
-          <nav aria-label={related.title} className="mt-14">
+          // Hidden on phones (long chip list at the page end); links stay in the HTML for crawlers
+          <nav aria-label={related.title} className="mt-14 hidden sm:block">
             <h2 className="text-muted text-xs font-semibold uppercase tracking-widest mb-3">{related.title}</h2>
             <ul className="flex flex-wrap gap-2">
               {related.items.map((it) => (

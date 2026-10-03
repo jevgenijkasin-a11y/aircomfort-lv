@@ -14,6 +14,7 @@ import { type Category, categoryTree, catName } from '@/lib/categories';
 import { KW_RANGES, PIPE_SYSTEMS, FAN_MOTORS } from '@/lib/fanCoil';
 import { type Filters, AREA_BUCKETS, FAN_FILTER_KEYS, filtersQuery, fanFiltersActive, hasFilters } from '@/lib/catalogFilter';
 import { starred } from '@/components/FootnoteStar';
+import { pageItems } from '@/lib/pagination';
 
 /** Fields of a category the filters need (the rest stays on the server). */
 export type CatalogCategory = Pick<Category, 'key' | 'parent_key' | 'slug' | 'name_lv' | 'name_ru' | 'name_en' | 'sort_order' | 'is_visible' | 'is_system'>;
@@ -285,11 +286,14 @@ function CatalogInner({
           {page > 1 && (
             <Link href={pageHref(page - 1) as any} rel="prev" className="px-3.5 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">← {PG.prev[L]}</Link>
           )}
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-            n === page ? (
-              <span key={n} aria-current="page" className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm font-bold bg-primary text-on-primary">{n}</span>
+          {/* On phones: 1 2 3 … current … last (all numbers stay in the HTML) */}
+          {pageItems(page, totalPages).map((it, i) => (
+            'gap' in it ? (
+              <span key={`g${i}`} aria-hidden="true" className="sm:hidden px-1 text-muted">…</span>
+            ) : it.n === page ? (
+              <span key={it.n} aria-current="page" className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm font-bold bg-primary text-on-primary">{it.n}</span>
             ) : (
-              <Link key={n} href={pageHref(n) as any} className="min-w-[40px] text-center px-3 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors">{n}</Link>
+              <Link key={it.n} href={pageHref(it.n) as any} className={`min-w-[40px] text-center px-3 py-2 rounded-xl text-sm text-muted bg-surface border border-line hover:border-accent/50 hover:text-fg transition-colors ${it.compact ? '' : 'hidden sm:inline-block'}`}>{it.n}</Link>
             )
           ))}
           {page < totalPages && (
