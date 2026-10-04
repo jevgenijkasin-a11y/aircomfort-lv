@@ -8,7 +8,6 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { CardProduct } from '@/lib/productCard';
 import { useCompare, removeCompare, clearCompare } from '@/lib/shortlist';
-import { OrderButton } from '@/components/ProductCardActions';
 import { finalCardPrice } from '@/lib/productCard';
 
 type Specs = {
@@ -130,7 +129,9 @@ export default function CompareView({ locale }: { locale: string }) {
             <tr>
               <td className={`${stickyCol} p-2.5 md:p-4`} />
               {cols.map(({ card }) => (
-                <td key={card.id} className="p-2.5 md:p-4 border-l border-line"><OrderButton product={card} /></td>
+                <td key={card.id} className="p-2.5 md:p-4 border-l border-line">
+                  <Link href={`/catalog/${card.id}` as '/catalog'} className="pc-view">{t('view')}</Link>
+                </td>
               ))}
             </tr>
           </tbody>

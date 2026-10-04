@@ -286,6 +286,7 @@
     "toCatalog": "Uz katalogu"
   },
   "shop": {
+    "view": "Apskatīt",
     "order": "Pasūtīt",
     "orderTitle": "Pasūtījums",
     "orderHint": "Atstājiet kontaktus — mēs piezvanīsim, precizēsim detaļas un cenu ar montāžu.",

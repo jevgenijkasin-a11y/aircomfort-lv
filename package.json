@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node -e \"const fs=require('fs');try{fs.rmSync('.next',{recursive:true,force:true})}catch(e){}\" && next build",
+    "build": "node -e \"const fs=require('fs');try{fs.rmSync('.next',{recursive:true,force:true})}catch(e){}\" && next build && node scripts/check-css.mjs",
     "start": "next start",
     "lint": "next lint",
     "test-smtp": "node scripts/test-smtp.mjs",

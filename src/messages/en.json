@@ -286,6 +286,7 @@
     "toCatalog": "Go to the catalogue"
   },
   "shop": {
+    "view": "View",
     "order": "Order",
     "orderTitle": "Place an order",
     "orderHint": "Leave your details — we will call you back to confirm the details and the price with installation.",

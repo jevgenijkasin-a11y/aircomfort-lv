@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { CardProduct } from '@/lib/productCard';
 import { starred } from '@/components/FootnoteStar';
-import { CardToggles, OrderButton } from '@/components/ProductCardActions';
+import { CardToggles } from '@/components/ProductCardActions';
 import { finalCardPrice } from '@/lib/productCard';
 
 const energyColors: Record<string, string> = {
@@ -132,7 +132,8 @@ export default function ProductCard({ product, locale, installFrom }: { product:
           {/* Installation price: not on the compact phone card */}
           <span className="pc-inst">{starred(t('installFrom', { price: installFrom }))}</span>
         </div>
-        <OrderButton product={{ id: product.id, name, price: product.price, discount_percent: product.discount_percent, image }} className="mt-2.5 md:mt-3" />
+        {/* Looks like a button; the click goes to the stretched title link (product page) */}
+        <span className="pc-view mt-2.5 md:mt-3" aria-hidden="true">{ts('view')}</span>
       </div>
     </article>
   );

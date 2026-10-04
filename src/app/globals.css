@@ -1,3 +1,8 @@
+/* Site config stated explicitly: the admin CSS (/admin) uses its own Tailwind
+   config via @config, and without this line the build could compile this
+   file with the admin config (site classes missing). */
+@config "../../tailwind.config.ts";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -294,7 +299,9 @@ body {
   .pc-ib:focus-visible .pc-ic { @apply ring-2 ring-accent; }
   .pc-ib[aria-pressed='true'] .pc-ic { @apply bg-[#0B7A63] border-[#0B7A63] text-white; }
   .pc-ib[aria-pressed='true'] .pc-ic .i-fill { fill: currentColor; }
-  .pc-order { @apply relative z-10 w-full min-h-[44px] rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-bold text-sm transition-colors; }
+  /* "View" on product cards / comparison: brand green, like the main buttons */
+  .pc-view { @apply flex w-full min-h-[44px] items-center justify-center rounded-xl bg-primary text-on-primary font-bold text-sm transition-colors; }
+  .product-card:hover .pc-view, a.pc-view:hover { @apply bg-primary-hover; }
   .pc-chip { @apply text-[11px] md:text-xs font-semibold leading-none px-2 py-1 rounded-md bg-tint text-primary whitespace-nowrap; }
 }
 
