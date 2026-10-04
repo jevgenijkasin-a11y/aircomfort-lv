@@ -90,7 +90,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, locale 
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Form */}
-        <div className="glass-card rounded-2xl p-7">
+        <div className="glass-card rounded-2xl p-5 sm:p-7">
           <h2 className="font-heading font-semibold text-lg mb-6 text-primary">{t('step1')}</h2>
 
           <div className="space-y-5">
@@ -141,13 +141,15 @@ export default function Calculator({ installFrom = 250, installTo = 350, locale 
                   <button
                     key={val}
                     onClick={() => setInsulation(val)}
-                    className={`py-2.5 px-2 text-xs font-medium rounded-xl border transition-all ${
+                    className={`min-w-0 py-2.5 px-1 sm:px-2 text-xs font-medium leading-tight rounded-xl border transition-all [overflow-wrap:anywhere] ${
                       insulation === val
                         ? 'bg-accent/15 border-accent/50 text-primary'
                         : 'bg-surface border-line text-muted hover:text-fg hover:border-line'
                     }`}
                   >
-                    {label}
+                    {/* "Хорошая (новостройка)": the bracket part as a smaller second line, without brackets */}
+                    {label.replace(/\s*\(.*\)$/, '')}
+                    {/\((.*)\)$/.test(label) && <span className="block mt-0.5 text-[11px] opacity-80">{label.match(/\((.*)\)$/)![1]}</span>}
                   </button>
                 ))}
               </div>
@@ -175,7 +177,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, locale 
                   <button
                     key={val}
                     onClick={() => setFloor(val)}
-                    className={`py-2.5 px-3 text-xs font-medium rounded-xl border transition-all ${
+                    className={`min-w-0 py-2.5 px-2 sm:px-3 text-xs font-medium leading-tight rounded-xl border transition-all [overflow-wrap:anywhere] ${
                       floor === val
                         ? 'bg-accent/15 border-accent/50 text-primary'
                         : 'bg-surface border-line text-muted hover:text-fg hover:border-line'
@@ -201,7 +203,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, locale 
         {/* Result */}
         <div ref={resultRef} className="scroll-mt-28">
           {result ? (
-            <div className="glass-card rounded-2xl p-7">
+            <div className="glass-card rounded-2xl p-5 sm:p-7">
               <div className="flex items-center gap-3 mb-7">
                 <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center">
                   <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
