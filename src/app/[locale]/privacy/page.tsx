@@ -3,11 +3,12 @@ import { Link } from '@/i18n/navigation';
 import type { Metadata } from 'next';
 import { getSettings } from '@/lib/db';
 import { getCompany } from '@/lib/company';
+import { pageTitle } from '@/lib/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'privacy' });
-  return { title: t('title') };
+  return { title: pageTitle(t('title')) };
 }
 
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {

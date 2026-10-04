@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { getSettings } from '@/lib/db';
-import { BASE_URL } from '@/lib/seo';
+import { BASE_URL, pageTitle, clipDescription } from '@/lib/seo';
 import { breadcrumbJsonLd, jsonLdString, absUrl } from '@/lib/productSeo';
 import { renderMarkdown, extractFaq, excerpt, articleLocales, type Article, type Loc } from '@/lib/articles';
 import { asLoc, articleAlternates, publicArticle, publishedDate, relatedProducts } from '@/lib/blogData';
@@ -20,7 +20,7 @@ import { PageLocales } from '@/lib/pageLocales';
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
 const OG_LOCALE: Record<Loc, string> = { lv: 'lv_LV', ru: 'ru_RU', en: 'en_US' };
-const description = (a: Article, l: Loc) => a[`meta_description_${l}`] || excerpt(a[`body_${l}`], 160);
+const description = (a: Article, l: Loc) => clipDescription(a[`meta_description_${l}`]) || excerpt(a[`body_${l}`], 160);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
@@ -31,8 +31,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const desc = description(a, l);
   const alternates = articleAlternates(a, locale);
   return {
-    // The brand suffix from the layout template only when the title stays short
-    title: (metaTitle + ' | AirComfort').length <= 65 ? metaTitle : { absolute: metaTitle },
+    // <title> ≤ 65 characters incl. " | AirComfort" (also for a meta title typed in the admin)
+    title: pageTitle(metaTitle),
     description: desc,
     alternates,
     openGraph: {
@@ -132,7 +132,7 @@ export default async function ArticlePage({ params }: Props) {
               <ArticleCover cover={a.cover_url} category={a.category} alt={title} sizes="(min-width: 768px) 720px, 100vw" priority />
             </div>
           )}
-          <div className="article-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(a[`body_${l}`]) }} />
+          <div className="article-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(a[`body_${l}`], title) }} />
           <p className="mt-10">
             <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5 5-5M18 12H6" /></svg>

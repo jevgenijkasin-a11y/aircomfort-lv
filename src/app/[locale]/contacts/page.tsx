@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import ContactForm from '@/components/ContactForm';
 import { getSettings } from '@/lib/db';
-import { localizedAlternates, BASE_URL } from '@/lib/seo';
+import { localizedAlternates, BASE_URL, pageTitle } from '@/lib/seo';
 import { getCompany, contactPageJsonLd } from '@/lib/company';
 import GoogleIcon from '@/components/GoogleIcon';
 import { jsonLdString } from '@/lib/productSeo';
@@ -18,7 +18,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
   // indexed: canonical always points to the clean URL, and any query → noindex.
   const hasQuery = Object.keys(sp).length > 0;
   return {
-    title: t('title'),
+    title: pageTitle(t('title')),
     alternates: localizedAlternates(locale, '/contacts'),
     ...(hasQuery ? { robots: { index: false, follow: true } } : {}),
   };

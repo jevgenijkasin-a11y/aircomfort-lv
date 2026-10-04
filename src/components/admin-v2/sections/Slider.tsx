@@ -61,7 +61,7 @@ export default function Slider() {
           {slides.map((s, i) => (
             <div key={s.id} className={`card overflow-hidden ${s.is_visible ? '' : 'opacity-60'}`}>
               <div className="relative aspect-video bg-gray-100 dark:bg-white/5">
-                <img src={s.image_url} alt="" className="h-full w-full object-cover" />
+                <img src={s.image_url} alt={`${t.sliderTitle} #${i + 1}`} className="h-full w-full object-cover" />
                 <span className="absolute left-2 top-2"><Badge color={s.is_visible ? 'success' : 'gray'}>{s.is_visible ? t.visible : t.hidden}</Badge></span>
                 <span className="absolute right-2 top-2 rounded-full bg-gray-900/70 px-2 text-theme-xs font-bold text-white">#{i + 1}</span>
               </div>

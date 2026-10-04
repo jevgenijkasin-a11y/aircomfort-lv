@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 
@@ -14,6 +14,10 @@ interface Props {
 
 export default function ProductImageViewer({ images, alt, brandColor, brand }: Props) {
   const t = useTranslations('products');
+  const locale = useLocale();
+  // Alt text: the product name, extra photos "Name — фото 2" (Bing counts empty alt as missing)
+  const photoWord = locale === 'ru' ? 'фото' : locale === 'en' ? 'photo' : 'foto';
+  const altFor = (i: number) => (i === 0 ? alt : `${alt} — ${photoWord} ${i + 1}`);
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [lbIndex, setLbIndex] = useState(0);
@@ -47,7 +51,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
 
         {hasImages ? (
           <>
-            <Image src={images[active]} alt={alt} fill priority sizes="(max-width: 1024px) 100vw, 50vw" quality={80} className="object-contain p-8 mix-blend-multiply" />
+            <Image src={images[active]} alt={altFor(active)} fill priority sizes="(max-width: 1024px) 100vw, 50vw" quality={80} className="object-contain p-8 mix-blend-multiply" />
 
             {hasMultiple && (
               <>
@@ -90,7 +94,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
           {images.map((src, i) => (
             <button
               key={i}
-              aria-label={`${alt} ${i + 1}`}
+              aria-label={altFor(i)}
               onClick={() => setActive(i)}
               className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all bg-photo ${
                 active === i
@@ -98,7 +102,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
                   : 'border-gray-200 opacity-60 hover:opacity-90 hover:border-gray-400'
               }`}
             >
-              <span className="relative block w-full h-full"><Image src={src} alt={`${alt} ${i + 1}`} fill sizes="96px" className="object-contain p-1 mix-blend-multiply" /></span>
+              <span className="relative block w-full h-full"><Image src={src} alt={altFor(i)} fill sizes="96px" className="object-contain p-1 mix-blend-multiply" /></span>
             </button>
           ))}
         </div>
@@ -139,7 +143,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
             <div className="relative w-full h-full flex items-center justify-center bg-fg/5 rounded-2xl mx-4 overflow-hidden">
               <Image
                 src={images[lbIndex]}
-                alt={`${alt} ${lbIndex + 1}`}
+                alt={altFor(lbIndex)}
                 fill
                 sizes="100vw"
                 quality={85}
@@ -167,7 +171,7 @@ export default function ProductImageViewer({ images, alt, brandColor, brand }: P
                     lbIndex === i ? 'border-accent' : 'border-line opacity-50 hover:opacity-80'
                   }`}
                 >
-                  <span className="relative block w-full h-full"><Image src={src} alt="" fill sizes="96px" className="object-contain" /></span>
+                  <span className="relative block w-full h-full"><Image src={src} alt={altFor(i)} fill sizes="96px" className="object-contain" /></span>
                 </button>
               ))}
             </div>

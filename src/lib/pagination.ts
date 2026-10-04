@@ -2,7 +2,7 @@
 // 24 products per page, real ?page=N URLs, self-canonical pages.
 import type { Metadata } from 'next';
 import { CATALOG_PAGE_SIZE } from './catalogData';
-import { BASE_URL, localizedAlternates } from './seo';
+import { BASE_URL, localizedAlternates, pageTitle, clipDescription } from './seo';
 import type { Loc } from './productSeo';
 
 export const PAGE_WORD: Record<Loc, string> = { lv: 'lapa', ru: 'страница', en: 'page' };
@@ -53,11 +53,13 @@ export const pageSuffix = (page: number, l: Loc) => (page > 1 ? ` — ${PAGE_WOR
 export function listingMetadata(opts: { locale: string; path: string; title: string; description: string }): Metadata {
   const { locale, path, title, description } = opts;
   const full = `${title} | AirComfort`;
+  const desc = clipDescription(description) ?? '';
   return {
-    title,
-    description: description || undefined,
+    // <title> ≤ 65 characters; og:title stays complete
+    title: pageTitle(title),
+    description: desc || undefined,
     alternates: localizedAlternates(locale, path),
-    ...socialMeta(locale, path, full, description),
+    ...socialMeta(locale, path, full, desc),
   };
 }
 

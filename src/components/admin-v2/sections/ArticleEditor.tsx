@@ -214,7 +214,7 @@ export default function ArticleEditor({ initial, products, cats, onClose, onSave
           <Section title={t.artCover}>
             {f.cover_url ? (
               <div className="relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-                <img src={f.cover_url} alt="" className="aspect-video w-full object-cover" />
+                <img src={f.cover_url} alt={f[`title_${tab}`] || t.artCover} className="aspect-video w-full object-cover" />
                 <button type="button" onClick={() => set('cover_url', '')} className="absolute right-2 top-2 rounded-full bg-gray-900/70 p-1.5 text-white hover:bg-error-500" aria-label={t.artCoverRemove} title={t.artCoverRemove}>
                   <IconX className="h-4 w-4" />
                 </button>
@@ -245,7 +245,7 @@ export default function ArticleEditor({ initial, products, cats, onClose, onSave
                   const p = products.find((x) => x.id === id);
                   return (
                     <li key={id} className="flex items-center gap-2 rounded-lg border border-gray-200 p-1.5 dark:border-gray-800">
-                      {p && firstImage(p.image_url) ? <img src={firstImage(p.image_url)} alt="" className="h-9 w-9 flex-shrink-0 rounded bg-gray-50 object-contain" /> : <span className="h-9 w-9 flex-shrink-0 rounded bg-gray-100 dark:bg-white/5" />}
+                      {p && firstImage(p.image_url) ? <img src={firstImage(p.image_url)} alt={pname(p)} className="h-9 w-9 flex-shrink-0 rounded bg-gray-50 object-contain" /> : <span className="h-9 w-9 flex-shrink-0 rounded bg-gray-100 dark:bg-white/5" />}
                       <span className="min-w-0 flex-1 truncate text-theme-sm text-gray-700 dark:text-gray-300">{p ? pname(p) : id}</span>
                       {p && !p.in_stock && <Badge color="gray">{t.outOfStock}</Badge>}
                       <button type="button" onClick={() => toggleProduct(id)} className="rounded p-1 text-gray-400 hover:text-error-500" aria-label={t.del}><IconX className="h-4 w-4" /></button>

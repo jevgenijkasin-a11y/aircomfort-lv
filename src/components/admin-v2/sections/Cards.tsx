@@ -85,7 +85,7 @@ export default function Cards() {
               <div key={c.id} className="p-5">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full bg-gray-100 dark:bg-white/5">
-                    {c.photo_url ? <img src={c.photo_url} alt="" className="h-full w-full object-cover" style={{ objectPosition: `center ${c.photo_position ?? 50}%` }} /> : <IconUser className="m-4 h-6 w-6 text-gray-400" />}
+                    {c.photo_url ? <img src={c.photo_url} alt={c.name} className="h-full w-full object-cover" style={{ objectPosition: `center ${c.photo_position ?? 50}%` }} /> : <IconUser className="m-4 h-6 w-6 text-gray-400" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-gray-800 dark:text-white/90">{c.name} {!c.is_active && <Badge color="gray">{t.hidden}</Badge>}</p>
@@ -128,7 +128,7 @@ export default function Cards() {
             <Field label={t.cardPhoto}>
               <div className="flex items-center gap-4">
                 <div className="h-20 w-20 overflow-hidden rounded-full bg-gray-100 dark:bg-white/5">
-                  {form.photo_url && <img src={form.photo_url} alt="" className="h-full w-full object-cover" style={{ objectPosition: `center ${form.photo_position}%` }} />}
+                  {form.photo_url && <img src={form.photo_url} alt={form.name || t.cardPhoto} className="h-full w-full object-cover" style={{ objectPosition: `center ${form.photo_position}%` }} />}
                 </div>
                 <label className="cursor-pointer">
                   <span className="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:ring-gray-700 dark:hover:bg-white/5">{uploading ? t.uploading : t.upload}</span>

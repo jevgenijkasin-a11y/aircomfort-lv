@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { localizedAlternates, BASE_URL } from '@/lib/seo';
+import { localizedAlternates, BASE_URL, pageTitle, clipDescription } from '@/lib/seo';
 import { breadcrumbJsonLd, jsonLdString } from '@/lib/productSeo';
 import { excerpt } from '@/lib/articles';
 import { asLoc, publishedArticles } from '@/lib/blogData';
@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'blog' });
   const empty = publishedArticles(locale).length === 0;
   return {
-    title: t('metaTitle'),
-    description: t('metaDescription'),
+    title: pageTitle(t('metaTitle')),
+    description: clipDescription(t('metaDescription')),
     alternates: localizedAlternates(locale, '/blog'),
     // A language without articles yet stays out of the index
     ...(empty ? { robots: { index: false, follow: true } } : {}),

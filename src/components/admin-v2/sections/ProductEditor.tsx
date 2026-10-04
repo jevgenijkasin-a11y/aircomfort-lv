@@ -251,7 +251,7 @@ export default function ProductEditor({ initial, cats, products, onClose, onSave
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); if (dragIdx !== null) reorder(dragIdx, i); setDragIdx(null); }}
                     className={`group relative aspect-square cursor-grab overflow-hidden rounded-xl border bg-gray-50 dark:bg-white/5 ${dragIdx === i ? 'opacity-40' : ''} ${i === 0 ? 'border-brand-500 ring-2 ring-brand-500/20' : 'border-gray-200 dark:border-gray-700'}`}>
-                    <img src={url} alt="" className="h-full w-full object-contain p-1" />
+                    <img src={url} alt={`${nameFor(lang) || t.secPhotos} — ${i + 1}`} className="h-full w-full object-contain p-1" />
                     {i === 0 && <span className="absolute left-1 top-1"><Badge color="brand">{t.mainPhoto}</Badge></span>}
                     <span className="absolute bottom-1 left-1 rounded bg-white/80 p-0.5 text-gray-500 dark:bg-gray-900/80"><IconGrip className="h-3.5 w-3.5" /></span>
                     <button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))} aria-label={t.removePhoto} title={t.removePhoto}
@@ -331,7 +331,7 @@ export default function ProductEditor({ initial, cats, products, onClose, onSave
           <Section title={t.secPreview}>
             <div className="mx-auto max-w-[280px] rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-md dark:border-gray-700 dark:bg-gray-900">
               <div className="relative flex h-40 items-center justify-center overflow-hidden rounded-xl bg-[#F8FAFC]">
-                {firstImage(f.image_url) ? <img src={firstImage(f.image_url)} alt="" className="h-full w-full object-contain p-3 mix-blend-multiply" /> : <span className="text-sm font-semibold text-gray-400">{f.brand || '—'}</span>}
+                {firstImage(f.image_url) ? <img src={firstImage(f.image_url)} alt={nameFor(lang) || t.secPreview} className="h-full w-full object-contain p-3 mix-blend-multiply" /> : <span className="text-sm font-semibold text-gray-400">{f.brand || '—'}</span>}
                 {f.energy_class && <span className="absolute right-2 top-2 rounded-md border border-success-500/30 bg-success-50 px-1.5 text-theme-xs font-bold text-success-700">{f.energy_class}</span>}
                 <div className="absolute left-2 top-2 flex flex-col gap-1">
                   {f.is_hit && <span className="rounded-full bg-[#C2410C] px-2 text-theme-xs font-bold text-white">{t.hit}</span>}

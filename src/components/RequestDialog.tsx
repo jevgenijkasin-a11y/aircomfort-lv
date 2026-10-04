@@ -71,7 +71,7 @@ export default function RequestDialog({ mode, products, onClose }: {
             products.map((p) => (
               <div key={p.id} className="flex items-center gap-3 rounded-xl bg-surface border border-line p-3">
                 <div data-theme="light" className="relative w-16 h-16 flex-shrink-0 rounded-lg bg-photo overflow-hidden">
-                  {p.image && <Image src={p.image} alt="" fill sizes="64px" className="object-contain p-1.5 mix-blend-multiply" />}
+                  {p.image && <Image src={p.image} alt={p.name} fill sizes="64px" className="object-contain p-1.5 mix-blend-multiply" />}
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-sm leading-snug line-clamp-2">{p.name}</p>

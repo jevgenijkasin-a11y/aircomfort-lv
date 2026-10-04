@@ -134,7 +134,7 @@ export default function Categories() {
               <Field label={t.catImage}>
                 <div className="flex items-center gap-3">
                   <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-white/5">
-                    {form.image_url ? <img src={form.image_url} alt="" className="h-full w-full object-cover" /> : <span className="text-gray-300">—</span>}
+                    {form.image_url ? <img src={form.image_url} alt={t.catImage} className="h-full w-full object-cover" /> : <span className="text-gray-300">—</span>}
                   </div>
                   <label className="cursor-pointer">
                     <span className="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:ring-gray-700 dark:hover:bg-white/5">{uploading ? t.uploading : t.upload}</span>

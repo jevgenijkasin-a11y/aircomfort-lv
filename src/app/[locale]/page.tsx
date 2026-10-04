@@ -10,7 +10,7 @@ import { Link } from '@/i18n/navigation';
 import { getSettings } from '@/lib/db';
 import { homeJsonLd } from '@/lib/company';
 import { jsonLdString } from '@/lib/productSeo';
-import { BASE_URL } from '@/lib/seo';
+import { BASE_URL, pageTitle } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +25,7 @@ const HOME_META = {
     description: 'AirComfort — продажа и монтаж кондиционеров и тепловых насосов Daikin, Mitsubishi Electric, Midea в Риге и по всей Латвии. Монтаж от 1 дня, гарантия.',
   },
   en: {
-    title: 'AirComfort — air conditioners and heat pumps in Riga with installation',
+    title: 'AirComfort — Riga air conditioners & heat pumps with installation',
     description: 'AirComfort sells and installs Daikin, Mitsubishi Electric and Midea air conditioners and heat pumps in Riga and across Latvia. Fitting from 1 day, warranty.',
   },
 } as const;
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const m = HOME_META[(locale === 'ru' || locale === 'en' ? locale : 'lv') as keyof typeof HOME_META];
   return {
-    title: { absolute: m.title }, // no "| AirComfort" suffix — the brand already leads
+    title: pageTitle(m.title, ''), // no "| AirComfort" suffix — the brand already leads
     description: m.description,
     openGraph: {
       type: 'website',

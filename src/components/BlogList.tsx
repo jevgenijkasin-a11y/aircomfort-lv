@@ -79,7 +79,7 @@ export default function BlogList({ cards, labels }: {
                 className="group h-full flex flex-col bg-card border border-line rounded-2xl overflow-hidden shadow-soft hover:border-accent/50 hover:shadow-lg hover:shadow-glow/10 transition-all duration-300"
               >
                 <div className="relative aspect-[16/9] overflow-hidden bg-surface">
-                  <ArticleCover cover={a.cover} category={a.category} alt="" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" priority={i < 3} />
+                  <ArticleCover cover={a.cover} category={a.category} alt={a.title} sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" priority={i < 3} />
                 </div>
                 <div className="flex flex-col flex-1 p-5">
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mb-3">

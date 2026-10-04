@@ -149,8 +149,13 @@ const marked = new Marked({
   },
 });
 
-export function renderMarkdown(md: string): string {
-  return marked.parse(stripLeadingH1(md ?? ''), { async: false }) as string;
+/**
+ * Markdown → HTML. Pictures without alt text get `fallbackAlt` (the article
+ * title): search engines treat an empty alt as missing.
+ */
+export function renderMarkdown(md: string, fallbackAlt = ''): string {
+  const html = marked.parse(stripLeadingH1(md ?? ''), { async: false }) as string;
+  return fallbackAlt ? html.replace(/<img([^>]*?) alt=""/g, `<img$1 alt="${esc(fallbackAlt)}"`) : html;
 }
 
 // ── FAQ (for FAQPage JSON-LD) ─────────────────────────────────────────

@@ -174,7 +174,7 @@ export default function Products() {
                   const cell: Record<ColKey, React.ReactNode> = {
                     photo: (
                       <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-gray-100 dark:bg-white/5">
-                        {img ? <img src={img} alt="" className="h-full w-full object-contain" loading="lazy" /> : <IconImage className="h-5 w-5 text-gray-400" />}
+                        {img ? <img src={img} alt={`${p.brand} ${p.name_ru || p.name_lv || p.name_en}`.trim()} className="h-full w-full object-contain" loading="lazy" /> : <IconImage className="h-5 w-5 text-gray-400" />}
                       </div>
                     ),
                     name: (

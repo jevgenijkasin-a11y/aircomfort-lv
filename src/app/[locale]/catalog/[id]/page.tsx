@@ -9,7 +9,7 @@ import { type SupabaseProduct, productName, productFeatures, productImages, prod
 import { getProduct, getSettings, listProducts, listCategories, hiddenCategoryKeys } from '@/lib/db';
 import { AIR_WATER_KEY, catName, hiddenKeys, isFanCoil, isWithin } from '@/lib/categories';
 import { fanSpec } from '@/lib/fanCoil';
-import { localizedAlternates, BASE_URL } from '@/lib/seo';
+import { localizedAlternates, BASE_URL, pageTitle, clipDescription } from '@/lib/seo';
 import {
   productTitle, productMetaDescription, productParagraphs, similarProducts,
   productJsonLd, breadcrumbJsonLd, jsonLdString, absUrl, brandSlug, categoryNoun, asLoc, areaLabel, roomCount, fullName,
@@ -37,10 +37,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const [data, settings] = await Promise.all([getProduct(id), getSettings()]);
   if (!data) return { title: 'Product' };
   const title = productTitle(data, locale);
-  const description = productMetaDescription(data, locale, installFromSettings(settings));
+  const description = clipDescription(productMetaDescription(data, locale, installFromSettings(settings)))!;
   const image = productImages(data)[0];
   return {
-    title,
+    // <title> ≤ 65 characters (long model names are cut at a word); og:title stays complete
+    title: pageTitle(title),
     description,
     alternates: localizedAlternates(locale, `/catalog/${id}`),
     openGraph: {
@@ -205,18 +206,23 @@ export default async function ProductPage({ params }: Props) {
   const rooms = roomCount(p);
   const installRow: [string, string] = ['install', `${l === 'en' ? 'from €' : l === 'ru' ? 'от ' : 'no '}${installFrom}${l === 'en' ? '' : ' €'}*`];
   const typeLabel = categoryNoun(p.category, l).replace(/^./, (c) => c.toUpperCase());
+  // Units in the page language
+  const U = l === 'ru' ? { kw: 'кВт', flow: 'м³/ч', db: 'дБ(А)', pa: 'Па' } : { kw: 'kW', flow: 'm³/h', db: 'dB(A)', pa: 'Pa' };
+  // External static pressure: shown whenever it is filled in (also when the
+  // product sits outside the fan coil categories)
+  const espRow = (fan('esp_pa') ? [['fc_esp', `${fan('esp_pa')} ${U.pa}`]] : []) as [string, string][];
   const baseRows: [string, string][] = fanCoil ? [
     ['brand', p.brand],
     ['type', cat && cat.key !== 'fan_coils' ? `${typeLabel} — ${catName(cat, l).toLocaleLowerCase()}` : typeLabel],
     ...([
       ['fc_pipes', fan('pipe_system') ? t(`pipes${fan('pipe_system')}`) : ''],
       ['fc_motor', fan('fan_motor')],
-      ['fc_cooling', fan('cooling_kw') && `${fan('cooling_kw')} kW`],
-      ['fc_heating', fan('heating_kw') && `${fan('heating_kw')} kW`],
-      ['fc_airflow', fan('airflow') && `${fan('airflow')} m³/h`],
-      ['fc_noise', fan('noise_db') && `${fan('noise_db')} dB(A)`],
-      ['fc_esp', fan('esp_pa') && `${fan('esp_pa')} Pa`],
+      ['fc_cooling', fan('cooling_kw') && `${fan('cooling_kw')} ${U.kw}`],
+      ['fc_heating', fan('heating_kw') && `${fan('heating_kw')} ${U.kw}`],
+      ['fc_airflow', fan('airflow') && `${fan('airflow')} ${U.flow}`],
+      ['fc_noise', fan('noise_db') && `${fan('noise_db')} ${U.db}`],
     ] as [string, string][]).filter(([, v]) => v),
+    ...espRow,
     ...(p.energy_class ? [['energy_class', p.energy_class] as [string, string]] : []),
     installRow,
   ] : [
@@ -226,6 +232,7 @@ export default async function ProductPage({ params }: Props) {
     ...(areaTxt ? [['area', `${areaTxt} m²`] as [string, string]] : []),
     ...(rooms ? [['rooms', String(rooms)] as [string, string]] : []),
     ...(p.energy_class ? [['energy_class', p.energy_class] as [string, string]] : []),
+    ...espRow,
     installRow,
   ];
   const FAN_LABEL: Record<string, string> = {
@@ -559,7 +566,7 @@ export default async function ProductPage({ params }: Props) {
                 <li key={a.slug}>
                   <Link href={`/blog/${a.slug}` as any} className="group flex gap-4 items-center bg-card border border-line rounded-2xl p-3 hover:border-accent/50 transition-colors h-full">
                     <span className="relative w-32 sm:w-40 aspect-[16/9] flex-shrink-0 rounded-xl overflow-hidden bg-surface">
-                      <ArticleCover cover={a.cover_url} category={a.category} alt="" sizes="160px" />
+                      <ArticleCover cover={a.cover_url} category={a.category} alt={a[`title_${l}`]} sizes="160px" />
                     </span>
                     <span className="font-heading font-semibold text-base leading-snug group-hover:text-primary transition-colors">{a[`title_${l}`]}</span>
                   </Link>

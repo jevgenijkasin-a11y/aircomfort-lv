@@ -452,6 +452,13 @@ export function productJsonLd(p: SupabaseProduct, locale: string, url: string, d
   if (!price) return null;
   const images = productImages(p).map(absUrl);
   const { model } = nameParts(p, l);
+  // Measured values from the specs (fan coils: airflow, external static pressure)
+  const s = specsOf(p);
+  const num = (v: string | undefined) => (v && /^\s*\d+(?:[.,]\d+)?\s*$/.test(v) ? Number(v.replace(',', '.')) : null);
+  const props = [
+    num(s.airflow) !== null && { '@type': 'PropertyValue', name: { lv: 'Gaisa plūsma', ru: 'Расход воздуха', en: 'Airflow' }[l], value: num(s.airflow), unitCode: 'MQH', unitText: 'm³/h' },
+    num(s.esp_pa) !== null && { '@type': 'PropertyValue', name: { lv: 'Brīvais spiediens', ru: 'Свободный напор', en: 'External static pressure' }[l], value: num(s.esp_pa), unitCode: 'PAL', unitText: 'Pa' },
+  ].filter(Boolean);
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -463,6 +470,7 @@ export function productJsonLd(p: SupabaseProduct, locale: string, url: string, d
     ...(images.length ? { image: images } : {}),
     description: clip(descriptionText, 300),
     url,
+    ...(props.length ? { additionalProperty: props } : {}),
     offers: {
       '@type': 'Offer',
       price: String(price),

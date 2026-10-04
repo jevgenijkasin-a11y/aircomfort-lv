@@ -134,7 +134,7 @@
     "specHeating": "Sildīšanas jauda",
     "specAirflow": "Gaisa plūsma",
     "specNoise": "Trokšņa līmenis",
-    "specEsp": "Ārējais statiskais spiediens",
+    "specEsp": "Brīvais spiediens",
     "worksWithHeatPump": "Darbojas ar siltumsūkni",
     "worksWithHint": "Fankoils saņem siltu vai aukstu ūdeni no siltumsūkņa gaiss-ūdens.",
     "matchingFanCoils": "Piemēroti fankoili"
