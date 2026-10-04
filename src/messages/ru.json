@@ -349,6 +349,12 @@
     "viewList": "Список",
     "viewLabel": "Вид",
     "upTo": "до {n} м²",
-    "areaChips": "Площадь помещения"
+    "areaChips": "Площадь помещения",
+    "favIn": "В избранном",
+    "cmpIn": "В сравнении",
+    "sections": "Разделы",
+    "tabAbout": "Описание",
+    "tabSpecs": "Характеристики",
+    "tabInstall": "Монтаж"
   }
 }

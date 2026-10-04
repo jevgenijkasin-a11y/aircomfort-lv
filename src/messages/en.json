@@ -349,6 +349,12 @@
     "viewList": "List",
     "viewLabel": "View",
     "upTo": "up to {n} m²",
-    "areaChips": "Room area"
+    "areaChips": "Room area",
+    "favIn": "In favourites",
+    "cmpIn": "In comparison",
+    "sections": "Sections",
+    "tabAbout": "Description",
+    "tabSpecs": "Specs",
+    "tabInstall": "Installation"
   }
 }

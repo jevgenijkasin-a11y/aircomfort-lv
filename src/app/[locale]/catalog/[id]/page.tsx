@@ -23,6 +23,7 @@ import { ProductGrid } from '@/components/ProductGrid';
 import { toCards } from '@/lib/productCard';
 import { starred } from '@/components/FootnoteStar';
 import OrderLink from '@/components/OrderLink';
+import ProductShortlist from '@/components/ProductShortlist';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -139,11 +140,12 @@ const SPEC_LABELS: Record<string, Record<string, string>> = {
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
   setRequestLocale(locale);
-  const [t, tp, tn, tTrust, product, settings, all] = await Promise.all([
+  const [t, tp, tn, tTrust, ts, product, settings, all] = await Promise.all([
     getTranslations('catalog'),
     getTranslations('products'),
     getTranslations('nav'),
     getTranslations('trustbar'),
+    getTranslations('shop'),
     getProduct(id),
     getSettings(),
     listProducts({ inStockOnly: true }),
@@ -301,6 +303,16 @@ export default async function ProductPage({ params }: Props) {
               {!!p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-sale text-black shadow-md">−{p.discount_percent}%</span>}
             </div>
           )}
+          {/* Phones: jump links to the sections further down the page */}
+          <nav aria-label={ts('sections')} className="md:hidden no-scrollbar -mx-4 px-4 mt-4 flex gap-4 min-[360px]:gap-6 overflow-x-auto border-b border-line">
+            {[
+              ['#description', ts('tabAbout')],
+              ...(specs.length ? [['#specs', ts('tabSpecs')]] : []),
+              ['#install', ts('tabInstall')],
+            ].map(([href, label]) => (
+              <a key={href} href={href} className="flex-shrink-0 py-3 text-sm font-semibold uppercase tracking-wide text-muted hover:text-primary border-b-2 border-transparent hover:border-primary -mb-px transition-colors whitespace-nowrap">{label}</a>
+            ))}
+          </nav>
         </div>
       </div>
 
@@ -430,9 +442,10 @@ export default async function ProductPage({ params }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
               </svg>
             </OrderLink>
+            <ProductShortlist item={{ id: p.id, category: p.category, name, image: images[0] ?? null }} />
 
             {/* Description (manual text, or generated from product data) */}
-            <div className="glass-card rounded-2xl p-6">
+            <div id="description" className="glass-card rounded-2xl p-6 scroll-mt-28">
               <h2 className="text-muted text-xs font-semibold uppercase tracking-widest mb-3">{TX.about[l]}</h2>
               <div className="space-y-3">
                 {paragraphs.map((para, i) => (
@@ -442,7 +455,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             {/* Installation — site-wide facts only (settings + trust bar) */}
-            <div className="glass-card rounded-2xl p-6">
+            <div id="install" className="glass-card rounded-2xl p-6 scroll-mt-28">
               <h2 className="text-muted text-xs font-semibold uppercase tracking-widest mb-3">{TX.install[l]}</h2>
               <ul className="space-y-1.5 text-sm text-muted list-disc pl-5">
                 <li>{starred(TX.installFrom[l])}</li>
@@ -457,7 +470,7 @@ export default async function ProductPage({ params }: Props) {
 
         {/* Specs table — full width below main grid */}
         {specs.length > 0 && (
-          <div className="mt-10">
+          <div id="specs" className="mt-10 scroll-mt-28">
             <div className="glass-card rounded-2xl p-6">
               <h2 className="text-muted text-xs font-semibold uppercase tracking-widest mb-5">
                 {t('specsLabel')}

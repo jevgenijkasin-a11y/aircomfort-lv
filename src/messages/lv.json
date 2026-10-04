@@ -349,6 +349,12 @@
     "viewList": "Saraksts",
     "viewLabel": "Skats",
     "upTo": "līdz {n} m²",
-    "areaChips": "Telpas platība"
+    "areaChips": "Telpas platība",
+    "favIn": "Izlasē",
+    "cmpIn": "Salīdzināšanā",
+    "sections": "Sadaļas",
+    "tabAbout": "Apraksts",
+    "tabSpecs": "Tehniskie dati",
+    "tabInstall": "Montāža"
   }
 }
