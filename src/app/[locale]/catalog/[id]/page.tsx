@@ -24,6 +24,7 @@ import { toCards } from '@/lib/productCard';
 import { starred } from '@/components/FootnoteStar';
 import OrderLink from '@/components/OrderLink';
 import ProductShortlist from '@/components/ProductShortlist';
+import { CardToggles } from '@/components/ProductCardActions';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -303,16 +304,6 @@ export default async function ProductPage({ params }: Props) {
               {!!p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-sale text-black shadow-md">−{p.discount_percent}%</span>}
             </div>
           )}
-          {/* Phones: jump links to the sections further down the page */}
-          <nav aria-label={ts('sections')} className="md:hidden no-scrollbar -mx-4 px-4 mt-4 flex gap-4 min-[360px]:gap-6 overflow-x-auto border-b border-line">
-            {[
-              ['#description', ts('tabAbout')],
-              ...(specs.length ? [['#specs', ts('tabSpecs')]] : []),
-              ['#install', ts('tabInstall')],
-            ].map(([href, label]) => (
-              <a key={href} href={href} className="flex-shrink-0 py-3 text-sm font-semibold uppercase tracking-wide text-muted hover:text-primary border-b-2 border-transparent hover:border-primary -mb-px transition-colors whitespace-nowrap">{label}</a>
-            ))}
-          </nav>
         </div>
       </div>
 
@@ -328,7 +319,11 @@ export default async function ProductPage({ params }: Props) {
               brandColor={p.brand_color}
               brand={p.brand}
             />
-            {p.energy_class && <div data-theme="light" className={`absolute top-4 right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>}
+            {/* Phones: ♡ / ⇄ on the photo like on catalog cards (desktop has the text buttons) */}
+            <div className="md:hidden">
+              <CardToggles id={p.id} category={p.category} name={name} image={images[0] ?? null} className="absolute top-3 right-3 z-20 flex flex-col gap-1" />
+            </div>
+            {p.energy_class && <div data-theme="light" className={`absolute top-4 right-16 md:right-4 text-sm font-bold px-3 py-1 rounded-xl border ${energyCls}`}>{p.energy_class}</div>}
             {(p.is_hit || p.is_promo || !!p.discount_percent) && (
               <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                 {p.is_hit && <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-hit text-white shadow-sm">{tp('badgeHit')}</span>}
@@ -378,7 +373,8 @@ export default async function ProductPage({ params }: Props) {
               <div className="grid grid-cols-2 gap-4">
                 {p.energy_class ? (
                   <div className="bg-surface rounded-xl p-4">
-                    <p className="text-muted text-xs mb-1">{tp('energyClass')}</p>
+                    {/* the long Russian label does not fit the small phone tile */}
+                    <p className="text-muted text-xs mb-1"><span className="sm:hidden">{ts('energyShort')}</span><span className="hidden sm:inline">{tp('energyClass')}</span></p>
                     <p className={`font-heading font-bold text-xl ${energyColors[p.energy_class]?.split(' ')[0] ?? 'text-fg'}`}>{p.energy_class}</p>
                   </div>
                 ) : fanCoil && fan('pipe_system') ? (
@@ -442,7 +438,19 @@ export default async function ProductPage({ params }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
               </svg>
             </OrderLink>
-            <ProductShortlist item={{ id: p.id, category: p.category, name, image: images[0] ?? null }} />
+            <div className="hidden md:block">
+              <ProductShortlist item={{ id: p.id, category: p.category, name, image: images[0] ?? null }} />
+            </div>
+            {/* Phones: jump buttons to the sections below */}
+            <nav aria-label={ts('sections')} className="md:hidden flex flex-wrap gap-2">
+              {[
+                ['#description', ts('tabAbout')],
+                ...(specs.length ? [['#specs', ts('tabSpecs')]] : []),
+                ['#install', ts('tabInstall')],
+              ].map(([href, label]) => (
+                <a key={href} href={href} className="flex-1 inline-flex items-center justify-center min-h-[44px] px-3 rounded-xl border border-line bg-surface text-sm font-semibold text-fg hover:border-primary hover:text-primary transition-colors whitespace-nowrap">{label}</a>
+              ))}
+            </nav>
 
             {/* Description (manual text, or generated from product data) */}
             <div id="description" className="glass-card rounded-2xl p-6 scroll-mt-28">

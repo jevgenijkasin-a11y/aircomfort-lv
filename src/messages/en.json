@@ -355,6 +355,7 @@
     "sections": "Sections",
     "tabAbout": "Description",
     "tabSpecs": "Specs",
-    "tabInstall": "Installation"
+    "tabInstall": "Installation",
+    "energyShort": "Energy class"
   }
 }

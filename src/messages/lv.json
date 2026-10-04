@@ -355,6 +355,7 @@
     "sections": "Sadaļas",
     "tabAbout": "Apraksts",
     "tabSpecs": "Tehniskie dati",
-    "tabInstall": "Montāža"
+    "tabInstall": "Montāža",
+    "energyShort": "Energoklase"
   }
 }

@@ -355,6 +355,7 @@
     "sections": "Разделы",
     "tabAbout": "Описание",
     "tabSpecs": "Характеристики",
-    "tabInstall": "Монтаж"
+    "tabInstall": "Монтаж",
+    "energyShort": "Энергокласс"
   }
 }

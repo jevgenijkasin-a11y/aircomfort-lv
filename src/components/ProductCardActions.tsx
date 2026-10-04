@@ -8,14 +8,14 @@ import { useTranslations } from 'next-intl';
 import type { CardProduct } from '@/lib/productCard';
 import { toggleFavorite, toggleCompare, useFavorites, useCompare } from '@/lib/shortlist';
 
-export function CardToggles({ id, category, name, image }: Pick<CardProduct, 'id' | 'category' | 'name' | 'image'>) {
+export function CardToggles({ id, category, name, image, className = 'pc-tg' }: Pick<CardProduct, 'id' | 'category' | 'name' | 'image'> & { className?: string }) {
   const t = useTranslations('shop');
   const fav = useFavorites().includes(id);
   const inCmp = useCompare().some((x) => x.id === id);
   const favLabel = fav ? t('favRemove') : t('favAdd');
   const cmpLabel = inCmp ? t('cmpRemove') : t('cmpAdd');
   return (
-    <div className="pc-tg">
+    <div className={className}>
       <button type="button" className="pc-ib" aria-pressed={fav} aria-label={favLabel} title={favLabel} onClick={() => toggleFavorite(id)}>
         <span className="pc-ic"><svg aria-hidden><use href="#i-heart" /></svg></span>
       </button>
