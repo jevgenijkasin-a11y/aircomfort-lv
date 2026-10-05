@@ -225,6 +225,27 @@ export function extractFaq(md: string): FaqItem[] {
   return out;
 }
 
+/**
+ * The opening text of an article as plain paragraphs, at most `n`. Headings
+ * and pictures are skipped; a table or list (or the "…:" line introducing
+ * one) ends the summary once it has two paragraphs, so later text that
+ * refers to the skipped table is not taken out of context.
+ */
+export function leadParagraphs(md: string, n = 3): string[] {
+  const out: string[] = [];
+  for (const block of stripLeadingH1(md ?? '').split(/\n\s*\n/)) {
+    if (out.length >= n) break;
+    if (!block.trim() || /^\s*(#|!\[)/.test(block)) continue;
+    const text = plain(block);
+    if (/^\s*(\||[-*] |\d+\. |>)/.test(block) || text.endsWith(':')) {
+      if (out.length >= 2) break;
+      continue;
+    }
+    if (text) out.push(text);
+  }
+  return out;
+}
+
 /** First paragraph-ish text for cards when meta_description is empty. */
 export function excerpt(md: string, max = 200): string {
   const text = plain(stripLeadingH1(md ?? '').split(/\n\s*\n/).find((p) => p.trim() && !/^\s*(#|\||[-*] |\d+\. )/.test(p)) ?? '');

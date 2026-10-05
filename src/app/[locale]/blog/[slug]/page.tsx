@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { getSettings } from '@/lib/db';
-import { BASE_URL, pageTitle, clipDescription } from '@/lib/seo';
+import { BASE_URL, pageTitle, clipDescription, blogRssTypes } from '@/lib/seo';
 import { breadcrumbJsonLd, jsonLdString, absUrl } from '@/lib/productSeo';
 import { renderMarkdown, extractFaq, excerpt, articleLocales, type Article, type Loc } from '@/lib/articles';
 import { asLoc, articleAlternates, publicArticle, publishedDate, relatedProducts } from '@/lib/blogData';
@@ -30,11 +30,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const metaTitle = a[`meta_title_${l}`] || a[`title_${l}`];
   const desc = description(a, l);
   const alternates = articleAlternates(a, locale);
+  const tb = await getTranslations({ locale, namespace: 'blog' });
   return {
     // <title> ≤ 65 characters incl. " | AirComfort" (also for a meta title typed in the admin)
     title: pageTitle(metaTitle),
     description: desc,
-    alternates,
+    alternates: { ...alternates, types: blogRssTypes(locale, tb('metaTitle')) },
     openGraph: {
       type: 'article',
       url: alternates.canonical as string,

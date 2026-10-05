@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { localizedAlternates, BASE_URL, pageTitle, clipDescription } from '@/lib/seo';
+import { localizedAlternates, BASE_URL, pageTitle, clipDescription, blogRssTypes } from '@/lib/seo';
 import { breadcrumbJsonLd, jsonLdString } from '@/lib/productSeo';
 import { excerpt } from '@/lib/articles';
 import { asLoc, publishedArticles } from '@/lib/blogData';
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: pageTitle(t('metaTitle')),
     description: clipDescription(t('metaDescription')),
-    alternates: localizedAlternates(locale, '/blog'),
+    alternates: { ...localizedAlternates(locale, '/blog'), types: blogRssTypes(locale, t('metaTitle')) },
     // A language without articles yet stays out of the index
     ...(empty ? { robots: { index: false, follow: true } } : {}),
   };

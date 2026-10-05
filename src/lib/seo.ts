@@ -57,3 +57,8 @@ export function localizedAlternates(locale: string, path = ''): NonNullable<Meta
     languages,
   };
 }
+
+/** <link rel="alternate" type="application/rss+xml"> of the blog feed in this language. */
+export const blogRssTypes = (locale: string, title: string) => ({
+  'application/rss+xml': [{ url: `${BASE_URL}/${locale}/blog/rss.xml`, title }],
+});
