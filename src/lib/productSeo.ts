@@ -106,8 +106,10 @@ function pick<T>(p: SupabaseProduct, salt: number, options: T[]): T {
 
 /** Full model name, always starting with the brand. */
 export function fullName(p: SupabaseProduct, l: Loc): string {
-  const n = productName(p, l).trim();
-  return n.toLowerCase().startsWith(p.brand.toLowerCase()) ? n : `${p.brand} ${n}`;
+  const n = productName(p, l).trim().replace(/\s+/g, ' ');
+  // The name may already start with the brand, also spelled in Cyrillic ("Хайсенс …")
+  const spellings = [p.brand, ...(BRAND_ALIASES[p.brand] ?? [])].map((b) => b.toLowerCase());
+  return spellings.some((b) => n.toLowerCase().startsWith(b)) ? n : `${p.brand} ${n}`;
 }
 
 // ── name parts: brand · series · model code · capacity ───────────────
@@ -414,18 +416,19 @@ export function productParagraphs(p: SupabaseProduct, locale: string, installFro
 }
 
 // ── related products ─────────────────────────────────────────────────
-export function similarProducts(all: SupabaseProduct[], p: SupabaseProduct, n = 6): SupabaseProduct[] {
-  const others = all.filter((x) => x.id !== p.id);
+/**
+ * "Similar products": the same category, closest in power, the same brand
+ * first. `family` (e.g. all fan coils) tops the list up to `min` when the
+ * category itself has too few models.
+ */
+export function similarProducts(all: SupabaseProduct[], p: SupabaseProduct, n = 8, family: SupabaseProduct[] = [], min = 4): SupabaseProduct[] {
   const byPower = (a: SupabaseProduct, b: SupabaseProduct) =>
+    (a.brand === p.brand ? 0 : 1) - (b.brand === p.brand ? 0 : 1) ||
     Math.abs(a.power_kw - p.power_kw) - Math.abs(b.power_kw - p.power_kw) || a.price - b.price;
-  const sameBrand = others.filter((x) => x.brand === p.brand).sort(byPower);
-  const out = sameBrand.slice(0, n);
-  if (out.length < n) {
-    const fill = others
-      .filter((x) => x.brand !== p.brand && x.category === p.category)
-      .sort(byPower)
-      .slice(0, n - out.length);
-    out.push(...fill);
+  const out = all.filter((x) => x.id !== p.id && x.category === p.category).sort(byPower).slice(0, n);
+  if (out.length < min) {
+    const taken = new Set([p.id, ...out.map((x) => x.id)]);
+    out.push(...family.filter((x) => !taken.has(x.id)).sort(byPower).slice(0, min - out.length));
   }
   return out;
 }

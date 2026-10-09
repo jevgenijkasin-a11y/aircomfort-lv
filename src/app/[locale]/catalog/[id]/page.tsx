@@ -7,12 +7,12 @@ import { DUPLICATE_REDIRECTS, visibleProducts } from '@/lib/catalogData';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productFeatures, productImages, productDescription } from '@/lib/types';
 import { getProduct, getSettings, listProducts, listCategories, hiddenCategoryKeys } from '@/lib/db';
-import { AIR_WATER_KEY, catName, hiddenKeys, isFanCoil, isWithin } from '@/lib/categories';
+import { AIR_WATER_KEY, catName, hiddenKeys, isFanCoil, isWithin, type Category } from '@/lib/categories';
 import { fanSpec } from '@/lib/fanCoil';
 import { localizedAlternates, BASE_URL, pageTitle, clipDescription } from '@/lib/seo';
 import {
   productTitle, productMetaDescription, productParagraphs, similarProducts,
-  productJsonLd, breadcrumbJsonLd, jsonLdString, absUrl, brandSlug, categoryNoun, asLoc, areaLabel, roomCount, fullName,
+  productJsonLd, breadcrumbJsonLd, jsonLdString, absUrl, categoryNoun, CATEGORY_MSG_KEY, asLoc, areaLabel, roomCount, fullName,
   productHeading, seriesSiblings, nameParts,
 } from '@/lib/productSeo';
 import { articlesForProduct } from '@/lib/blogData';
@@ -76,11 +76,14 @@ function buildContactMessage(p: SupabaseProduct, _name: string, locale: string, 
   const L = {
     lv: { want: 'Interesē', power: 'Jauda', area: 'Platība', rooms: 'Telpu skaits', price: 'Cena', install: 'Montāža no' },
     ru: { want: 'Интересует', power: 'Мощность', area: 'Площадь', rooms: 'Количество комнат', price: 'Цена', install: 'Монтаж от' },
-    en: { want: 'Interested in', power: 'Capacity', area: 'Area', rooms: 'Rooms', price: 'Price', install: 'Installation from' },
+    en: { want: 'Interested in', power: 'Power', area: 'Area', rooms: 'Rooms', price: 'Price', install: 'Installation from' },
   }[l];
+  const unit = l === 'ru' ? { kw: 'кВт', m2: 'м²' } : { kw: 'kW', m2: 'm²' };
+  // fullName: brand only once ("Hisense New Comfort…", not "Hisense Hisense…");
+  // areaLabel: "līdz 60" → "до 60" / "up to 60"
   const lines = [`${L.want}: ${fullName(p, l)}`];
-  if (p.power_kw) lines.push(`${L.power}: ${p.power_kw} kW`);
-  if (area) lines.push(`${L.area}: ${area} m²`);
+  if (p.power_kw) lines.push(`${L.power}: ${p.power_kw} ${unit.kw}`);
+  if (area) lines.push(`${L.area}: ${area} ${unit.m2}`);
   else if (rooms) lines.push(`${L.rooms}: ${rooms}`);
   if (price) lines.push(`${L.price}: ${price} €`);
   lines.push(`${L.install}: ${installFrom} €`);
@@ -142,12 +145,13 @@ const SPEC_LABELS: Record<string, Record<string, string>> = {
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
   setRequestLocale(locale);
-  const [t, tp, tn, tTrust, ts, product, settings, all] = await Promise.all([
+  const [t, tp, tn, tTrust, ts, tc, product, settings, all] = await Promise.all([
     getTranslations('catalog'),
     getTranslations('products'),
     getTranslations('nav'),
     getTranslations('trustbar'),
     getTranslations('shop'),
+    getTranslations('categories'),
     getProduct(id),
     getSettings(),
     listProducts({ inStockOnly: true }),
@@ -178,7 +182,9 @@ export default async function ProductPage({ params }: Props) {
   const series = seriesSiblings(publicAll, p);
   const seriesIds = new Set(series.map((x) => x.id));
   // Fan coils are compared with other fan coils only; the series block already lists its models
-  const similar = similarProducts((fanCoil ? publicAll.filter((x) => isFanCoil(cats, x.category)) : publicAll).filter((x) => !seriesIds.has(x.id)), p, 6);
+  // Same category, closest power, same brand first (4–8); fan coils top up from the other fan coil types
+  const similarPool = publicAll.filter((x) => !seriesIds.has(x.id));
+  const similar = similarProducts(similarPool, p, 8, fanCoil ? similarPool.filter((x) => isFanCoil(cats, x.category)) : []);
   const articles = articlesForProduct(p, locale, 2);
 
   // Fan coil → "Works with a heat pump": products picked in the admin, else
@@ -254,13 +260,20 @@ export default async function ProductPage({ params }: Props) {
       .filter(([, v]) => v),
   ];
 
-  // Breadcrumbs: Home → Catalog → Brand → Product
+  // Breadcrumbs: Home → Catalog → Category (→ subcategory) → Product
   const pageUrl = `${BASE_URL}/${locale}/catalog/${p.id}`;
-  const brandHref = `/catalog/brand/${brandSlug(p.brand)}`;
+  const hiddenCats = hiddenKeys(cats);
+  const catChain: Category[] = [];
+  for (let c = cat; c && !catChain.includes(c); c = cats.find((x) => x.key === c!.parent_key)) catChain.unshift(c);
+  const catCrumbs = catChain.filter((c) => !hiddenCats.has(c.key)).map((c) => {
+    const href = c.is_system ? `/catalog/type/${c.slug}` : `/catalog/category/${c.slug}`;
+    const name = (c.is_system && CATEGORY_MSG_KEY[c.key] ? tc(CATEGORY_MSG_KEY[c.key]) : '') || catName(c, l);
+    return { name, href, url: `${BASE_URL}/${locale}${href}` };
+  });
   const crumbs = [
     { name: tn('home'), href: '/', url: `${BASE_URL}/${locale}` },
     { name: tn('catalog'), href: '/catalog', url: `${BASE_URL}/${locale}/catalog` },
-    { name: p.brand, href: brandHref, url: `${BASE_URL}/${locale}${brandHref}` },
+    ...catCrumbs,
     { name: heading, href: null, url: pageUrl },
   ];
   const productLd = productJsonLd(p, locale, pageUrl, paragraphs.join(' '));
@@ -268,7 +281,7 @@ export default async function ProductPage({ params }: Props) {
   const TX = {
     about: { lv: 'Apraksts', ru: 'Описание', en: 'Description' },
     install: { lv: 'Montāža un konsultācija', ru: 'Монтаж и консультация', en: 'Installation and advice' },
-    similar: { lv: 'Līdzīgi modeļi', ru: 'Похожие модели', en: 'Similar models' },
+    similar: { lv: 'Līdzīgas preces', ru: 'Похожие товары', en: 'Similar products' },
     series: { lv: 'Šī sērija citās jaudās', ru: 'Эта серия в других мощностях', en: 'This series in other capacities' },
     articles: { lv: 'Noderīgi raksti', ru: 'Полезные статьи', en: 'Useful articles' },
     installFrom: { lv: `Montāža no ${installFrom} €*`, ru: `Монтаж от ${installFrom} €*`, en: `Installation from €${installFrom}*` },

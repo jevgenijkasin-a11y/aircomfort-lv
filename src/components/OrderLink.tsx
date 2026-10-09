@@ -19,7 +19,7 @@ export default function OrderLink({
   'data-fab-avoid'?: boolean;
 }) {
   return (
-    <Link href="/contacts" className={className} onClick={() => saveContactPrefill({ service, message })} {...rest}>
+    <Link href="/contacts" rel="nofollow" className={className} onClick={() => saveContactPrefill({ service, message })} {...rest}>
       {children}
     </Link>
   );
