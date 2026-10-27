@@ -36,7 +36,7 @@ const nextConfig = {
       {
         source: '/',
         destination: '/lv',
-        permanent: false,
+        permanent: true, // 308, like the other addresses without a language
       },
       // The new admin moved from /admin-v2 to /admin
       { source: '/admin-v2', destination: '/admin', permanent: true },
