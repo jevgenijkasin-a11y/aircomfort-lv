@@ -15,7 +15,7 @@ const TX = {
   ru: {
     desc: 'Страницы /pakalpojumi/… Черновик (DRAFT) открывается по ссылке, но не индексируется и не попадает в sitemap.',
     draft: 'Черновик (DRAFT)', published: 'Опубликовано', sort: 'Порядок', contact: 'Услуга в форме заявки',
-    cats: 'Категории товаров (ключи через запятую)', priceFrom: 'Цена «от», €', priceAuto: 'Цена «от» = минимальная цена монтажа товаров этих категорий',
+    cats: 'Категории товаров для блока оборудования (ключи через запятую)', priceFrom: 'Цена «от», €', priceAuto: 'Цена «от» = «Монтаж от» из настроек сайта',
     priceNow: 'Сейчас на странице', none: 'не указана (TODO)', title: 'Заголовок H1', metaTitle: 'Title', metaDesc: 'Description',
     intro: 'Вводный текст (абзацы через пустую строку)', includes: '«Что входит в цену» — по пункту в строке',
     steps: '«Как проходит работа» — по шагу в строке', warranty: 'Гарантия (пусто — блок скрыт)', open: 'Открыть страницу',
@@ -23,7 +23,7 @@ const TX = {
   lv: {
     desc: 'Lapas /pakalpojumi/… Melnraksts (DRAFT) atveras pēc saites, bet netiek indeksēts un nav sitemap.',
     draft: 'Melnraksts (DRAFT)', published: 'Publicēts', sort: 'Secība', contact: 'Pakalpojums pieteikuma formā',
-    cats: 'Preču kategorijas (atslēgas ar komatu)', priceFrom: 'Cena «no», €', priceAuto: 'Cena «no» = mazākā šo kategoriju preču montāžas cena',
+    cats: 'Preču kategorijas (atslēgas ar komatu)', priceFrom: 'Cena «no», €', priceAuto: 'Cena «no» = «Montāža no» no vietnes iestatījumiem',
     priceNow: 'Pašlaik lapā', none: 'nav norādīta (TODO)', title: 'Virsraksts H1', metaTitle: 'Title', metaDesc: 'Description',
     intro: 'Ievadteksts (rindkopas ar tukšu rindu)', includes: '«Kas ietilpst cenā» — katrs punkts jaunā rindā',
     steps: '«Kā notiek darbs» — katrs solis jaunā rindā', warranty: 'Garantija (tukšs — bloks paslēpts)', open: 'Atvērt lapu',
@@ -31,7 +31,7 @@ const TX = {
   en: {
     desc: 'Pages /pakalpojumi/… A draft (DRAFT) opens by link but is not indexed and not in the sitemap.',
     draft: 'Draft (DRAFT)', published: 'Published', sort: 'Order', contact: 'Service in the request form',
-    cats: 'Product categories (keys, comma separated)', priceFrom: 'Price "from", €', priceAuto: 'Price "from" = lowest installation price of these categories',
+    cats: 'Product categories (keys, comma separated)', priceFrom: 'Price "from", €', priceAuto: 'Price "from" = "Installation from" in the site settings',
     priceNow: 'Shown now', none: 'not set (TODO)', title: 'H1 title', metaTitle: 'Title', metaDesc: 'Description',
     intro: 'Intro (paragraphs separated by an empty line)', includes: '"What the price includes" — one item per line',
     steps: '"How it works" — one step per line', warranty: 'Warranty (empty — block hidden)', open: 'Open the page',

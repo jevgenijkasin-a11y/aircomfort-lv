@@ -1,5 +1,5 @@
 // Server-side data for the service pages: products, the "from" price, JSON-LD.
-import { listProducts, listCategories, listServices } from './db';
+import { listProducts, listCategories, listServices, getSettings } from './db';
 import { descendantKeys, hiddenKeys } from './categories';
 import { visibleProducts, pricedFirst } from './catalogData';
 import { BASE_URL } from './seo';
@@ -17,12 +17,15 @@ async function productsOf(s: Service): Promise<SupabaseProduct[]> {
   return pricedFirst(products.filter((p) => all.has(p.category)));
 }
 
-/** "From" price: the manual value, else (auto) the lowest installation price of its products, else null. */
+/**
+ * "From" price: the manual value, else (auto) the site-wide "installation from"
+ * price (Admin → Settings, the same "Montāža no 250 €" as on every product), else null.
+ */
 export async function servicePrice(s: Service): Promise<number | null> {
   if (s.price_from !== null && s.price_from > 0) return s.price_from;
   if (!s.price_auto) return null;
-  const prices = (await productsOf(s)).map((p) => p.install_price).filter((n) => n > 0);
-  return prices.length ? Math.min(...prices) : null;
+  const from = parseInt((await getSettings()).install_price_from || '250') || 250;
+  return from > 0 ? from : null;
 }
 
 /** 4–6 products for the page: hits and promos first, then the cheapest. */

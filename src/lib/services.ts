@@ -17,11 +17,11 @@ export interface Service {
   is_draft: boolean;
   /** Value preselected in the contact form ("install", "maintenance"). */
   contact_service: string;
-  /** Category keys (comma separated) for the products block and the automatic price. */
+  /** Category keys (comma separated) for the products block. */
   product_categories: string;
   /** Manual "from … €" price; null = none (or automatic, see price_auto). */
   price_from: number | null;
-  /** Price "from" = lowest install_price of the products in product_categories. */
+  /** Price "from" = the site-wide installation price (settings install_price_from). */
   price_auto: boolean;
   title_lv: string; title_ru: string; title_en: string;
   meta_title_lv: string; meta_title_ru: string; meta_title_en: string;
