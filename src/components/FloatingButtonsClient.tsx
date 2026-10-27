@@ -80,7 +80,8 @@ export default function FloatingButtonsClient({ whatsapp, telegram, phone }: Pro
       className={`fixed right-4 z-50 flex flex-col items-end gap-3 transition-opacity duration-200 ${hidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
       // Raised above the footer's bottom row so "Privacy policy" stays visible at
       // the page end, and above the comparison bar while it is shown
-      style={{ bottom: 'calc(3rem + var(--compare-bar-h, 0px) + env(safe-area-inset-bottom))' }}
+      // and above the product page's sticky buy bar (--buybar-h, smaller gap --fab-gap) on phones
+      style={{ bottom: 'calc(var(--fab-gap, 3rem) + var(--compare-bar-h, 0px) + var(--buybar-h, 0px) + env(safe-area-inset-bottom))' }}
     >
       {open && (
         <ul id={menuId} role="menu" aria-label={LBL.contact[l]} className="flex flex-col items-end gap-2.5">
@@ -117,7 +118,7 @@ export default function FloatingButtonsClient({ whatsapp, telegram, phone }: Pro
         aria-controls={menuId}
         aria-label={open ? LBL.close[l] : LBL.contact[l]}
         // Phones: round 56×56 icon button; md and up: icon + text as before
-        className="h-14 w-14 md:w-auto justify-center md:justify-start md:pl-4 md:pr-5 rounded-full bg-primary hover:bg-primary-hover text-on-primary font-bold text-sm shadow-lg shadow-black/30 flex items-center gap-2 transition-colors"
+        className="fab-btn h-14 w-14 md:w-auto justify-center md:justify-start md:pl-4 md:pr-5 rounded-full bg-primary hover:bg-primary-hover text-on-primary font-bold text-sm shadow-lg shadow-black/30 flex items-center gap-2 transition-colors"
       >
         {open ? (
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>

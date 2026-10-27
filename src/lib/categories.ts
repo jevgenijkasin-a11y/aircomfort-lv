@@ -91,3 +91,43 @@ export function slugify(s: string): string {
 }
 
 export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+// ── public URLs of category pages ─────────────────────────────────────
+// /catalog/<slug> for top-level categories, /catalog/<parent>/<sub> for
+// subcategories ("fan-coils-cassette" under "fan-coils" → /catalog/fan-coils/cassette).
+
+/** Static segments under /catalog that a category slug must not take. */
+export const RESERVED_CATALOG_SEGMENTS = ['brand', 'type', 'category'];
+
+/** Last URL segment of a subcategory: its slug without the parent's slug prefix. */
+const subSegment = (child: Category, parent: Category) =>
+  child.slug.startsWith(`${parent.slug}-`) ? child.slug.slice(parent.slug.length + 1) : child.slug;
+
+/** "/catalog/home-air-conditioners", "/catalog/fan-coils/cassette"; "/catalog" for an unknown key. */
+export function categoryPath(cats: Pick<Category, 'key' | 'slug' | 'parent_key'>[], key: string): string {
+  const c = cats.find((x) => x.key === key);
+  if (!c) return '/catalog';
+  const parent = c.parent_key ? cats.find((x) => x.key === c.parent_key) : null;
+  return parent ? `/catalog/${parent.slug}/${subSegment(c as Category, parent as Category)}` : `/catalog/${c.slug}`;
+}
+
+/** Category of a URL: ["fan-coils"] or ["fan-coils", "cassette"]. A subcategory also matches its full slug. */
+export function categoryBySegments(cats: Category[], segments: string[]): Category | null {
+  const [a, b] = segments;
+  if (!b) return cats.find((c) => c.slug === a) ?? null;
+  const parent = cats.find((c) => c.slug === a && !c.parent_key);
+  if (!parent) return null;
+  return cats.find((c) => c.parent_key === parent.key && (subSegment(c, parent) === b || c.slug === b)) ?? null;
+}
+
+/**
+ * Old catalog section paths → current ones: "/catalog/type/<slug>" and
+ * "/catalog/category/<slug>" (article links stored in the DB) become
+ * "/catalog/<slug>"; anything else is returned unchanged.
+ */
+export function currentCatalogPath(cats: Category[], path: string): string {
+  const m = path.match(/^\/catalog\/(?:type|category)\/([a-z0-9-]+)\/?$/);
+  if (!m) return path;
+  const c = cats.find((x) => x.slug === m[1]);
+  return c ? categoryPath(cats, c.key) : path;
+}

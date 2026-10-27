@@ -18,6 +18,7 @@ import Slider from './sections/Slider';
 import Cards from './sections/Cards';
 import Reviews from './sections/Reviews';
 import Articles from './sections/Articles';
+import Services from './sections/Services';
 import Texts from './sections/Texts';
 import Settings from './sections/Settings';
 import Password from './sections/Password';
@@ -33,6 +34,7 @@ const NAV: { id: Section; icon: (p: { className?: string }) => JSX.Element; key:
   { id: 'cards', icon: IconUser, key: 'navCards' },
   { id: 'reviews', icon: IconChat, key: 'navReviews' },
   { id: 'articles', icon: IconDoc, key: 'navArticles' },
+  { id: 'services', icon: IconDoc, key: 'navServices' },
   { id: 'texts', icon: IconText, key: 'navTexts' },
   { id: 'settings', icon: IconCog, key: 'navSettings' },
   { id: 'password', icon: IconKey, key: 'navPassword' },
@@ -104,7 +106,7 @@ export default function AdminV2App() {
 
   const body: Record<Section, ReactNode> = {
     dashboard: <Dashboard />, requests: <Requests />, products: <Products />, categories: <Categories />,
-    slider: <Slider />, cards: <Cards />, reviews: <Reviews />, articles: <Articles />, texts: <Texts />, settings: <Settings />, password: <Password />,
+    slider: <Slider />, cards: <Cards />, reviews: <Reviews />, articles: <Articles />, services: <Services />, texts: <Texts />, settings: <Settings />, password: <Password />,
   };
 
   return (

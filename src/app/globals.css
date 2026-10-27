@@ -221,6 +221,14 @@ body {
   body { padding-bottom: calc(116px + var(--compare-bar-h, 0px) + env(safe-area-inset-bottom)); }
 }
 
+/* Product page on phones (<html data-product-page>, set by StickyBuyBar): the
+   contact button is 48 px and sits above the sticky buy bar; "scroll to top"
+   is not shown there (the bar takes the bottom of the screen). */
+@media (max-width: 767px) {
+  html[data-product-page] .fab-btn { width: 48px; height: 48px; }
+  html[data-product-page] .scroll-top-btn { display: none; }
+}
+
 /* Headings font (Manrope): bold headings use the 800 weight */
 .font-heading.font-bold { font-weight: 800; }
 

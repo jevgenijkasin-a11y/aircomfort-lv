@@ -8,7 +8,7 @@ import { getSettings } from '@/lib/db';
 import { BASE_URL, pageTitle, clipDescription, blogRssTypes } from '@/lib/seo';
 import { breadcrumbJsonLd, jsonLdString, absUrl } from '@/lib/productSeo';
 import { renderMarkdown, extractFaq, excerpt, articleLocales, type Article, type Loc } from '@/lib/articles';
-import { asLoc, articleAlternates, publicArticle, publishedDate, relatedProducts } from '@/lib/blogData';
+import { asLoc, articleAlternates, articleCatalogPath, currentCatalogLinks, publicArticle, publishedDate, relatedProducts } from '@/lib/blogData';
 import { organizationNode, ORG_ID, WEBSITE_ID } from '@/lib/company';
 import { siteConfig } from '@/config/site';
 import { ProductGrid } from '@/components/ProductGrid';
@@ -133,7 +133,7 @@ export default async function ArticlePage({ params }: Props) {
               <ArticleCover cover={a.cover_url} category={a.category} alt={title} sizes="(min-width: 768px) 720px, 100vw" priority />
             </div>
           )}
-          <div className="article-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(a[`body_${l}`], title) }} />
+          <div className="article-body" dangerouslySetInnerHTML={{ __html: currentCatalogLinks(renderMarkdown(a[`body_${l}`], title)) }} />
           <p className="mt-10">
             <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5 5-5M18 12H6" /></svg>
@@ -147,8 +147,8 @@ export default async function ArticlePage({ params }: Props) {
         <section aria-labelledby="related-title" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           <div className="flex flex-wrap items-end justify-between gap-3 mb-6">
             <h2 id="related-title" className="font-heading font-bold text-2xl sm:text-3xl">{t('related')}</h2>
-            {a.related_catalog && (
-              <Link href={a.related_catalog as '/catalog'} className="text-sm font-semibold text-primary hover:underline">{t('seeAll')} →</Link>
+            {articleCatalogPath(a) && (
+              <Link href={articleCatalogPath(a) as '/catalog'} className="text-sm font-semibold text-primary hover:underline">{t('seeAll')} →</Link>
             )}
           </div>
           <ProductGrid products={toCards(products, locale)} locale={locale} installFrom={installFrom} />

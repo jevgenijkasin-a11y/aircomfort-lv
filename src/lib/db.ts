@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import type { SupabaseProduct, SupabaseContact, ContactProduct, SupabaseReview, SupabaseHeroSlide, EmployeeCard } from './types';
 import { type Category, hiddenKeys } from './categories';
 import { type Article, type ArticleInput, ARTICLE_FIELDS, articleLocales } from './articles';
+import { type Service, SERVICE_FIELDS, SERVICE_SEED } from './services';
 
 export const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
 export const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
@@ -104,7 +105,7 @@ export function db(): DatabaseSync {
   return g.__aircomfortDb;
 }
 
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 // Additive, idempotent schema migrations for databases created by older code
 // (the live DB on the server). Never drops or rewrites existing data.
@@ -126,6 +127,7 @@ function migrate(instance: DatabaseSync) {
       if (version < 2) migrateV2(instance);
       if (version < 3) migrateV3(instance);
       if (version < 4) migrateV4(instance);
+      if (version < 5) migrateV5(instance);
       instance.exec(`PRAGMA user_version = ${DB_VERSION}`);
       instance.exec('COMMIT');
     } catch (e) {
@@ -224,6 +226,36 @@ function migrateV4(instance: DatabaseSync) {
   const cols = instance.prepare('PRAGMA table_info(contacts)').all().map((c) => c.name as string);
   if (!cols.includes('products')) instance.exec("ALTER TABLE contacts ADD COLUMN products TEXT NOT NULL DEFAULT '[]'");
   if (!cols.includes('install')) instance.exec('ALTER TABLE contacts ADD COLUMN install INTEGER');
+}
+
+/**
+ * v5: service pages (/pakalpojumi/<slug>), seeded with the three services as
+ * DRAFT (noindex, not in the sitemap until unmarked in the admin).
+ * Rollback: DROP TABLE services; PRAGMA user_version = 4;
+ */
+function migrateV5(instance: DatabaseSync) {
+  const loc = (col: string) => ['lv', 'ru', 'en'].map((l) => `${col}_${l} TEXT NOT NULL DEFAULT ''`).join(', ');
+  instance.exec(`
+CREATE TABLE IF NOT EXISTS services (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL UNIQUE,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_draft INTEGER NOT NULL DEFAULT 1,
+  contact_service TEXT NOT NULL DEFAULT '',
+  product_categories TEXT NOT NULL DEFAULT '',
+  price_from INTEGER,
+  price_auto INTEGER NOT NULL DEFAULT 0,
+  ${loc('title')}, ${loc('meta_title')}, ${loc('meta_description')}, ${loc('intro')},
+  ${loc('includes')}, ${loc('steps')}, ${loc('warranty')},
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);`);
+  const now = new Date().toISOString();
+  for (const s of SERVICE_SEED) {
+    const vals: Record<string, string | number | null> = { ...serviceValues(s), slug: s.slug, created_at: now, updated_at: now };
+    const cols = Object.keys(vals);
+    instance.prepare(`INSERT OR IGNORE INTO services (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`).run(...cols.map((c) => vals[c]));
+  }
 }
 
 function migrateV3(instance: DatabaseSync) {
@@ -688,6 +720,46 @@ export function blogLocales(): Set<string> {
   const out = new Set<string>();
   for (const a of listArticles({ publishedOnly: true })) for (const l of articleLocales(a)) out.add(l);
   return out;
+}
+
+// ---------- service pages ----------
+
+function mapService(r: any): Service {
+  return { ...r, is_draft: bool(r.is_draft), price_auto: bool(r.price_auto), price_from: r.price_from ?? null };
+}
+
+function serviceValues(data: Partial<Service>) {
+  const out: Record<string, string | number | null> = {};
+  for (const k of SERVICE_FIELDS) {
+    if (!(k in data)) continue;
+    const v = data[k];
+    if (k === 'is_draft' || k === 'price_auto') out[k] = v ? 1 : 0;
+    else if (k === 'price_from') out[k] = v === null || v === undefined || v === '' ? null : Number(v);
+    else if (k === 'sort_order') out[k] = Number(v) || 0;
+    else out[k] = String(v ?? '');
+  }
+  return out;
+}
+
+export function listServices(opts: { publicOnly?: boolean } = {}): Service[] {
+  const where = opts.publicOnly ? 'WHERE is_draft = 0' : '';
+  return db().prepare(`SELECT * FROM services ${where} ORDER BY sort_order, id`).all().map(mapService);
+}
+
+export function getServiceBySlug(slug: string): Service | null {
+  const row = db().prepare('SELECT * FROM services WHERE slug = ?').get(slug);
+  return row ? mapService(row) : null;
+}
+
+export function updateService(id: number, data: Partial<Service>): Service | null {
+  const vals = serviceValues(data);
+  if (Object.keys(vals).length) {
+    vals.updated_at = new Date().toISOString();
+    const cols = Object.keys(vals);
+    db().prepare(`UPDATE services SET ${cols.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`).run(...cols.map((c) => vals[c]), id);
+  }
+  const row = db().prepare('SELECT * FROM services WHERE id = ?').get(id);
+  return row ? mapService(row) : null;
 }
 
 // ---------- auth secrets (separate from public settings) ----------

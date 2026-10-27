@@ -7,8 +7,9 @@ export default function BackLink({ label }: { label: string }) {
 
   const handleBack = () => {
     let saved: string | null = null;
-    try { saved = sessionStorage.getItem('catalogParams'); } catch { /* storage blocked */ }
-    router.push(saved ? `/catalog?${saved}` : '/catalog');
+    // Last catalog listing with its filters, e.g. /catalog/home-air-conditioners?brand=LG
+    try { saved = sessionStorage.getItem('catalogBack'); } catch { /* storage blocked */ }
+    router.push((saved && saved.startsWith('/catalog') ? saved : '/catalog') as '/catalog');
   };
 
   return (

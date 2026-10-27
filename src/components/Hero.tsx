@@ -1,6 +1,8 @@
 ﻿import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { getSettings, getHeroSlides } from '@/lib/db';
+import { getSettings, getHeroSlides, listCategories } from '@/lib/db';
+import { categoryPath } from '@/lib/categories';
+import { servicePath } from '@/lib/services';
 import HeroSlider from './HeroSlider';
 import CoolWidget from './CoolWidget';
 import AirFlow from './AirFlow';
@@ -35,28 +37,29 @@ export default async function Hero() {
   const showAccent = !titleFromSettings; // only show accent span when no settings title
   const subtitle = settings[`hero_subtitle_${locale}`] || t('subtitle');
 
+  const cats = listCategories();
   const heroServices = [
     {
       label: t('serviceHome'),
-      href: '/catalog?category=home',
+      href: categoryPath(cats, 'home'),
       color: 'text-primary',
       icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
     },
     {
       label: t('serviceHeatPump'),
-      href: '/catalog?category=heat_pump',
+      href: categoryPath(cats, 'heat_pump'),
       color: 'text-cool',
       icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
     },
     {
       label: t('serviceCommercial'),
-      href: '/catalog?category=commercial',
+      href: categoryPath(cats, 'commercial'),
       color: 'text-heat',
       icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>,
     },
     {
       label: t('serviceMaintenance'),
-      href: '/contacts',
+      href: servicePath('kondicionieru-apkope'),
       color: 'text-fg',
       icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
     },
@@ -94,14 +97,18 @@ export default async function Hero() {
 
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 w-full">
         <div className="max-w-3xl mx-auto sm:mx-0 text-center sm:text-left">
-          <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/25 text-primary text-sm font-medium px-4 py-1.5 rounded-full mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            {t('badge')}
-          </div>
+          {/* The slogan ("Komforts jūsu mājās visu gadu", editable in the admin) is the badge above the H1 */}
+          <p className="inline-flex items-center gap-2 bg-accent/10 border border-accent/25 text-primary text-sm sm:text-base font-semibold px-4 py-1.5 rounded-full mb-6 sm:mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse flex-shrink-0" />
+            <span>
+              {titleMain}
+              {showAccent && <> <span className="gradient-text">{t('titleAccent')}</span></>}
+            </span>
+          </p>
 
-          <h1 className="font-heading font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.05] mb-7 tracking-tight">
-            {titleMain}{' '}
-            {showAccent && <span className="gradient-text">{t('titleAccent')}</span>}
+          {/* SEO H1; on phones at most three lines */}
+          <h1 className="font-heading font-bold text-[1.5rem] min-[370px]:text-[1.625rem] min-[400px]:text-[2rem] sm:text-5xl lg:text-6xl leading-[1.12] sm:leading-[1.05] mb-6 sm:mb-7 tracking-tight text-balance">
+            {t('h1')}
           </h1>
 
           <p className="text-lg sm:text-xl text-muted mb-10 leading-relaxed max-w-xl mx-auto sm:mx-0">

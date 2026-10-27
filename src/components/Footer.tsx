@@ -3,6 +3,8 @@ import { Link } from '@/i18n/navigation';
 import { getSettings, blogLocales } from '@/lib/db';
 import { getCompany } from '@/lib/company';
 import GoogleIcon from '@/components/GoogleIcon';
+import { allServices } from '@/lib/serviceData';
+import { servicePath, SERVICES_HUB } from '@/lib/services';
 
 export default async function Footer() {
   const [t, settings, locale] = await Promise.all([getTranslations(), getSettings(), getLocale()]);
@@ -16,17 +18,19 @@ export default async function Footer() {
   const navLinks = [
     { href: '/' as const, label: t('nav.home') },
     { href: '/catalog' as const, label: t('nav.catalog') },
+    { href: SERVICES_HUB as '/catalog', label: t('nav.services') },
     { href: '/calculator' as const, label: t('nav.calculator') },
     // "Guides" only once this language has published articles
     ...(blogLocales().has(locale) ? [{ href: '/blog' as const, label: t('nav.blog') }] : []),
     { href: '/contacts' as const, label: t('nav.contacts') },
   ];
 
+  // "Our services": the service pages (Admin → Services), then sales (catalog) and consultation (contacts)
+  const l = (locale === 'ru' || locale === 'en' ? locale : 'lv') as 'lv' | 'ru' | 'en';
   const services = [
-    t('services.supply'),
-    t('services.installation'),
-    t('services.maintenance'),
-    t('services.consultation'),
+    ...allServices().map((s) => ({ href: servicePath(s.slug), label: s[`title_${l}`] })),
+    { href: '/catalog', label: t('services.supply') },
+    { href: '/contacts', label: t('services.consultation') },
   ];
 
   return (
@@ -90,11 +94,11 @@ export default async function Footer() {
           <div>
             <h3 className="font-heading font-semibold text-sm text-muted uppercase tracking-widest mb-5">{t('services.title')}</h3>
             <ul className="space-y-3">
-              {services.map((svc) => (
-                <li key={svc}>
-                  <Link href="/contacts" className="text-muted hover:text-primary text-sm transition-colors duration-200 flex items-center gap-2 group">
+              {services.map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href as any} className="text-muted hover:text-primary text-sm transition-colors duration-200 flex items-center gap-2 group">
                     <span className="w-1 h-1 rounded-full bg-accent/40 group-hover:bg-primary transition-colors" />
-                    {svc}
+                    {label}
                   </Link>
                 </li>
               ))}

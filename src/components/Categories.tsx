@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { getSettings, listCategories } from '@/lib/db';
-import { catName, hiddenKeys } from '@/lib/categories';
+import { catName, hiddenKeys, categoryPath } from '@/lib/categories';
 import { asLoc } from '@/lib/productSeo';
 
 function FanCoilIcon() {
@@ -72,9 +72,13 @@ export default async function Categories() {
   const title = settings[`cats_title_${locale}`] || t('title');
   const subtitle = settings[`cats_subtitle_${locale}`] || t('subtitle');
 
-  const cards: { slug: string; href: string; Icon: () => JSX.Element; image?: string; accent: Tone; name: string; desc: string; explore: string }[] = CAT_META.map(({ tKey, sk, slug, Icon, accent }) => ({
+  const l = asLoc(locale);
+  const cats = listCategories();
+  const hidden = hiddenKeys(cats);
+  // Each tile links to its category page /catalog/<slug> (hidden categories are left out)
+  const cards: { slug: string; href: string; Icon: () => JSX.Element; image?: string; accent: Tone; name: string; desc: string; explore: string }[] = CAT_META.filter(({ slug }) => !hidden.has(slug)).map(({ tKey, sk, slug, Icon, accent }) => ({
     slug,
-    href: `/catalog?category=${slug}`,
+    href: categoryPath(cats, slug),
     Icon,
     accent,
     name: settings[`${sk}_${locale}`] || t(tKey),
@@ -83,14 +87,11 @@ export default async function Categories() {
   }));
 
   // Top-level categories added in Admin → Categories with "show on site" on (e.g. fan coils)
-  const l = asLoc(locale);
-  const cats = listCategories();
-  const hidden = hiddenKeys(cats);
   for (const c of cats) {
     if (c.is_system || c.parent_key || hidden.has(c.key)) continue;
     cards.push({
       slug: c.key,
-      href: `/catalog/category/${c.slug}`,
+      href: categoryPath(cats, c.key),
       Icon: FanCoilIcon,
       image: c.image_url || undefined,
       accent: 'cool',

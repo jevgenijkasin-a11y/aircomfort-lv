@@ -1,34 +1,38 @@
-'use client';
+// Brand strip on the home page: brands that have public in-stock products
+// (from the DB, most models first), each linking to /catalog/brand/<brand>.
+import { Link } from '@/i18n/navigation';
+import { listProducts, hiddenCategoryKeys } from '@/lib/db';
+import { visibleProducts } from '@/lib/catalogData';
+import { brandSlug } from '@/lib/productSeo';
 
-const brands = ['Daikin', 'Mitsubishi', 'LG', 'TCL', 'Midea', 'Nordis', 'Hisense', 'Toshiba', 'HAVA'];
-
-export default function BrandMarquee() {
+export default async function BrandMarquee() {
+  const products = visibleProducts(await listProducts({ inStockOnly: true }), hiddenCategoryKeys());
+  const counts = products.reduce<Record<string, number>>((acc, p) => ({ ...acc, [p.brand]: (acc[p.brand] ?? 0) + 1 }), {});
+  const brands = Object.keys(counts).sort((a, b) => counts[b] - counts[a] || a.localeCompare(b));
+  if (!brands.length) return null;
   // 4 copies — translateX(-25%) loops seamlessly regardless of viewport width
   const quad = [...brands, ...brands, ...brands, ...brands];
+  const linkCls = 'font-heading font-bold text-xl text-muted hover:text-primary transition-colors duration-200 tracking-wide';
 
   return (
     <section className="py-14 border-y border-line overflow-hidden">
-      {/* prefers-reduced-motion: static grid */}
+      {/* prefers-reduced-motion: static list */}
       <div className="motion-reduce-show max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
+        <ul className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
           {brands.map((b) => (
-            <span key={b} className="font-heading font-bold text-xl text-muted tracking-wide">
-              {b}
-            </span>
+            <li key={b}><Link href={`/catalog/brand/${brandSlug(b)}` as any} className={linkCls}>{b}</Link></li>
           ))}
-        </div>
+        </ul>
       </div>
 
-      {/* normal: marquee */}
-      <div className="motion-ok-show marquee-track group" aria-hidden="true">
-        <div className="marquee-inner group-hover:[animation-play-state:paused]">
+      {/* normal: marquee — the first copy is the real list, the repeats are hidden from assistive tech and the tab order */}
+      <div className="motion-ok-show marquee-track group">
+        <div className="marquee-inner group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
           {quad.map((b, i) => (
-            <span
-              key={i}
-              className="font-heading font-bold text-xl text-muted hover:text-fg transition-colors duration-200 tracking-wide cursor-default select-none px-10"
-            >
+            <Link key={i} href={`/catalog/brand/${brandSlug(b)}` as any} className={`${linkCls} select-none px-10`}
+              {...(i >= brands.length ? { 'aria-hidden': true, tabIndex: -1 } : {})}>
               {b}
-            </span>
+            </Link>
           ))}
         </div>
       </div>

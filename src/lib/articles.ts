@@ -85,7 +85,7 @@ export function validateArticle(body: Record<string, unknown>, creating: boolean
     if (!(ARTICLE_CATEGORIES as readonly string[]).includes(String(data.category ?? ''))) errors.push('Выберите раздел: охлаждение, отопление или субсидии.');
   }
   if ('related_catalog' in body && body.related_catalog && !data.related_catalog) {
-    errors.push('Раздел каталога: укажите путь вида /catalog/type/air-to-water-heat-pumps.');
+    errors.push('Раздел каталога: укажите путь вида /catalog/air-to-water-heat-pumps.');
   }
   for (const l of ARTICLE_LOCALES) {
     const title = data[`title_${l}`] as string | undefined;

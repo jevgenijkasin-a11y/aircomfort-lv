@@ -4,7 +4,7 @@
 // text with a live preview rendered by the same code as the public page.
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import type { AdminProduct } from '@/lib/adminTypes';
-import { type Category, slugify } from '@/lib/categories';
+import { type Category, slugify, categoryPath, currentCatalogPath } from '@/lib/categories';
 import { type Article, type Loc, ARTICLE_CATEGORIES, ARTICLE_LOCALES, hasLocale, renderMarkdown, extractFaq } from '@/lib/articles';
 import { firstImage } from '@/lib/adminShared';
 import { useAdmin, api, revalidate, uploadImage } from '../context';
@@ -69,16 +69,18 @@ export default function ArticleEditor({ initial, products, cats, onClose, onSave
   const faq = useMemo(() => extractFaq(body).length, [body]);
 
   const catName = (c: Category) => (lang === 'lv' ? c.name_lv : lang === 'en' ? c.name_en : c.name_ru) || c.name_ru || c.key;
+  // Old saved paths (/catalog/type/x, /catalog/category/x) are shown as the new /catalog/x
+  const relatedCatalog = currentCatalogPath(cats, f.related_catalog);
   const catalogOptions = useMemo(() => {
     const opts = [{ value: '/catalog', label: lang === 'lv' ? 'Viss katalogs' : lang === 'en' ? 'Whole catalog' : 'Весь каталог' }];
     for (const c of cats) {
       const parent = c.parent_key ? cats.find((x) => x.key === c.parent_key) : null;
       opts.push({
-        value: c.is_system ? `/catalog/type/${c.slug}` : `/catalog/category/${c.slug}`,
+        value: categoryPath(cats, c.key),
         label: parent ? `${catName(parent)} → ${catName(c)}` : catName(c),
       });
     }
-    if (f.related_catalog && !opts.some((o) => o.value === f.related_catalog)) opts.push({ value: f.related_catalog, label: f.related_catalog });
+    if (relatedCatalog && !opts.some((o) => o.value === relatedCatalog)) opts.push({ value: relatedCatalog, label: relatedCatalog });
     return opts;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cats, lang, f.related_catalog]);
@@ -230,7 +232,7 @@ export default function ArticleEditor({ initial, products, cats, onClose, onSave
           </Section>
 
           <Section title={t.artCatalog}>
-            <select className="field-input" value={f.related_catalog} onChange={(e) => set('related_catalog', e.target.value)} aria-label={t.artCatalog}>
+            <select className="field-input" value={relatedCatalog} onChange={(e) => set('related_catalog', e.target.value)} aria-label={t.artCatalog}>
               <option value="">{t.artCatalogNone}</option>
               {catalogOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>

@@ -10,7 +10,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import ProductCard from '@/components/ProductCard';
 import type { CardProduct } from '@/lib/productCard';
-import { type Category, categoryTree, catName } from '@/lib/categories';
+import { type Category, categoryTree, catName, categoryPath } from '@/lib/categories';
 import { KW_RANGES, PIPE_SYSTEMS, FAN_MOTORS } from '@/lib/fanCoil';
 import { type Filters, AREA_BUCKETS, AREA_EXTRA, AREA_CHIPS, FAN_FILTER_KEYS, filtersQuery, fanFiltersActive, hasFilters } from '@/lib/catalogFilter';
 import Sheet from '@/components/Sheet';
@@ -60,6 +60,8 @@ type Props = {
   locale: string;
   initialFilters?: Filters;
   installFrom?: number;
+  /** Shown instead of the grid when the category has no products at all. */
+  emptyText?: string;
 };
 
 /** Keeps a rendering error inside the catalog from blanking the whole page. */
@@ -103,7 +105,7 @@ export default function CatalogClient(props: Props) {
 const sameFilters = (a: Filters, b: Filters, cats: Category[]) => filtersQuery(a, 1, cats) === filtersQuery(b, 1, cats);
 
 function CatalogInner({
-  cards, total, page, totalPages, brands, categories: slimCats, locale, initialFilters = {}, installFrom = 250,
+  cards, total, page, totalPages, brands, categories: slimCats, locale, initialFilters = {}, installFrom = 250, emptyText,
 }: Props) {
   const t = useTranslations('catalog');
   const tp = useTranslations('products');
@@ -130,15 +132,26 @@ function CatalogInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQuery(initialFilters, 1, categories)]);
 
+  // The category is part of the path (/catalog/<slug>), the other filters are query parameters
+  const pathFor = (f: Filters) => (f.category ? categoryPath(categories, f.category) : '/catalog');
+  const hrefFor = (f: Filters, n = 1) => {
+    const p = new URLSearchParams(filtersQuery(f, n, categories));
+    p.delete('category');
+    const qs = p.toString();
+    return qs ? `${pathFor(f)}?${qs}` : pathFor(f);
+  };
+
   // Remember the current listing for the product page's "Back to catalog"
   useEffect(() => {
-    try { sessionStorage.setItem('catalogParams', filtersQuery(initialFilters, page, categories)); } catch { /* storage blocked */ }
+    try { sessionStorage.setItem('catalogBack', hrefFor(initialFilters, page)); } catch { /* storage blocked */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQuery(initialFilters, page, categories)]);
 
   const navigate = (next: Filters) => {
-    const qs = filtersQuery(next, 1, categories);
-    startTransition(() => router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false }));
+    const target = `/${locale}${hrefFor(next)}`;
+    // Another category → another page (own history entry); other filters only replace the query
+    if (pathFor(next) !== pathFor(filtersRef.current)) startTransition(() => router.push(target));
+    else startTransition(() => router.replace(target, { scroll: false }));
   };
 
   const update = (patch: Filters) => {
@@ -161,13 +174,17 @@ function CatalogInner({
 
   const tree = categoryTree(categories);
   const fan = fanFiltersActive(filters, categories);
-  const resetAll = () => { setQuery(''); const next = { sort: 'asc' }; setFilters(next); navigate(next); };
+  // "Reset" keeps the category page you are on (choose "All categories" to leave it)
+  const resetAll = () => {
+    setQuery('');
+    const next: Filters = { sort: 'asc', ...(filters.category ? { category: filters.category } : {}) };
+    setFilters(next);
+    navigate(next);
+  };
+  const filtered = hasFilters({ ...filters, category: undefined });
   const select = (k: keyof Filters) => (e: React.ChangeEvent<HTMLSelectElement>) => update({ [k]: e.target.value });
 
-  const pageHref = (n: number) => {
-    const qs = filtersQuery(filters, n, categories);
-    return qs ? `/catalog?${qs}` : '/catalog';
-  };
+  const pageHref = (n: number) => hrefFor(filters, n);
   const PG = {
     prev: { lv: 'Iepriekšējā', ru: 'Назад', en: 'Previous' },
     next: { lv: 'Nākamā', ru: 'Далее', en: 'Next' },
@@ -175,7 +192,7 @@ function CatalogInner({
   };
   const catLabel = (c: Category) => (SYSTEM_LABEL[c.key] ? t(SYSTEM_LABEL[c.key]) : catName(c, L));
   // Active filters (sorting does not count) — "Filters (N)" on phones
-  const activeCount = (['brand', 'area', 'category', 'q', 'pipes', 'motor', 'cool', 'heat'] as const).filter((k) => !!filters[k]).length;
+  const activeCount = (['brand', 'area', 'q', 'pipes', 'motor', 'cool', 'heat'] as const).filter((k) => !!filters[k]).length;
   const chipLabel = (id: string) => (id === 'lt25' ? ts('upTo', { n: 25 }) : id === '50plus' ? '50+' : id.replace('-', '–'));
   const sortSelect = (id: string, cls: string) => (
     <select id={id} value={filters.sort ?? 'asc'} onChange={select('sort')} className={cls}>
@@ -315,7 +332,7 @@ function CatalogInner({
 
       <div className="flex items-center justify-between mt-4 md:mt-0 mb-4 md:mb-6">
         <p className="text-muted text-sm" aria-live="polite"><span className="text-fg font-semibold">{total}</span> {t('results')}</p>
-        {(hasFilters(filters) || query) && (
+        {(filtered || query) && (
           <button onClick={resetAll} className="text-primary text-sm hover:text-fg transition-colors flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
             {t('resetFilters')}
@@ -324,7 +341,9 @@ function CatalogInner({
       </div>
 
       <div className={`transition-opacity duration-200 ${pending ? 'opacity-50' : ''}`} aria-busy={pending}>
-        {total === 0 ? (
+        {total === 0 && emptyText && !filtered && !query ? (
+          <p className="glass-card rounded-2xl p-6 text-muted">{emptyText}</p>
+        ) : total === 0 ? (
           <div className="text-center py-20">
             <div className="w-16 h-16 rounded-2xl bg-surface border border-line flex items-center justify-center mx-auto mb-4">
               <svg className="w-7 h-7 text-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>

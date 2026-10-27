@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { listProducts, getSettings, hiddenCategoryKeys } from '@/lib/db';
+import { listProducts, getSettings, hiddenCategoryKeys, listCategories } from '@/lib/db';
+import { categoryPath } from '@/lib/categories';
 import { visibleProducts, pricedFirst } from '@/lib/catalogData';
 import { BASE_URL } from '@/lib/seo';
 import { asLoc, brandSlug, CATEGORY_SLUGS, CATEGORY_MSG_KEY } from '@/lib/productSeo';
@@ -72,7 +73,7 @@ export default async function BrandPage({ params, searchParams }: Props) {
       related={{
         title: RELATED[l],
         items: [
-          ...cats.map((c) => ({ href: `/catalog/type/${CATEGORY_SLUGS[c]}`, label: tc(CATEGORY_MSG_KEY[c]) })),
+          ...cats.map((c) => ({ href: categoryPath(listCategories(), c), label: tc(CATEGORY_MSG_KEY[c]) })),
           ...otherBrands.map((b) => ({ href: `/catalog/brand/${brandSlug(b)}`, label: b })),
         ],
       }}

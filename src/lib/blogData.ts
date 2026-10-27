@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import { listArticles, getArticleBySlug, listProducts, listCategories, hiddenCategoryKeys } from './db';
 import { type Article, type Loc, hasLocale, articleLocales } from './articles';
 import { visibleProducts } from './catalogData';
-import { brandSlug, categoryFromSlug, CATEGORY_SLUGS } from './productSeo';
-import { descendantKeys } from './categories';
+import { brandSlug } from './productSeo';
+import { descendantKeys, categoryBySegments, categoryPath, currentCatalogPath } from './categories';
 import { BASE_URL } from './seo';
 import type { SupabaseProduct } from './types';
 
@@ -20,17 +20,20 @@ export function publicArticle(slug: string, locale: string): Article | null {
   return a && a.is_published && hasLocale(a, asLoc(locale)) ? a : null;
 }
 
-/** Products of a catalog section path (/catalog, /catalog/type/x, /catalog/category/x, /catalog/brand/x). */
+/** Products of a catalog section path (/catalog, /catalog/<slug>, /catalog/<parent>/<sub>, /catalog/brand/x; old /catalog/type/x too). */
 function productsOfPath(all: SupabaseProduct[], path: string): SupabaseProduct[] {
-  const [, , kind, slug] = path.split('/'); // ['', 'catalog', kind, slug]
-  if (!kind) return all;
-  if (kind === 'brand') return all.filter((p) => brandSlug(p.brand) === slug);
   const cats = listCategories();
-  const key = kind === 'type' ? categoryFromSlug(slug) : kind === 'category' ? cats.find((c) => c.slug === slug)?.key : null;
-  if (!key) return [];
-  const keys = descendantKeys(cats, key);
+  const [, , ...segments] = currentCatalogPath(cats, path).split('/'); // ['', 'catalog', ...]
+  if (!segments.length) return all;
+  if (segments[0] === 'brand') return all.filter((p) => brandSlug(p.brand) === segments[1]);
+  const cat = categoryBySegments(cats, segments);
+  if (!cat) return [];
+  const keys = descendantKeys(cats, cat.key);
   return all.filter((p) => keys.has(p.category));
 }
+
+/** The article's catalog section as a current URL (old /catalog/type/x links are mapped). */
+export const articleCatalogPath = (a: Article) => (a.related_catalog ? currentCatalogPath(listCategories(), a.related_catalog) : '');
 
 /**
  * "Suitable equipment": the products picked in the admin (in stock and
@@ -70,12 +73,13 @@ const TOPIC_FIT: Record<string, Partial<Record<Article['category'], number>>> = 
 export function articlesForProduct(p: SupabaseProduct, locale: string, n = 2): Article[] {
   const list = publishedArticles(locale);
   const topicKey = p.category.startsWith('fan_coils') ? 'fan_coils' : p.category;
-  const typeSlug = CATEGORY_SLUGS[p.category];
-  const ownPaths = new Set([
-    ...(typeSlug ? [`/catalog/type/${typeSlug}`] : []),
-    ...(topicKey === 'fan_coils' ? listCategories().filter((c) => c.key.startsWith('fan_coils')).map((c) => `/catalog/category/${c.slug}`) : []),
-  ]);
-  const score = (a: Article) => (ownPaths.has(a.related_catalog) ? 3 : 0) + (TOPIC_FIT[topicKey]?.[a.category] ?? 0);
+  const cats = listCategories();
+  const ownPaths = new Set(
+    topicKey === 'fan_coils'
+      ? cats.filter((c) => c.key.startsWith('fan_coils')).map((c) => categoryPath(cats, c.key))
+      : [categoryPath(cats, p.category)],
+  );
+  const score = (a: Article) => (ownPaths.has(articleCatalogPath(a)) ? 3 : 0) + (TOPIC_FIT[topicKey]?.[a.category] ?? 0);
   return list
     .map((a, i) => ({ a, s: score(a), i }))
     .sort((x, y) => y.s - x.s || x.i - y.i)
@@ -95,3 +99,14 @@ export function articleAlternates(a: Article, locale: string): NonNullable<Metad
 
 /** Article date for JSON-LD and Open Graph (not shown to visitors): first publication, else creation. */
 export const publishedDate = (a: Article) => a.published_at ?? a.created_at;
+
+/**
+ * Links inside article texts that still point to old category addresses
+ * (/lv/catalog/type/x, /catalog/category/x) are rewritten to /lv/catalog/x,
+ * so readers and crawlers go straight to the page without a redirect.
+ */
+export function currentCatalogLinks(html: string): string {
+  const cats = listCategories();
+  return html.replace(/href="(\/(?:lv|ru|en))?(\/catalog\/(?:type|category)\/[a-z0-9-]+)\/?"/g, (_m, loc: string | undefined, path: string) =>
+    `href="${loc ?? ''}${currentCatalogPath(cats, path)}"`);
+}

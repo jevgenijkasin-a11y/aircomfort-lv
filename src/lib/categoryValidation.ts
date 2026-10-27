@@ -1,5 +1,5 @@
 // Validation for category create/update (admin API). Errors are in Russian.
-import { type Category, SLUG_RE, slugify } from './categories';
+import { type Category, SLUG_RE, slugify, RESERVED_CATALOG_SEGMENTS } from './categories';
 
 const TEXT_FIELDS = [
   'name_lv', 'name_ru', 'name_en', 'image_url',
@@ -31,6 +31,7 @@ export function validateCategory(
 
   const slug = String(body.slug ?? current?.slug ?? '').trim() || slugify(name('name_en') || name('name_ru'));
   if (!SLUG_RE.test(slug)) errors.push('Slug: только латинские буквы в нижнем регистре, цифры и дефисы (напр. fan-coils-wall).');
+  else if (RESERVED_CATALOG_SEGMENTS.includes(slug)) errors.push(`Slug «${slug}» занят адресом сайта (/catalog/${slug}/…), выберите другой.`);
   else if (cats.some((c) => c.slug === slug && c.key !== current?.key)) errors.push(`Slug «${slug}» уже занят другой категорией.`);
   else patch.slug = slug;
 

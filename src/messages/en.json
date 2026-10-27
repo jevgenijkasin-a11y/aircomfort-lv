@@ -6,7 +6,8 @@
     "contacts": "Contacts",
     "getQuote": "Get a Quote",
     "themeToggle": "Switch light/dark theme",
-    "blog": "Guides"
+    "blog": "Guides",
+    "services": "Services"
   },
   "hero": {
     "badge": "Professional installation with warranty",
@@ -25,7 +26,8 @@
     "serviceHeatPump": "Heat Pumps",
     "serviceCommercial": "Commercial",
     "serviceMaintenance": "Maintenance",
-    "coolWidget": "Fast cooling"
+    "coolWidget": "Fast cooling",
+    "h1": "Air conditioners and heat pumps with installation in Riga and Latvia"
   },
   "trustbar": {
     "warranty": "Warranty",
@@ -36,13 +38,14 @@
     "title": "Our Services",
     "subtitle": "Full cycle — from consultation to maintenance",
     "supply": "Sales",
-    "supplyDesc": "Wide range from leading manufacturers — Daikin, Mitsubishi, LG, TCL, Midea, Nordis, Hisense",
+    "supplyDesc": "A wide range from leading brands — Daikin, Mitsubishi Electric, Hisense, Midea, TCL, Toshiba and more",
     "installation": "Installation",
     "installationDesc": "Professional installation with warranty. All work from one day",
     "maintenance": "Maintenance",
     "maintenanceDesc": "Regular maintenance, cleaning and repair. Fast response time",
     "consultation": "Consultation",
-    "consultationDesc": "Free consultation and selection of the best solution for your space"
+    "consultationDesc": "Free consultation and selection of the best solution for your space",
+    "more": "Learn more"
   },
   "categories": {
     "title": "Our Product Range",

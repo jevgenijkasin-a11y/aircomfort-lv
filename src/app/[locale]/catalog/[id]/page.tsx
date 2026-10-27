@@ -7,7 +7,7 @@ import { DUPLICATE_REDIRECTS, visibleProducts } from '@/lib/catalogData';
 import { Link } from '@/i18n/navigation';
 import { type SupabaseProduct, productName, productFeatures, productImages, productDescription } from '@/lib/types';
 import { getProduct, getSettings, listProducts, listCategories, hiddenCategoryKeys } from '@/lib/db';
-import { AIR_WATER_KEY, catName, hiddenKeys, isFanCoil, isWithin, type Category } from '@/lib/categories';
+import { AIR_WATER_KEY, catName, hiddenKeys, isFanCoil, isWithin, categoryPath, type Category } from '@/lib/categories';
 import { fanSpec } from '@/lib/fanCoil';
 import { localizedAlternates, BASE_URL, pageTitle, clipDescription } from '@/lib/seo';
 import {
@@ -24,16 +24,23 @@ import { toCards } from '@/lib/productCard';
 import { starred } from '@/components/FootnoteStar';
 import OrderLink from '@/components/OrderLink';
 import ProductShortlist from '@/components/ProductShortlist';
+import StickyBuyBar from '@/components/StickyBuyBar';
 import { CardToggles } from '@/components/ProductCardActions';
+import CategoryListing, { categoryListingMetadata } from '@/components/CategoryListing';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
+
+/** Product ids are UUIDs; any other segment is a category slug (/catalog/home-air-conditioners). */
+const PRODUCT_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const installFromSettings = (s: Record<string, string>) => parseInt(s.install_price_from || '250') || 250;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { id, locale } = await params;
+  if (!PRODUCT_ID_RE.test(id)) return categoryListingMetadata(locale, [id], await searchParams);
   const [data, settings] = await Promise.all([getProduct(id), getSettings()]);
   if (!data) return { title: 'Product' };
   const title = productTitle(data, locale);
@@ -142,9 +149,10 @@ const SPEC_LABELS: Record<string, Record<string, string>> = {
   install:        { ru: 'Монтаж', lv: 'Montāža', en: 'Installation' },
 };
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params, searchParams }: Props) {
   const { id, locale } = await params;
   setRequestLocale(locale);
+  if (!PRODUCT_ID_RE.test(id)) return <CategoryListing locale={locale} segments={[id]} sp={await searchParams} />;
   const [t, tp, tn, tTrust, ts, tc, product, settings, all] = await Promise.all([
     getTranslations('catalog'),
     getTranslations('products'),
@@ -171,6 +179,7 @@ export default async function ProductPage({ params }: Props) {
   const energyCls = energyColors[p.energy_class] ?? 'text-muted border-line bg-fg/5';
 
   const contactMessage = buildContactMessage(p, name, locale, installFrom);
+  const finalPriceNum = p.price ? (p.discount_percent ? Math.round(p.price * (1 - p.discount_percent / 100)) : p.price) : null;
   const paragraphs = productParagraphs(p, locale, installFrom);
   const cats = listCategories();
   const publicAll = visibleProducts(all, hiddenKeys(cats));
@@ -266,7 +275,7 @@ export default async function ProductPage({ params }: Props) {
   const catChain: Category[] = [];
   for (let c = cat; c && !catChain.includes(c); c = cats.find((x) => x.key === c!.parent_key)) catChain.unshift(c);
   const catCrumbs = catChain.filter((c) => !hiddenCats.has(c.key)).map((c) => {
-    const href = c.is_system ? `/catalog/type/${c.slug}` : `/catalog/category/${c.slug}`;
+    const href = categoryPath(cats, c.key);
     const name = (c.is_system && CATEGORY_MSG_KEY[c.key] ? tc(CATEGORY_MSG_KEY[c.key]) : '') || catName(c, l);
     return { name, href, url: `${BASE_URL}/${locale}${href}` };
   });
@@ -297,10 +306,11 @@ export default async function ProductPage({ params }: Props) {
       {productLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(productLd) }} />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumbJsonLd(crumbs.map(({ name: n, url }) => ({ name: n, url })))) }} />
       {/* Header */}
-      <div className="pt-36 pb-6 bg-gradient-to-b from-surface to-page relative overflow-hidden">
+      <div className="pt-28 md:pt-36 pb-6 bg-gradient-to-b from-surface to-page relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, rgb(var(--text)) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <BackLink label={t('backToCatalog')} />
+          {/* Phones: the breadcrumbs are enough; the room goes to the price under the title */}
+          <div className="hidden md:block"><BackLink label={t('backToCatalog')} /></div>
           <nav aria-label="Breadcrumb" className="mb-3">
             <ol className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
               {crumbs.map((c, i) => (
@@ -324,8 +334,28 @@ export default async function ProductPage({ params }: Props) {
               {!!p.discount_percent && <span className="text-sm font-bold px-3 py-1 rounded-full bg-sale text-black shadow-md">−{p.discount_percent}%</span>}
             </div>
           )}
+          {/* Phones: price and energy class right under the title, before the photos */}
+          <div id="price-top" className="md:hidden mt-3 flex items-center flex-wrap gap-x-3 gap-y-1">
+            {!p.price ? (
+              <p className="font-heading font-semibold text-lg text-muted">{tp('priceOnRequest')}</p>
+            ) : (
+              <p className="font-heading font-bold text-2xl text-primary leading-none">
+                {finalPriceNum!.toLocaleString('lv-LV')} €
+                {!!p.discount_percent && <span className="ml-2 text-sm font-normal text-muted line-through">{p.price.toLocaleString('lv-LV')} €</span>}
+              </p>
+            )}
+            {p.energy_class && <span data-theme="light" className={`text-sm font-bold px-2.5 py-0.5 rounded-lg border ${energyCls}`}>{p.energy_class}</span>}
+            {!!p.price && <p className="basis-full text-sm text-muted">{starred(TX.total[l]((finalPriceNum! + installFrom).toLocaleString('lv-LV')))}</p>}
+          </div>
         </div>
       </div>
+      <StickyBuyBar
+        price={p.price ? `${finalPriceNum!.toLocaleString('lv-LV')} €` : tp('priceOnRequest')}
+        total={p.price ? starred(TX.total[l]((finalPriceNum! + installFrom).toLocaleString('lv-LV'))) : undefined}
+        orderLabel={tp('order')}
+        service="install"
+        message={contactMessage}
+      />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -367,7 +397,7 @@ export default async function ProductPage({ params }: Props) {
 
           {/* Details */}
           <div className="space-y-6">
-            <div className="glass-card rounded-2xl p-6 space-y-4">
+            <div id="buy-box" className="glass-card rounded-2xl p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-surface rounded-xl p-4">
                   <p className="text-muted text-xs mb-1">{fanCoil ? t('specCooling') : tp('power')}</p>

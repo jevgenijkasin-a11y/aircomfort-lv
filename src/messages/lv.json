@@ -6,7 +6,8 @@
     "contacts": "Kontakti",
     "getQuote": "Saņemt piedāvājumu",
     "themeToggle": "Pārslēgt gaišo/tumšo tēmu",
-    "blog": "Padomi"
+    "blog": "Padomi",
+    "services": "Pakalpojumi"
   },
   "hero": {
     "badge": "Profesionāla uzstādīšana ar garantiju",
@@ -25,7 +26,8 @@
     "serviceHeatPump": "Siltumsūkņi",
     "serviceCommercial": "Komerciālie",
     "serviceMaintenance": "Apkope",
-    "coolWidget": "Ātra dzesēšana"
+    "coolWidget": "Ātra dzesēšana",
+    "h1": "Kondicionieri un siltumsūkņi ar montāžu Rīgā un Latvijā"
   },
   "trustbar": {
     "warranty": "Garantija",
@@ -36,13 +38,14 @@
     "title": "Mūsu pakalpojumi",
     "subtitle": "Pilns cikls — no konsultācijas līdz apkopei",
     "supply": "Pārdošana",
-    "supplyDesc": "Plašs klāsts no vadošajiem ražotājiem — Daikin, Mitsubishi, LG, TCL, Midea, Nordis, Hisense",
+    "supplyDesc": "Plašs klāsts no vadošajiem ražotājiem — Daikin, Mitsubishi Electric, Hisense, Midea, TCL, Toshiba un citiem",
     "installation": "Uzstādīšana",
     "installationDesc": "Profesionāla uzstādīšana ar garantiju. Visi darbi no vienas dienas",
     "maintenance": "Apkope",
     "maintenanceDesc": "Regulāra tehniskā apkope, tīrīšana un remonts. Ātra reaģēšana",
     "consultation": "Konsultācija",
-    "consultationDesc": "Bezmaksas konsultācija un piemērotākā risinājuma izvēle jūsu telpām"
+    "consultationDesc": "Bezmaksas konsultācija un piemērotākā risinājuma izvēle jūsu telpām",
+    "more": "Uzzināt vairāk"
   },
   "categories": {
     "title": "Mūsu produktu klāsts",

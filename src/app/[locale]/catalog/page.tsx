@@ -7,9 +7,11 @@ import CatalogClient, { type CatalogCategory } from '@/components/CatalogClient'
 import { jsonLdString } from '@/lib/productSeo';
 import { toCards } from '@/lib/productCard';
 import { listingMetadata, itemListJsonLd, paginate, parsePage, PAGE_WORD } from '@/lib/pagination';
-import { asLoc, brandSlug, CATEGORY_SLUGS, CATEGORY_MSG_KEY } from '@/lib/productSeo';
+import { asLoc, brandSlug } from '@/lib/productSeo';
 import { visibleProducts } from '@/lib/catalogData';
-import { hiddenKeys, descendantKeys, catName } from '@/lib/categories';
+import { hiddenKeys, descendantKeys, categoryPath } from '@/lib/categories';
+import { redirectToCategory } from '@/lib/categoryRedirect';
+import { categoryLabel } from '@/components/CategoryListing';
 import { parseFilters, hasFilters, filterProducts } from '@/lib/catalogFilter';
 
 export const dynamic = 'force-dynamic';
@@ -64,8 +66,11 @@ export default async function CatalogPage({
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
 
   const filters = parseFilters(sp);
+  // ?category=<key> (old links) → the category's own page /catalog/<slug>, other filters kept
+  const legacy = filters.category && categories.find((c) => c.key === filters.category || c.slug === filters.category);
+  if (legacy) redirectToCategory(locale, { key: legacy.key }, sp, ['category']);
   // Unknown or hidden category in the URL → show everything instead of an empty list
-  if (filters.category && !categories.some((c) => c.key === filters.category)) delete filters.category;
+  delete filters.category;
   // Filter, sort and page on the server: the browser only gets this page's cards
   const filtered = filterProducts(products, filters, categories);
   const page = parsePage(sp.page);
@@ -76,9 +81,8 @@ export default async function CatalogPage({
     ({ key, parent_key, slug, name_lv, name_ru, name_en, sort_order, is_visible, is_system }));
 
   const brands = Array.from(new Set(products.map((p) => p.brand))).sort();
-  const cats = Object.keys(CATEGORY_SLUGS).filter((c) => products.some((p) => p.category === c));
-  // Category landings managed in the admin (e.g. fan coils) — only with products
-  const managed = categories.filter((c) => !c.is_system && products.some((p) => descendantKeys(categories, c.key).has(p.category)));
+  // Category pages (top level) that have products
+  const cats = categories.filter((c) => !c.parent_key && products.some((p) => descendantKeys(categories, c.key).has(p.category)));
   const LBL = {
     brands: { lv: 'Zīmoli', ru: 'Бренды', en: 'Brands' },
     types: { lv: 'Kategorijas', ru: 'Категории', en: 'Categories' },
@@ -121,13 +125,8 @@ export default async function CatalogPage({
           <h2 className="text-muted text-xs font-semibold uppercase tracking-widest mb-3">{LBL.types[l]}</h2>
           <ul className="flex flex-wrap gap-2">
             {cats.map((c) => (
-              <li key={c}>
-                <Link href={`/catalog/type/${CATEGORY_SLUGS[c]}` as any} className={chip}>{tc(CATEGORY_MSG_KEY[c])}</Link>
-              </li>
-            ))}
-            {managed.map((c) => (
               <li key={c.key}>
-                <Link href={`/catalog/category/${c.slug}` as any} className={chip}>{catName(c, l)}</Link>
+                <Link href={categoryPath(categories, c.key) as any} className={chip}>{categoryLabel(c, l, tc)}</Link>
               </li>
             ))}
           </ul>

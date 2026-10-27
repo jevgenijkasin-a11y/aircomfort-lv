@@ -6,6 +6,10 @@ import Calculator from '@/components/Calculator';
 import { getSettings } from '@/lib/db';
 import { asLoc } from '@/lib/productSeo';
 import { listingMetadata } from '@/lib/pagination';
+import CalculatorGuide from '@/components/CalculatorGuide';
+import { BASE_URL } from '@/lib/seo';
+import { ORG_ID } from '@/lib/company';
+import { jsonLdString } from '@/lib/productSeo';
 
 const DESC = {
   lv: 'Bezmaksas kondicioniera jaudas kalkulators: ievadiet telpas platību, siltināšanu un logus — uzzināsiet vajadzīgo jaudu kW, piemērotus modeļus un aptuvenās izmaksas ar montāžu.',
@@ -31,8 +35,25 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
   const installTo = parseInt(settings.install_price_to || '350') || 350;
 
+  // The calculator as a free web application (schema.org WebApplication)
+  const appLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: t('title'),
+    description: DESC[asLoc(locale)],
+    url: `${BASE_URL}/${locale}/calculator`,
+    inLanguage: locale,
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires JavaScript',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: 0, priceCurrency: 'EUR' },
+    provider: { '@id': ORG_ID },
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(appLd) }} />
       <div className="pt-36 pb-10 bg-gradient-to-b from-surface to-page relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.03]"
@@ -52,6 +73,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
       </div>
       {/* Matching models are fetched from /api/calc-models when the user calculates */}
       <Calculator installFrom={installFrom} installTo={installTo} locale={locale} />
+      <CalculatorGuide locale={asLoc(locale)} installFrom={installFrom} installTo={installTo} />
     </>
   );
 }

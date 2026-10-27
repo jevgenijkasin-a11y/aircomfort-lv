@@ -17,6 +17,7 @@ export default function OrderLink({
   className?: string;
   children: ReactNode;
   'data-fab-avoid'?: boolean;
+  tabIndex?: number;
 }) {
   return (
     <Link href="/contacts" rel="nofollow" className={className} onClick={() => saveContactPrefill({ service, message })} {...rest}>

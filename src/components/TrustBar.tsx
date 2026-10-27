@@ -31,15 +31,22 @@ export default async function TrustBar() {
     },
   ] as const;
 
+  const item = (key: string, icon: JSX.Element) => (
+    <>
+      <span className="text-primary shrink-0">{icon}</span>
+      <span>{t(key)}</span>
+    </>
+  );
+
   return (
     // data-theme="dark": tokens inside always resolve to the dark palette
     <div data-theme="dark" className="bg-ink text-fg border-b border-line py-2 relative z-40">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center gap-2 sm:gap-8">
+        {/* 400 px and wider: the three points side by side (as before) */}
+        <div className="hidden min-[400px]:flex items-center justify-center gap-2 sm:gap-8">
           {items.map(({ key, icon }, i) => (
             <div key={key} className="flex items-center gap-1 sm:gap-2 text-muted text-[11px] sm:text-sm font-medium shrink-0">
-              <span className="text-primary shrink-0">{icon}</span>
-              <span>{t(key)}</span>
+              {item(key, icon)}
               {i < items.length - 1 && (
                 <span className="w-px h-3 bg-line ml-1 sm:ml-4 shrink-0" />
               )}
@@ -47,6 +54,40 @@ export default async function TrustBar() {
           ))}
         </div>
       </div>
+
+      {/* Narrower than 400 px the line does not fit: a slow ticker (two copies loop seamlessly) … */}
+      <div className="tb-ticker min-[400px]:hidden overflow-hidden">
+        <div className="tb-ticker-inner flex w-max">
+          {[0, 1].map((copy) => (
+            <ul key={copy} className="flex shrink-0" {...(copy ? { 'aria-hidden': true } : {})}>
+              {items.map(({ key, icon }) => (
+                <li key={key} className="flex items-center gap-1 text-muted text-[11px] font-medium shrink-0 px-4">{item(key, icon)}</li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
+      {/* … or, with reduced motion, one point at a time without movement */}
+      <ul className="tb-single min-[400px]:hidden relative h-4">
+        {items.map(({ key, icon }, i) => (
+          <li key={key} className="tb-single-item absolute inset-0 flex items-center justify-center gap-1 text-muted text-[11px] font-medium" style={{ animationDelay: `${i * 4}s` }}>
+            {item(key, icon)}
+          </li>
+        ))}
+      </ul>
+
+      <style>{`
+        .tb-ticker-inner { animation: tb-scroll 22s linear infinite; }
+        @keyframes tb-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .tb-single { display: none; }
+        .tb-single-item { opacity: 0; animation: tb-one 12s step-end infinite; }
+        @keyframes tb-one { 0% { opacity: 1; } 33.333% { opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) {
+          .tb-ticker { display: none; }
+          .tb-single { display: block; }
+        }
+        @media (min-width: 400px) { .tb-single { display: none !important; } }
+      `}</style>
     </div>
   );
 }

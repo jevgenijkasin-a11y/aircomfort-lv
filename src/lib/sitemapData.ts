@@ -1,8 +1,9 @@
-import { listProducts, hiddenCategoryKeys, listCategories } from './db';
-import { descendantKeys, hiddenKeys } from './categories';
+import { listProducts, hiddenCategoryKeys, listCategories, listServices } from './db';
+import { descendantKeys, hiddenKeys, categoryPath } from './categories';
 import { visibleProducts } from './catalogData';
 import { BASE_URL } from './seo';
-import { brandSlug, CATEGORY_SLUGS, absUrl } from './productSeo';
+import { brandSlug, absUrl } from './productSeo';
+import { SERVICES_HUB, servicePath } from './services';
 import { productImages } from './types';
 import { publishedArticles } from './blogData';
 
@@ -58,20 +59,23 @@ export async function sitemapEntries(locale: string): Promise<Entry[]> {
   for (const [brand, list] of byBrand) {
     out.push({ loc: `${base}/catalog/brand/${brandSlug(brand)}`, lastmod: maxDate(list.map(pDate)), priority: 0.8, changefreq: 'weekly' });
   }
-  // Category landings
-  for (const [cat, slug] of Object.entries(CATEGORY_SLUGS)) {
-    const list = products.filter((p) => p.category === cat);
-    if (list.length) out.push({ loc: `${base}/catalog/type/${slug}`, lastmod: maxDate(list.map(pDate)), priority: 0.8, changefreq: 'weekly' });
-  }
-  // Category landings managed in the admin (fan coils…): visible and not empty
-  // (empty ones are noindex, so they stay out of the sitemap)
+  // Category pages /catalog/<slug> (+ /catalog/<parent>/<sub>): visible and not empty
+  // (empty ones are noindex, so they stay out of the sitemap); lastmod = newest of their products
   const cats = listCategories();
   const hidden = hiddenKeys(cats);
   for (const c of cats) {
-    if (c.is_system || hidden.has(c.key)) continue;
+    if (hidden.has(c.key)) continue;
     const keys = descendantKeys(cats, c.key);
     const list = products.filter((p) => keys.has(p.category));
-    if (list.length) out.push({ loc: `${base}/catalog/category/${c.slug}`, lastmod: maxDate(list.map(pDate)), priority: 0.8, changefreq: 'weekly' });
+    if (list.length) out.push({ loc: `${base}${categoryPath(cats, c.key)}`, lastmod: maxDate(list.map(pDate)), priority: 0.8, changefreq: 'weekly' });
+  }
+  // Service pages (drafts are left out) and their hub
+  const services = listServices({ publicOnly: true });
+  if (services.length) {
+    out.push({ loc: `${base}${SERVICES_HUB}`, lastmod: maxDate(services.map((s) => lastmod(s.updated_at))), priority: 0.8, changefreq: 'monthly' });
+    for (const s of services) {
+      out.push({ loc: `${base}${servicePath(s.slug)}`, lastmod: lastmod(s.updated_at), priority: 0.8, changefreq: 'monthly' });
+    }
   }
   // Products
   for (const p of products) {

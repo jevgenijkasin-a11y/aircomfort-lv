@@ -2,7 +2,7 @@
 // and the blog RSS feeds. Everything comes from the database (published
 // articles, visible categories, products in stock) — nothing is hard-coded.
 import { listProducts, listCategories } from './db';
-import { categoryTree, hiddenKeys, catName, type Category } from './categories';
+import { categoryTree, hiddenKeys, catName, categoryPath, type Category } from './categories';
 import { visibleProducts, pricedFirst } from './catalogData';
 import { BASE_URL } from './seo';
 import { CATEGORY_MSG_KEY, productHeading, finalPrice, areaLabel, roomCount } from './productSeo';
@@ -58,7 +58,7 @@ async function catalogTree() {
   const msgs = Object.fromEntries(await Promise.all(ARTICLE_LOCALES.map(async (l) => [l, await messages(l)]))) as Record<Loc, Messages>;
   // System categories take their public names from the site texts
   const name = (c: Category, l: Loc) => (c.is_system && CATEGORY_MSG_KEY[c.key] ? msgs[l].categories[CATEGORY_MSG_KEY[c.key]] : '') || catName(c, l);
-  const path = (c: Category) => (c.is_system ? `/catalog/type/${c.slug}` : `/catalog/category/${c.slug}`);
+  const path = (c: Category) => categoryPath(cats, c.key);
   const node = (c: Category) => ({ cat: c, name: (l: Loc) => name(c, l), path: path(c), products: own(c) });
   const tree = categoryTree(cats)
     .filter(({ cat }) => !hidden.has(cat.key))

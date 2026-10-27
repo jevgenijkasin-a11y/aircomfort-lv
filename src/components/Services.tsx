@@ -1,5 +1,7 @@
 ﻿import { getTranslations, getLocale } from 'next-intl/server';
 import { getSettings } from '@/lib/db';
+import { Link } from '@/i18n/navigation';
+import { servicePath } from '@/lib/services';
 
 function SupplyIcon() {
   return (
@@ -38,6 +40,8 @@ function ConsultIcon() {
 const serviceIcons = [SupplyIcon, InstallIcon, MaintenanceIcon, ConsultIcon];
 const serviceKeys = ['supply', 'installation', 'maintenance', 'consultation'] as const;
 const settingsKeys = ['svc_supply', 'svc_install', 'svc_maint', 'svc_consult'] as const;
+// Where each card leads: the catalog, the service pages, the contact form
+const serviceHrefs = ['/catalog', servicePath('kondicionieru-montaza'), servicePath('kondicionieru-apkope'), '/contacts'];
 
 export default async function Services() {
   const [t, locale, settings] = await Promise.all([
@@ -55,6 +59,7 @@ export default async function Services() {
     const descKey = `${key}Desc` as `${typeof key}Desc`;
     return {
       Icon,
+      href: serviceHrefs[i],
       name: settings[`${sk}_${locale}`] || t(key),
       desc: settings[`${sk}_desc_${locale}`] || t(descKey),
     };
@@ -71,13 +76,16 @@ export default async function Services() {
         </div>
 
         <div className="reveal-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {cards.map(({ Icon, name, desc }, i) => (
+          {cards.map(({ Icon, name, desc, href }, i) => (
             <div key={name} className="reveal-3d h-full" data-stagger={i}>
-              <div className="glass-card product-card-hover rounded-2xl p-7 group h-full flex flex-col">
+              <div className="glass-card product-card-hover rounded-2xl p-7 group h-full flex flex-col relative">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-cool/10 border border-accent/20 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                   <Icon />
                 </div>
-                <h3 className="font-heading font-semibold text-lg mb-2">{name}</h3>
+                {/* The whole card is clickable (stretched link on the title) */}
+                <h3 className="font-heading font-semibold text-lg mb-2">
+                  <Link href={href as any} className="after:absolute after:inset-0 after:rounded-2xl group-hover:text-primary transition-colors">{name}</Link>
+                </h3>
                 <p className="text-muted text-sm leading-relaxed flex-1">{desc}</p>
               </div>
             </div>

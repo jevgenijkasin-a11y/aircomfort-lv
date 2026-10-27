@@ -29,6 +29,7 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
   const navLinks = [
     { href: '/' as const, label: t('home') },
     { href: '/catalog' as const, label: t('catalog') },
+    { href: '/pakalpojumi' as '/catalog', label: t('services') },
     { href: '/calculator' as const, label: t('calculator') },
     ...(showBlog ? [{ href: '/blog' as const, label: t('blog') }] : []),
     { href: '/contacts' as const, label: t('contacts') },
