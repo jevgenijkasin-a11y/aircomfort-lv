@@ -14,7 +14,6 @@ interface CalcResult {
   equipMin: number;
   equipMax: number;
   installMin: number;
-  installMax: number;
   models: CardProduct[];
 }
 
@@ -29,7 +28,7 @@ async function fetchModels(powerKw: number, locale: string): Promise<{ equipMin:
   return { equipMin: 0, equipMax: 0, models: [] };
 }
 
-export default function Calculator({ installFrom = 250, installTo = 350, locale = 'lv' }: { installFrom?: number; installTo?: number; locale?: string }) {
+export default function Calculator({ installFrom = 250, locale = 'lv' }: { installFrom?: number; locale?: string }) {
   const t = useTranslations('calculator');
   const tp = useTranslations('products');
   const router = useRouter();
@@ -51,7 +50,7 @@ export default function Calculator({ installFrom = 250, installTo = 350, locale 
     setLoading(true);
     const { equipMin, equipMax, models } = await fetchModels(powerKw, locale);
     setLoading(false);
-    setResult({ powerKw, equipMin, equipMax, installMin: installFrom, installMax: installTo, models });
+    setResult({ powerKw, equipMin, equipMax, installMin: installFrom, models });
   };
 
   // After each calculation, bring the result into view (mostly matters on mobile,

@@ -68,7 +68,8 @@ export default function Settings() {
         <div className="space-y-4">{triple('contacts_title', t.tTitle)}{triple('contacts_subtitle', t.tSubtitle)}{triple('contacts_form_title', t.setFormTitle)}</div>
       </Card>
       <Card title={t.setPrices}>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{input('install_price_from', t.setInstallFrom, 'number')}{input('install_price_to', t.setInstallTo, 'number')}</div>
+        {/* Only "from": the site never shows an upper installation price */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{input('install_price_from', t.setInstallFrom, 'number')}</div>
       </Card>
       <div className="flex justify-end"><Button onClick={save} disabled={saving}>{saving ? t.saving : t.save}</Button></div>
     </div>

@@ -33,7 +33,6 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
     getSettings(),
   ]);
   const installFrom = parseInt(settings.install_price_from || '250') || 250;
-  const installTo = parseInt(settings.install_price_to || '350') || 350;
 
   // The calculator as a free web application (schema.org WebApplication)
   const appLd = {
@@ -72,8 +71,8 @@ export default async function CalculatorPage({ params }: { params: Promise<{ loc
         </div>
       </div>
       {/* Matching models are fetched from /api/calc-models when the user calculates */}
-      <Calculator installFrom={installFrom} installTo={installTo} locale={locale} />
-      <CalculatorGuide locale={asLoc(locale)} installFrom={installFrom} installTo={installTo} />
+      <Calculator installFrom={installFrom} locale={locale} />
+      <CalculatorGuide locale={asLoc(locale)} installFrom={installFrom} />
     </>
   );
 }

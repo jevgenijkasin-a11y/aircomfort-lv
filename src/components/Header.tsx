@@ -47,7 +47,8 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
       }`}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 lg:h-24">
+        {/* gap: logo, menu and the right group never touch; justify-between keeps both spaces equal */}
+        <div className="flex items-center justify-between gap-4 xl:gap-6 h-20 lg:h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-accent to-logo-blue flex items-center justify-center shadow-lg shadow-glow/20">
@@ -56,18 +57,18 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
                 <circle cx="12" cy="12" r="2.5" fill="white" stroke="none" />
               </svg>
             </div>
-            <span className="font-heading font-bold text-lg sm:text-2xl xl:text-3xl tracking-tight">
+            <span className="font-heading font-bold text-lg sm:text-2xl tracking-tight">
               Air<span className="text-primary">Comfort</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-7">
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-5">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className="text-base font-medium text-muted hover:text-fg transition-colors duration-200 relative group"
+                className="text-[15px] font-medium text-muted hover:text-fg transition-colors duration-200 relative group whitespace-nowrap"
               >
                 {label}
                 <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-primary transition-all duration-300 group-hover:w-full" />
@@ -96,7 +97,7 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
 
             <Link
               href="/contacts"
-              className="magnetic hidden sm:flex lg:hidden xl:flex whitespace-nowrap items-center gap-1.5 bg-primary hover:bg-primary-hover text-on-primary font-semibold text-base px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-glow/20 hover:shadow-glow/30"
+              className="magnetic hidden sm:flex lg:hidden xl:flex whitespace-nowrap items-center gap-1.5 bg-primary hover:bg-primary-hover text-on-primary font-semibold text-sm px-4 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-glow/20 hover:shadow-glow/30"
             >
               {t('getQuote')}
             </Link>
@@ -124,7 +125,7 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
         {/* Mobile menu */}
         <div
           className={`lg:hidden overflow-hidden transition-all duration-300 ${
-            menuOpen ? 'max-h-96 pb-5' : 'max-h-0'
+            menuOpen ? 'max-h-[40rem] pb-5' : 'max-h-0'
           }`}
         >
           <div className="border-t border-line pt-4 flex flex-col gap-1">
@@ -138,15 +139,16 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
                 {label}
               </Link>
             ))}
-            <div className="mt-3 pt-3 border-t border-line flex items-center justify-between px-1">
-              <div className="flex items-center bg-surface rounded-xl p-1 gap-0.5">
+            {/* Languages (three equal buttons) and the quote button, both full width */}
+            <div className="mt-3 pt-4 border-t border-line flex flex-col gap-3">
+              <div className="grid grid-cols-3 bg-surface rounded-xl p-1 gap-1">
                 {locales.map((lang) => (
                   <Link
                     key={lang}
                     href={langHref(lang)}
                     locale={lang}
                     onClick={() => setMenuOpen(false)}
-                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
+                    className={`min-h-[40px] flex items-center justify-center text-sm font-semibold rounded-lg transition-all ${
                       locale === lang
                         ? 'bg-primary text-on-primary'
                         : 'text-muted hover:text-fg'
@@ -159,7 +161,7 @@ export default function Header({ showBlog = false }: { showBlog?: boolean }) {
               <Link
                 href="/contacts"
                 onClick={() => setMenuOpen(false)}
-                className="bg-primary text-on-primary font-semibold text-sm px-4 py-2 rounded-xl"
+                className="min-h-[48px] flex items-center justify-center bg-primary hover:bg-primary-hover text-on-primary font-semibold text-base px-4 rounded-xl transition-colors"
               >
                 {t('getQuote')}
               </Link>
