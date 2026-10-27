@@ -24,6 +24,10 @@ const nextConfig = {
     ],
   },
 
+  // Build time = deploy date (the built .next is committed and deployed):
+  // lastmod of the static pages in the sitemap.
+  env: { BUILD_TIME: new Date().toISOString() },
+
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
 

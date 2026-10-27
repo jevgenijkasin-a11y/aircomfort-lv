@@ -11,11 +11,14 @@ export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem(STORAGE_KEY)) setVisible(true);
+    // Storage may be blocked (privacy mode, crawlers): then just show the banner
+    let saved: string | null = null;
+    try { saved = localStorage.getItem(STORAGE_KEY); } catch { /* storage blocked */ }
+    if (!saved) setVisible(true);
   }, []);
 
   const accept = (value: 'all' | 'necessary') => {
-    localStorage.setItem(STORAGE_KEY, value);
+    try { localStorage.setItem(STORAGE_KEY, value); } catch { /* storage blocked */ }
     setVisible(false);
   };
 

@@ -2,13 +2,14 @@
 export const dynamic = 'force-dynamic';
 
 import { BASE_URL } from '@/lib/seo';
-import { SITEMAP_LOCALES, sitemapEntries, indexXml, XML_HEADERS } from '@/lib/sitemapData';
+import { SITEMAP_LOCALES, sitemapEntries, indexXml, maxDate, XML_HEADERS } from '@/lib/sitemapData';
 
 export async function GET() {
   const items = await Promise.all(
     SITEMAP_LOCALES.map(async (l) => {
-      const entries = await sitemapEntries(l);
-      return { loc: `${BASE_URL}/sitemaps/${l}.xml`, lastmod: entries.map((e) => e.lastmod).sort().at(-1)! };
+      // lastmod = the newest product / article change in that sitemap (static pages carry the build date, not counted)
+      const entries = (await sitemapEntries(l)).filter((e) => !e.isStatic);
+      return { loc: `${BASE_URL}/sitemaps/${l}.xml`, lastmod: maxDate(entries.map((e) => e.lastmod)) };
     })
   );
   return new Response(indexXml(items), { headers: XML_HEADERS });

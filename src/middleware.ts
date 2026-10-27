@@ -5,6 +5,15 @@ import { routing } from './i18n/routing';
 const intlMiddleware = createMiddleware(routing);
 
 export default function middleware(request: NextRequest) {
+  // ── Addresses without a language (/catalog, /contacts…) ─────────────
+  // Permanent 308 to the Latvian version. next-intl would answer 307 and
+  // pick the language from cookie / Accept-Language, so the same URL
+  // redirected differently per visitor. "/" is handled in next.config.js.
+  const { pathname: path, search } = request.nextUrl;
+  if (path !== '/' && !(routing.locales as readonly string[]).some((l) => path === `/${l}` || path.startsWith(`/${l}/`))) {
+    return NextResponse.redirect(new URL(`/${routing.defaultLocale}${path}${search}`, request.url), 308);
+  }
+
   // ── Markdown for Agents ─────────────────────────────────────────────
   // Requests with `Accept: text/markdown` get a markdown rendition of the
   // page (converted from the HTML response). Browsers keep getting HTML.

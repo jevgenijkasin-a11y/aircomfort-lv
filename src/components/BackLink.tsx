@@ -6,7 +6,8 @@ export default function BackLink({ label }: { label: string }) {
   const router = useRouter();
 
   const handleBack = () => {
-    const saved = sessionStorage.getItem('catalogParams');
+    let saved: string | null = null;
+    try { saved = sessionStorage.getItem('catalogParams'); } catch { /* storage blocked */ }
     router.push(saved ? `/catalog?${saved}` : '/catalog');
   };
 

@@ -16,6 +16,7 @@ import { blogLocales } from '@/lib/db';
 import { THEME_COLOR, THEME_SCRIPT, VIEW_SCRIPT } from '@/lib/theme';
 import CompareBar from '@/components/CompareBar';
 import IconSprite from '@/components/IconSprite';
+import SafeWidget from '@/components/SafeWidget';
 import '../globals.css';
 
 // Headings: Manrope (`font-heading`), bold headings render at 800 (globals.css).
@@ -126,11 +127,12 @@ export default async function LocaleLayout({
           <TrustBar />
           <main className="min-h-screen">{children}</main>
           <Footer />
-          <FloatingButtons />
-          <ScrollToTop />
-          <CompareBar />
-          <CookieBanner />
-          <SiteAnimations />
+          {/* Optional widgets: an error in one of them must never blank the page */}
+          <SafeWidget><FloatingButtons /></SafeWidget>
+          <SafeWidget><ScrollToTop /></SafeWidget>
+          <SafeWidget><CompareBar /></SafeWidget>
+          <SafeWidget><CookieBanner /></SafeWidget>
+          <SafeWidget><SiteAnimations /></SafeWidget>
         </NextIntlClientProvider>
       </body>
     </html>
