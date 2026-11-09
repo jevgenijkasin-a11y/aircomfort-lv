@@ -1,5 +1,6 @@
 // Server-side checks for product create/update payloads (admin API).
-import { listCategories, getProduct, listProducts } from './db';
+import { listCategories, getProduct, listProducts, slugOwner } from './db';
+import { PRODUCT_SLUG_RE, PRODUCT_SLUG_MAX } from './productSlug';
 import { isFanCoil, isWithin, FAN_COILS_DUCTED_KEY } from './categories';
 import { validateFanCoilSpecs } from './fanCoil';
 
@@ -32,6 +33,19 @@ export async function validateProductPayload(
       const specs = { ...(payload.specs as Record<string, unknown>) };
       for (const k of ['pipe_system', 'fan_motor', 'esp_pa']) delete specs[k];
       out.specs = Object.keys(specs).length ? specs : null;
+    }
+  }
+
+  // Address /catalog/p/<slug>: empty = keep the current one (or generate on create)
+  if ('slug' in payload) {
+    const slug = String(payload.slug ?? '').trim().toLowerCase();
+    if (!slug) delete out.slug;
+    else if (!PRODUCT_SLUG_RE.test(slug) || slug.length > PRODUCT_SLUG_MAX) {
+      errors.push(`Адрес (slug): только латинские буквы, цифры и дефисы, до ${PRODUCT_SLUG_MAX} символов (напр. hava-smart-plus-5-3-kw).`);
+    } else {
+      const owner = slugOwner(slug);
+      if (owner && owner.productId !== id) errors.push(`Адрес «${slug}» уже занят другим товаром${owner.current ? '' : ' (его прежний адрес)'}.`);
+      else out.slug = slug;
     }
   }
 

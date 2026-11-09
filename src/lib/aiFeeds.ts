@@ -9,6 +9,7 @@ import { CATEGORY_MSG_KEY, productHeading, finalPrice, areaLabel, roomCount } fr
 import { type Article, type Loc, ARTICLE_LOCALES, excerpt, leadParagraphs } from './articles';
 import { publishedArticles, publishedDate } from './blogData';
 import type { SupabaseProduct } from './types';
+import { productPath } from './productSlug';
 
 export const TEXT_HEADERS = { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=3600' };
 export const RSS_HEADERS = { 'Content-Type': 'application/rss+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' };
@@ -250,7 +251,7 @@ function productLine(p: SupabaseProduct): string {
     [seer && `SEER ${seer}`, scop && `SCOP ${scop}`].filter(Boolean).join(' / '),
     noise ? `noise ${noise} dB(A)` : '',
   ].filter(Boolean);
-  const link = (l: Loc) => url(l, `/catalog/${p.id}`);
+  const link = (l: Loc) => url(l, productPath(p));
   return `- ${productHeading(p, 'lv')} — ${facts.join(', ')} — ${link('lv')} (ru: ${link('ru')}, en: ${link('en')})`;
 }
 

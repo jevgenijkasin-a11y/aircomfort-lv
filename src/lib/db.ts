@@ -10,6 +10,7 @@ import type { SupabaseProduct, SupabaseContact, ContactProduct, SupabaseReview, 
 import { type Category, hiddenKeys } from './categories';
 import { type Article, type ArticleInput, ARTICLE_FIELDS, articleLocales } from './articles';
 import { type Service, SERVICE_FIELDS, SERVICE_SEED } from './services';
+import { baseProductSlug } from './productSeo';
 
 export const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
 export const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
@@ -105,7 +106,7 @@ export function db(): DatabaseSync {
   return g.__aircomfortDb;
 }
 
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 // Additive, idempotent schema migrations for databases created by older code
 // (the live DB on the server). Never drops or rewrites existing data.
@@ -128,6 +129,7 @@ function migrate(instance: DatabaseSync) {
       if (version < 3) migrateV3(instance);
       if (version < 4) migrateV4(instance);
       if (version < 5) migrateV5(instance);
+      if (version < 6) migrateV6(instance);
       instance.exec(`PRAGMA user_version = ${DB_VERSION}`);
       instance.exec('COMMIT');
     } catch (e) {
@@ -258,6 +260,39 @@ CREATE TABLE IF NOT EXISTS services (
   }
 }
 
+/**
+ * v6: readable product addresses — products.slug (unique) for every product,
+ * hidden ones included, oldest products first so they get the plain slug;
+ * product_slug_history keeps slugs changed in the admin (old links redirect).
+ * Rollback: DROP INDEX idx_products_slug; ALTER TABLE products DROP COLUMN slug;
+ *           DROP TABLE product_slug_history; PRAGMA user_version = 5;
+ */
+function migrateV6(instance: DatabaseSync) {
+  const cols = instance.prepare('PRAGMA table_info(products)').all().map((c) => c.name as string);
+  if (!cols.includes('slug')) instance.exec('ALTER TABLE products ADD COLUMN slug TEXT');
+  instance.exec(`
+CREATE TABLE IF NOT EXISTS product_slug_history (
+  slug TEXT PRIMARY KEY,
+  product_id TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);`);
+  const rows = instance.prepare("SELECT * FROM products WHERE slug IS NULL OR slug = '' ORDER BY created_at, id").all();
+  const taken = new Set(instance.prepare("SELECT slug FROM products WHERE slug IS NOT NULL AND slug <> ''").all().map((r) => r.slug as string));
+  const set = instance.prepare('UPDATE products SET slug = ? WHERE id = ?');
+  for (const r of rows) {
+    const slug = uniqueSlug(baseProductSlug(mapProduct(r)), taken);
+    taken.add(slug);
+    set.run(slug, r.id as string);
+  }
+  instance.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_slug ON products(slug)');
+}
+
+/** base, base-2, base-3 … — the first one not in `taken`. */
+function uniqueSlug(base: string, taken: Set<string>): string {
+  if (!taken.has(base)) return base;
+  for (let i = 2; ; i++) if (!taken.has(`${base}-${i}`)) return `${base}-${i}`;
+}
+
 function migrateV3(instance: DatabaseSync) {
   instance.exec('ALTER TABLE articles ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0');
   const rows = instance.prepare('SELECT id FROM articles ORDER BY COALESCE(published_at, created_at) DESC, id DESC').all();
@@ -384,6 +419,31 @@ export async function getProduct(id: string): Promise<SupabaseProduct | null> {
   return row ? mapProduct(row) : null;
 }
 
+/** Slugs in use: current product slugs and old ones kept for redirects. */
+function takenSlugs(): Set<string> {
+  const d = db();
+  return new Set([
+    ...d.prepare("SELECT slug FROM products WHERE slug IS NOT NULL AND slug <> ''").all().map((r) => r.slug as string),
+    ...d.prepare('SELECT slug FROM product_slug_history').all().map((r) => r.slug as string),
+  ]);
+}
+
+/** Who uses a slug: a product (current address) or the history (old address of a product). */
+export function slugOwner(slug: string): { productId: string; current: boolean } | null {
+  const cur = db().prepare('SELECT id FROM products WHERE slug = ?').get(slug);
+  if (cur) return { productId: cur.id as string, current: true };
+  const old = db().prepare('SELECT product_id FROM product_slug_history WHERE slug = ?').get(slug);
+  return old ? { productId: old.product_id as string, current: false } : null;
+}
+
+/** Product by its current slug, or by an old one (then `moved` = true → redirect). */
+export async function getProductBySlug(slug: string): Promise<{ product: SupabaseProduct; moved: boolean } | null> {
+  const owner = slugOwner(slug);
+  if (!owner) return null;
+  const product = await getProduct(owner.productId);
+  return product ? { product, moved: !owner.current } : null;
+}
+
 export async function createProduct(payload: Record<string, unknown>): Promise<SupabaseProduct> {
   const data = serializeProduct(payload);
   const id = randomUUID();
@@ -392,11 +452,25 @@ export async function createProduct(payload: Record<string, unknown>): Promise<S
   db().prepare(
     `INSERT INTO products (id${cols.map(c => `, ${c}`).join('')}) VALUES (?${', ?'.repeat(cols.length)})`
   ).run(id, ...cols.map(c => data[c]));
+  // Slug: the one typed in the admin (validated), otherwise generated from the English name
+  const created = (await getProduct(id))!;
+  const wanted = typeof payload.slug === 'string' && payload.slug ? payload.slug : null;
+  const slug = wanted ?? uniqueSlug(baseProductSlug(created), takenSlugs());
+  db().prepare('UPDATE products SET slug = ? WHERE id = ?').run(slug, id);
   return (await getProduct(id))!;
 }
 
 export async function updateProduct(id: string, payload: Record<string, unknown>): Promise<SupabaseProduct | null> {
   const data = serializeProduct(payload);
+  // A changed slug keeps the old one in the history, so old links redirect (renaming never changes it)
+  const before = await getProduct(id);
+  const newSlug = typeof payload.slug === 'string' && payload.slug ? payload.slug : null;
+  if (before && newSlug && newSlug !== before.slug) {
+    const d = db();
+    if (before.slug) d.prepare('INSERT OR REPLACE INTO product_slug_history (slug, product_id) VALUES (?, ?)').run(before.slug, id);
+    d.prepare('DELETE FROM product_slug_history WHERE slug = ? AND product_id = ?').run(newSlug, id);
+    data.slug = newSlug;
+  }
   if (Object.keys(data).length) data.updated_at = new Date().toISOString();
   const cols = Object.keys(data);
   if (cols.length) {
@@ -408,6 +482,7 @@ export async function updateProduct(id: string, payload: Record<string, unknown>
 
 export async function deleteProduct(id: string): Promise<void> {
   db().prepare('DELETE FROM products WHERE id = ?').run(id);
+  db().prepare('DELETE FROM product_slug_history WHERE product_id = ?').run(id);
 }
 
 // ---------- categories ----------

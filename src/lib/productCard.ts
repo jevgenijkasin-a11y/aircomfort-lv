@@ -7,6 +7,8 @@ import { fanSpec } from './fanCoil';
 
 export type CardProduct = {
   id: string;
+  /** Readable address part: /catalog/p/<slug> */
+  slug: string;
   brand: string;
   /** Name in the page language */
   name: string;
@@ -33,6 +35,7 @@ export type CardProduct = {
 export function toCard(p: SupabaseProduct, locale: string): CardProduct {
   return {
     id: p.id,
+    slug: p.slug || p.id,
     brand: p.brand,
     name: productName(p, locale),
     category: p.category,

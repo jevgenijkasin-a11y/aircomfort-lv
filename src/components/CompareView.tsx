@@ -9,6 +9,7 @@ import { Link } from '@/i18n/navigation';
 import type { CardProduct } from '@/lib/productCard';
 import { useCompare, removeCompare, clearCompare } from '@/lib/shortlist';
 import { finalCardPrice } from '@/lib/productCard';
+import { productPath } from '@/lib/productSlug';
 
 type Specs = {
   cooling: string; heating: string; area: string; energy: string; noise: string; seer: string; scop: string;
@@ -106,7 +107,7 @@ export default function CompareView({ locale }: { locale: string }) {
                       {card.image && <Image src={card.image} alt={card.name} fill sizes="(max-width: 767px) 150px, 200px" className="object-contain p-3 mix-blend-multiply" />}
                     </div>
                     <p className="text-primary text-[11px] font-semibold uppercase tracking-wider">{card.brand}</p>
-                    <Link href={`/catalog/${card.id}` as '/catalog'} className="font-heading font-semibold leading-snug line-clamp-3 hover:text-primary transition-colors">{card.name}</Link>
+                    <Link href={productPath(card) as '/catalog'} className="font-heading font-semibold leading-snug line-clamp-3 hover:text-primary transition-colors">{card.name}</Link>
                   </div>
                 </th>
               ))}
@@ -130,7 +131,7 @@ export default function CompareView({ locale }: { locale: string }) {
               <td className={`${stickyCol} p-2.5 md:p-4`} />
               {cols.map(({ card }) => (
                 <td key={card.id} className="p-2.5 md:p-4 border-l border-line">
-                  <Link href={`/catalog/${card.id}` as '/catalog'} className="pc-view">{t('view')}</Link>
+                  <Link href={productPath(card) as '/catalog'} className="pc-view">{t('view')}</Link>
                 </td>
               ))}
             </tr>

@@ -171,6 +171,12 @@ export default function ProductEditor({ initial, cats, products, onClose, onSave
             <Field label={t.nameLv}><input className="field-input" value={f.name_lv} onChange={(e) => set('name_lv', e.target.value)} /></Field>
             <Field label={t.nameRu}><input className="field-input" value={f.name_ru} onChange={(e) => set('name_ru', e.target.value)} /></Field>
             <Field label={t.nameEn}><input className="field-input" value={f.name_en} onChange={(e) => set('name_en', e.target.value)} /></Field>
+            <Field label={t.slugF} hint={t.slugHint}>
+              <div className="flex items-center gap-2">
+                <span className="text-theme-sm text-gray-500 whitespace-nowrap">/catalog/p/</span>
+                <input className="field-input font-mono" value={f.slug ?? ''} onChange={(e) => set('slug', e.target.value.toLowerCase())} placeholder="hava-smart-plus-5-3-kw" />
+              </div>
+            </Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label={t.powerF}><input className="field-input" type="number" step="0.1" value={f.power_kw} onChange={(e) => set('power_kw', e.target.value as unknown as number)} /></Field>
               <Field label={t.areaF}><input className="field-input" value={f.area_coverage} onChange={(e) => set('area_coverage', e.target.value)} placeholder="20–25" /></Field>

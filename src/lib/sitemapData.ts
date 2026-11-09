@@ -6,6 +6,7 @@ import { brandSlug, absUrl } from './productSeo';
 import { SERVICES_HUB, servicePath } from './services';
 import { productImages } from './types';
 import { publishedArticles } from './blogData';
+import { productPath } from './productSlug';
 
 export const SITEMAP_LOCALES = ['lv', 'ru', 'en'] as const;
 
@@ -77,9 +78,9 @@ export async function sitemapEntries(locale: string): Promise<Entry[]> {
       out.push({ loc: `${base}${servicePath(s.slug)}`, lastmod: lastmod(s.updated_at), priority: 0.8, changefreq: 'monthly' });
     }
   }
-  // Products
-  for (const p of products) {
-    out.push({ loc: `${base}/catalog/${p.id}`, lastmod: pDate(p), priority: 0.6, changefreq: 'monthly', images: productImages(p).map(absUrl) });
+  // Products — Latvian and Russian only: the English cards are noindex (near-duplicates)
+  for (const p of locale === 'en' ? [] : products) {
+    out.push({ loc: `${base}${productPath(p)}`, lastmod: pDate(p), priority: 0.6, changefreq: 'monthly', images: productImages(p).map(absUrl) });
   }
   // Blog: published articles that exist in this language (drafts never listed)
   const articles = publishedArticles(locale);

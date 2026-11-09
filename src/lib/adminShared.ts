@@ -19,7 +19,7 @@ export const EMPTY_SPECS: ProductSpecs = {
 };
 
 export const EMPTY_PRODUCT: ProductForm = {
-  brand: '', name_lv: '', name_ru: '', name_en: '',
+  brand: '', name_lv: '', name_ru: '', name_en: '', slug: '',
   category: 'home', power_kw: 2.5, area_coverage: '20–25',
   price: 0, install_price: 249, energy_class: 'A++',
   features: [], features_lv: [], features_ru: [], features_en: [],

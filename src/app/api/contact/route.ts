@@ -6,6 +6,7 @@ import { fullName, finalPrice } from '@/lib/productSeo';
 import { BASE_URL } from '@/lib/seo';
 import type { ContactProduct } from '@/lib/types';
 import nodemailer from 'nodemailer';
+import { productPath } from '@/lib/productSlug';
 
 interface RequestEntry {
   name: string;
@@ -169,7 +170,7 @@ async function requestProducts(ids: unknown): Promise<ContactProduct[]> {
 function orderMessage(service: string, products: ContactProduct[], install: boolean | null, comment: string, locale: string): string {
   const lines: string[] = [];
   lines.push(service === 'catalog_order' ? 'Заказ из каталога' : 'Подборка из избранного');
-  for (const p of products) lines.push(`• ${p.name} — ${p.price ? `${p.price} €` : 'цена по запросу'}\n  ${BASE_URL}/${locale}/catalog/${p.id}`);
+  for (const p of products) lines.push(`• ${p.name} — ${p.price ? `${p.price} €` : 'цена по запросу'}\n  ${BASE_URL}/${locale}${productPath(p)}`);
   if (install !== null) lines.push(`Монтаж: ${install ? 'нужен' : 'не нужен'}`);
   if (comment) lines.push('', `Комментарий: ${comment}`);
   return lines.join('\n');

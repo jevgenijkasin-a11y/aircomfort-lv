@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { CATALOG_PAGE_SIZE } from './catalogData';
 import { BASE_URL, localizedAlternates, pageTitle, clipDescription } from './seo';
 import type { Loc } from './productSeo';
+import { productPath } from './productSlug';
 
 export const PAGE_WORD: Record<Loc, string> = { lv: 'lapa', ru: 'страница', en: 'page' };
 
@@ -79,7 +80,7 @@ export function socialMeta(locale: string, path: string, fullTitle: string, desc
 }
 
 /** schema.org ItemList of the products shown on this page (in stock only). */
-export function itemListJsonLd(locale: string, items: { id: string; name: string }[], offset: number, name: string) {
+export function itemListJsonLd(locale: string, items: { id: string; slug?: string | null; name: string }[], offset: number, name: string) {
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -88,7 +89,7 @@ export function itemListJsonLd(locale: string, items: { id: string; name: string
     itemListElement: items.map((p, i) => ({
       '@type': 'ListItem',
       position: offset + i + 1,
-      url: `${BASE_URL}/${locale}/catalog/${p.id}`,
+      url: `${BASE_URL}/${locale}${productPath(p)}`,
       name: p.name,
     })),
   };

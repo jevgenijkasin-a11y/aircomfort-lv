@@ -3,6 +3,7 @@
 // Manually written descriptions (description_lv/ru/en) always win over the
 // generated paragraphs.
 import { BASE_URL } from './seo';
+import { slugText } from './productSlug';
 import {
   type SupabaseProduct,
   productName,
@@ -177,6 +178,16 @@ export function productHeading(p: SupabaseProduct, locale: string): string {
   const l = asLoc(locale);
   const { series, model, extras } = nameParts(p, l);
   return [p.brand, series, model, kwText(p, l), ...extras].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Base slug of a product: the English H1 "Brand Series Model 3.5 kW (extra)" →
+ * "brand-series-model-3-5-kw-extra" (falls back to the Latvian name). Uniqueness
+ * (-2, -3…) is handled by the database layer.
+ */
+export function baseProductSlug(p: SupabaseProduct): string {
+  const en = productName(p, 'en').trim() ? productHeading(p, 'en') : productHeading(p, 'lv');
+  return slugText(en) || slugText(p.brand) || 'product';
 }
 
 /** Key shared by the models of one series (same brand + category + series, or code family). */

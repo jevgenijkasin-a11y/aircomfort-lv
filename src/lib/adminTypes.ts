@@ -36,6 +36,8 @@ export interface ProductSpecs {
 
 export interface AdminProduct {
   id: string;
+  /** Address /catalog/p/<slug>; empty on a new product = generated from the English name */
+  slug?: string | null;
   brand: string;
   name_lv: string;
   name_ru: string;

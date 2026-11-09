@@ -9,6 +9,7 @@ import type { CardProduct } from '@/lib/productCard';
 import { starred } from '@/components/FootnoteStar';
 import { CardToggles } from '@/components/ProductCardActions';
 import { finalCardPrice } from '@/lib/productCard';
+import { productPath } from '@/lib/productSlug';
 
 const energyColors: Record<string, string> = {
   'A+++': 'text-primary border-accent/40 bg-accent/10',
@@ -101,7 +102,7 @@ export default function ProductCard({ product, locale, installFrom }: { product:
       <div className="pc-body">
         <p className="pc-brand">{product.brand}</p>
         <h3 className="pc-title">
-          <Link href={`/catalog/${product.id}` as any}
+          <Link href={productPath(product) as any}
             className="pc-link">
             {name}
           </Link>

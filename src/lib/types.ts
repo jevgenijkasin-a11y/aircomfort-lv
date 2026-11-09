@@ -29,6 +29,8 @@ export interface SupabaseProduct {
   specs?: Record<string, string>;
   /** Product ids shown in "Works with a heat pump" / "Matching fan coils". */
   compatible_ids?: string[];
+  /** Readable address /catalog/p/<slug> (unique, from the English name). */
+  slug?: string | null;
 }
 
 /** Product attached to a request (catalog order / favorites selection), snapshot at send time. */

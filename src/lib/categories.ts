@@ -97,7 +97,7 @@ export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 // subcategories ("fan-coils-cassette" under "fan-coils" → /catalog/fan-coils/cassette).
 
 /** Static segments under /catalog that a category slug must not take. */
-export const RESERVED_CATALOG_SEGMENTS = ['brand', 'type', 'category'];
+export const RESERVED_CATALOG_SEGMENTS = ['brand', 'type', 'category', 'p'];
 
 /** Last URL segment of a subcategory: its slug without the parent's slug prefix. */
 const subSegment = (child: Category, parent: Category) =>

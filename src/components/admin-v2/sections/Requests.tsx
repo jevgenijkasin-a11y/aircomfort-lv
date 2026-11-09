@@ -5,6 +5,7 @@ import type { AdminRequest } from '@/lib/adminTypes';
 import { useAdmin, api, fmtDate } from '../context';
 import { Badge, Button, Confirm, Drawer, EmptyState, IconButton, PageHeader, Pagination, Spinner } from '../ui';
 import { IconCheck, IconEye, IconInbox, IconMail, IconPhone, IconSearch, IconTrash } from '../icons';
+import { productPath } from '@/lib/productSlug';
 
 const PER_PAGE = 20;
 // Actions stay visible when the table scrolls horizontally
@@ -133,7 +134,7 @@ export default function Requests() {
                 <dd className="mt-1"><ul className="space-y-1.5">
                   {open.products.map((p) => (
                     <li key={p.id} className="flex justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2 dark:border-gray-800">
-                      <a href={`/ru/catalog/${p.id}`} target="_blank" rel="noopener" className="text-brand-600 hover:underline dark:text-accent">{p.name}</a>
+                      <a href={`/ru${productPath(p)}`} target="_blank" rel="noopener" className="text-brand-600 hover:underline dark:text-accent">{p.name}</a>
                       <span className="whitespace-nowrap text-gray-600 dark:text-gray-300">{p.price ? `${p.price} €` : t.priceOnRequest}</span>
                     </li>
                   ))}
