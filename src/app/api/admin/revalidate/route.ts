@@ -1,9 +1,11 @@
 export const dynamic = 'force-dynamic';
 
 import { revalidatePath } from 'next/cache';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { verifySession } from '@/lib/adminAuth';
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  if (!(await verifySession(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   // Revalidate every locale root and all nested pages under each
   for (const locale of ['lv', 'ru', 'en']) {
     revalidatePath(`/${locale}`, 'layout');

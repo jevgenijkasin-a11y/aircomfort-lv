@@ -360,5 +360,11 @@
     "tabSpecs": "Tehniskie dati",
     "tabInstall": "Montāža",
     "energyShort": "Energoklase"
+  },
+  "errorPage": {
+    "title": "Kaut kas nogāja greizi",
+    "text": "Lapu neizdevās ielādēt. Lūdzu, mēģiniet vēlreiz vai zvaniet mums — palīdzēsim.",
+    "retry": "Mēģināt vēlreiz",
+    "home": "Uz sākumlapu"
   }
 }

@@ -15,7 +15,7 @@ export default function Password() {
   // Same checks and PUT /api/admin/password as the old admin
   const change = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.newPwd.length < 6) { setStatus('short'); return; }
+    if (form.newPwd.length < 8) { setStatus('short'); return; }
     if (form.newPwd !== form.confirm) { setStatus('mismatch'); return; }
     setStatus('saving');
     const r = await fetch('/api/admin/password', {

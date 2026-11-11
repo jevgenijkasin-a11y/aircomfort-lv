@@ -16,6 +16,10 @@ export default function ContactForm({ formTitle, reviewUrl, reviewLabel }: {
   const t = useTranslations('contacts.form');
   const [form, setForm] = useState({ name: '', phone: '', email: '', service: '', message: '' });
   const [status, setStatus] = useState<Status>('idle');
+  // Spam protection: a field people never see (robots fill it) and when the form appeared
+  const [website, setWebsite] = useState('');
+  const [ts, setTs] = useState(0);
+  useEffect(() => { setTs(Date.now()); }, []);
 
   // Pre-fill service and message handed over by the product "Order" button or
   // the calculator (sessionStorage; legacy ?service=&message= links still work)
@@ -42,7 +46,7 @@ export default function ContactForm({ formTitle, reviewUrl, reviewLabel }: {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, website, ts }),
       });
       setStatus(res.ok ? 'success' : 'error');
     } catch {
@@ -78,7 +82,12 @@ export default function ContactForm({ formTitle, reviewUrl, reviewLabel }: {
   }
 
   return (
-    <form onSubmit={handleSubmit} autoComplete="on" className="glass-card rounded-2xl p-7 space-y-5">
+    <form onSubmit={handleSubmit} autoComplete="on" className="glass-card rounded-2xl p-7 space-y-5 relative">
+      {/* Honeypot: invisible to people, robots fill it in (the request is then dropped) */}
+      <div aria-hidden="true" className="absolute -left-[9999px] top-0 h-0 w-0 overflow-hidden">
+        <label htmlFor="contact-website">Website</label>
+        <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
+      </div>
       <h3 className="font-heading font-semibold text-xl mb-2">{formTitle || t('title')}</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

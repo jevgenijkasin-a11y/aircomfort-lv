@@ -302,7 +302,7 @@ export default function SiteAnimations() {
       revealTriggers.forEach((st) => st.kill());
       revealTimeouts.forEach((id) => clearTimeout(id));
       // Reset reveal wrappers to visible so a remount starts clean
-      gsap.set('.reveal-3d', { clearProps: 'all' });
+      if (reveal3d.length) gsap.set(reveal3d, { clearProps: 'all' });
       document.querySelectorAll('.reveal-3d').forEach((n) => (n as HTMLElement).classList.add('is-revealed'));
       fadeObs.disconnect();
       counterObs.disconnect();

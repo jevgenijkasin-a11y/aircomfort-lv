@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest } from 'next/server';
 import TurndownService from 'turndown';
+import { BASE_URL } from '@/lib/seo';
 
 const turndown = new TurndownService({
   headingStyle: 'atx',
@@ -35,7 +36,9 @@ export async function GET(req: NextRequest) {
 
   const proto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '');
   const host = req.headers.get('host');
-  if (!host) return new Response('Bad request', { status: 400 });
+  // The page is fetched from this server only (never from a host named by the request)
+  const own = [new URL(BASE_URL).host, 'localhost', '127.0.0.1'];
+  if (!host || !own.includes(host.replace(/:\d+$/, '').toLowerCase())) return new Response('Bad request', { status: 400 });
 
   const pageUrl = `${proto}://${host}${path}`;
   let html: string;

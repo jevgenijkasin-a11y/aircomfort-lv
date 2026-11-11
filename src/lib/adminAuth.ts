@@ -55,7 +55,8 @@ export async function verifySession(req: NextRequest): Promise<boolean> {
   if (!token || token.length < 10) return false;
   const hash = getPasswordHash();
   if (!hash) return false;
-  return token === makeToken(hash);
+  const expected = makeToken(hash);
+  return token.length === expected.length && timingSafeEqual(Buffer.from(token), Buffer.from(expected));
 }
 
 export async function login(password: string): Promise<string | null> {

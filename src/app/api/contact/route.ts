@@ -6,7 +6,10 @@ import { fullName, finalPrice } from '@/lib/productSeo';
 import { BASE_URL } from '@/lib/seo';
 import type { ContactProduct } from '@/lib/types';
 import nodemailer from 'nodemailer';
+// Options accepted by createTransport (typed through the function, so the types package version does not matter)
+type TransportConfig = Parameters<typeof nodemailer.createTransport>[0];
 import { productPath } from '@/lib/productSlug';
+import { clientIp, tooMany } from '@/lib/rateLimit';
 
 interface RequestEntry {
   name: string;
@@ -33,27 +36,27 @@ async function createTransport(forExternal = false) {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  const configs: nodemailer.TransportOptions[] = [];
+  const configs: TransportConfig[] = [];
 
   // Configured external SMTP host (if set)
   if (host && user && pass) {
     const port = Number(process.env.SMTP_PORT || 465);
-    configs.push({ host, port, secure: port === 465, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
-    if (port === 465) configs.push({ host, port: 587, secure: false, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+    configs.push({ host, port, secure: port === 465, auth: { user, pass } } as TransportConfig);
+    if (port === 465) configs.push({ host, port: 587, secure: false, auth: { user, pass } } as TransportConfig);
   }
 
   // Try localhost with auth on submission ports (Plesk SMTP)
   if (user && pass) {
-    configs.push({ host: 'localhost', port: 587, secure: false, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
-    configs.push({ host: 'localhost', port: 465, secure: true, auth: { user, pass }, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+    configs.push({ host: 'localhost', port: 587, secure: false, auth: { user, pass }, tls: { rejectUnauthorized: false } } as TransportConfig);
+    configs.push({ host: 'localhost', port: 465, secure: true, auth: { user, pass }, tls: { rejectUnauthorized: false } } as TransportConfig);
   }
 
   // Postfix no-auth relay — works for local delivery, may not relay external
   if (!forExternal) {
-    configs.push({ host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+    configs.push({ host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } } as TransportConfig);
   } else {
     // For external: try localhost:25 last (may work if Postfix relays outbound)
-    configs.push({ host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } } as nodemailer.TransportOptions);
+    configs.push({ host: 'localhost', port: 25, secure: false, tls: { rejectUnauthorized: false } } as TransportConfig);
   }
 
   for (const config of configs) {
@@ -94,7 +97,7 @@ async function sendNotification(entry: RequestEntry) {
       <p style="margin-top:16px;color:#888;font-size:12px;">AirComfort.lv</p>
     `,
   });
-  console.log('[SMTP] notification sent to', to);
+  console.log('[SMTP] notification sent');
 }
 
 async function sendAutoReply(entry: RequestEntry) {
@@ -144,7 +147,7 @@ async function sendAutoReply(entry: RequestEntry) {
 </body>
 </html>`,
   });
-  console.log('[SMTP] auto-reply sent to', entry.email);
+  console.log('[SMTP] auto-reply sent');
 }
 
 const str = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
@@ -176,8 +179,20 @@ function orderMessage(service: string, products: ContactProduct[], install: bool
   return lines.join('\n');
 }
 
+/** Auto-replies go out at most once a day per address and 30 an hour in all (the site must never become a mailer). */
+const canAutoReply = (email: string) =>
+  !tooMany(`reply:${email.toLowerCase()}`, 1, 24 * 3_600_000) && !tooMany('reply:all', 30, 3_600_000);
+
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
+  // Spam protection: 5 requests per address per 10 minutes …
+  const ip = clientIp(req);
+  if (tooMany(`contact:${ip}`, 5, 10 * 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': '600' } });
+  }
+  // … a hidden field only robots fill in, and a form sent faster than a person can type
+  const bot = str(body.website, 200) !== '' || (typeof body.ts === 'number' && Date.now() - body.ts < 3000);
+  if (bot) return NextResponse.json({ success: true });
   const name = str(body.name, 120);
   const phone = str(body.phone, 40);
   // "+371 " alone is the prefilled prefix, not a number
@@ -195,14 +210,17 @@ export async function POST(req: NextRequest) {
     const locale = ['lv', 'ru', 'en'].includes(body.locale) ? body.locale : 'lv';
     message = orderMessage(service, products, install, message, locale);
   }
-  const entry: RequestEntry = { name, phone, email: str(body.email, 200), service, message };
+  // Only a plain address becomes an auto-reply recipient (no display names, comments or lists)
+  const emailRaw = str(body.email, 200);
+  const email = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/.test(emailRaw) ? emailRaw : '';
+  const entry: RequestEntry = { name, phone, email, service, message };
 
   // Save to contacts table (same as admin reads from)
   await createContact({ ...entry, products, install });
 
   // Send notification to admin + auto-reply to customer (non-blocking)
   sendNotification(entry).catch((err) => console.error('[SMTP notify]', err?.message || err));
-  sendAutoReply(entry).catch((err) => console.error('[SMTP reply]', err?.message || err));
+  if (entry.email && canAutoReply(entry.email)) sendAutoReply(entry).catch((err) => console.error('[SMTP reply]', err?.message || err));
 
   return NextResponse.json({ success: true });
 }

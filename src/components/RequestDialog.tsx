@@ -3,7 +3,7 @@
 // Request form in a sheet: "Order" from a product card / comparison, or
 // "Send the selection" from favourites. Goes to /api/contact like the
 // contact form — the server attaches product names and prices from the DB.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import Sheet from '@/components/Sheet';
@@ -25,6 +25,8 @@ export default function RequestDialog({ mode, products, onClose }: {
   const [install, setInstall] = useState(true);
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [touched, setTouched] = useState(false);
+  const [ts, setTs] = useState(0);
+  useEffect(() => { setTs(Date.now()); }, []);
 
   const nameErr = touched && !name.trim();
   const phoneErr = touched && phone.replace(/\D/g, '').length < 6;
@@ -39,7 +41,7 @@ export default function RequestDialog({ mode, products, onClose }: {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name, phone, message: comment, locale,
+          name, phone, message: comment, locale, ts,
           service: mode === 'order' ? 'catalog_order' : 'favorites',
           product_ids: products.map((p) => p.id),
           ...(mode === 'order' ? { install } : {}),

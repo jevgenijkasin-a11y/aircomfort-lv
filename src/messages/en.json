@@ -360,5 +360,11 @@
     "tabSpecs": "Specs",
     "tabInstall": "Installation",
     "energyShort": "Energy class"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "text": "The page could not be loaded. Please try again or give us a call — we will help.",
+    "retry": "Try again",
+    "home": "Home page"
   }
 }

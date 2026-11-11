@@ -94,8 +94,9 @@ export default function Calculator({ installFrom = 250, locale = 'lv' }: { insta
 
           <div className="space-y-5">
             <div>
-              <label className={labelCls}>{t('area')}</label>
+              <label htmlFor="calc-area" className={labelCls}>{t('area')}</label>
               <input
+                id="calc-area"
                 type="number"
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
@@ -107,9 +108,10 @@ export default function Calculator({ installFrom = 250, locale = 'lv' }: { insta
             </div>
 
             <div>
-              <label className={labelCls}>{t('roomType')}</label>
+              <label htmlFor="calc-room" className={labelCls}>{t('roomType')}</label>
               <div className="relative">
                 <select
+                  id="calc-room"
                   value={roomType}
                   onChange={(e) => setRoomType(e.target.value)}
                   className={selectCls}
@@ -148,15 +150,16 @@ export default function Calculator({ installFrom = 250, locale = 'lv' }: { insta
                   >
                     {/* "Хорошая (новостройка)": the bracket part as a smaller second line, without brackets */}
                     {label.replace(/\s*\(.*\)$/, '')}
-                    {/\((.*)\)$/.test(label) && <span className="block mt-0.5 text-[11px] opacity-80">{label.match(/\((.*)\)$/)![1]}</span>}
+                    {/\((.*)\)$/.test(label) && <span className="block mt-0.5 text-[11px] font-medium">{label.match(/\((.*)\)$/)![1]}</span>}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className={labelCls}>{t('windows')}</label>
+              <label htmlFor="calc-windows" className={labelCls}>{t('windows')}</label>
               <input
+                id="calc-windows"
                 type="number"
                 value={windows}
                 onChange={(e) => setWindows(e.target.value)}
